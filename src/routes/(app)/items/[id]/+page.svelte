@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { productDetailDummy, productDetailDummyEarpods } from '$lib/data/product-dummy';
 	import type { ProductSku } from '$lib/data/product-dummy';
+	import PriceChart from '$lib/components/PriceChart.svelte';
 
 	type ParsedSku = {
 		colorCode: string;
@@ -29,6 +30,41 @@
 		skus: ParsedSku[];
 		priceHistory: PriceEntry[];
 	};
+
+	// ── 90일 더미 히스토리 생성 ───────────────────────────────
+	function genHistory(base: number, days: number): PriceEntry[] {
+		// 파동 합성으로 결정론적 가격 생성 (SSR 하이드레이션 안전)
+		const unit = base >= 50000 ? 500 : 50;
+		const prices: { date: string; price: number }[] = [];
+		let p = Math.round((base * 1.1) / unit) * unit;
+
+		for (let i = 0; i < days; i++) {
+			const daysAgo = days - 1 - i;
+			const d = new Date('2026-03-15');
+			d.setDate(d.getDate() - daysAgo);
+
+			const wave =
+				Math.sin(i * 0.29) * 0.055 +
+				Math.sin(i * 0.13) * 0.03 +
+				Math.cos(i * 0.47) * 0.02 +
+				Math.sin(i * 0.07) * 0.04;
+			const target = base * (1 + wave);
+			p = Math.round((p * 0.6 + target * 0.4) / unit) * unit;
+			p = Math.max(Math.round(base * 0.72 / unit) * unit, Math.min(Math.round(base * 1.28 / unit) * unit, p));
+			prices.push({ date: `${d.getMonth() + 1}월 ${d.getDate()}일`, price: p });
+		}
+
+		// 최신순(newest first)으로 변환, change 계산
+		const entries: PriceEntry[] = [];
+		for (let i = prices.length - 1; i >= 0; i--) {
+			entries.push({
+				date: prices[i].date,
+				price: prices[i].price,
+				change: i > 0 ? prices[i].price - prices[i - 1].price : 0
+			});
+		}
+		return entries;
+	}
 
 	// ── helpers ──────────────────────────────────────────────
 	function parseKRW(str: string): number {
@@ -79,16 +115,7 @@
 			alertEnabled: true,
 			alertThreshold: 340000,
 			skus: parseSkus(d.skus),
-			priceHistory: [
-				{ date: '3월 7일', price: base, change: -8365 },
-				{ date: '3월 6일', price: 365000, change: 0 },
-				{ date: '3월 5일', price: 365000, change: 5000 },
-				{ date: '3월 4일', price: 360000, change: -15000 },
-				{ date: '3월 3일', price: 375000, change: 0 },
-				{ date: '3월 2일', price: 375000, change: 10000 },
-				{ date: '3월 1일', price: 365000, change: 0 },
-				{ date: '2월 28일', price: 365000, change: -5000 }
-			]
+			priceHistory: genHistory(base, 90)
 		};
 	}
 
@@ -106,16 +133,7 @@
 			alertEnabled: false,
 			alertThreshold: 7000,
 			skus: parseSkus(d.skus),
-			priceHistory: [
-				{ date: '3월 7일', price: base, change: -1551 },
-				{ date: '3월 6일', price: 9886, change: 0 },
-				{ date: '3월 5일', price: 9886, change: 500 },
-				{ date: '3월 4일', price: 9386, change: -1000 },
-				{ date: '3월 3일', price: 10386, change: 0 },
-				{ date: '3월 2일', price: 10386, change: 1000 },
-				{ date: '3월 1일', price: 9386, change: 0 },
-				{ date: '2월 28일', price: 9386, change: -600 }
-			]
+			priceHistory: genHistory(base, 90)
 		};
 	}
 
@@ -485,44 +503,30 @@
 			<div class="rounded-2xl bg-white p-6" style="border: 1px solid rgba(45, 45, 42, 0.06);">
 				<h2 class="mb-5 text-base font-semibold" style="color: #1a1a17;">가격 히스토리</h2>
 
-				<!-- Chart placeholder -->
-				<div
-					class="mb-5 flex h-40 items-center justify-center rounded-xl sm:h-56"
-					style="border: 1px solid rgba(45, 45, 42, 0.06); background-color: #f7f6f3;"
-				>
-					<div class="text-center">
-						<div
-							class="mx-auto mb-2.5 flex size-11 items-center justify-center rounded-xl"
-							style="background-color: #e8e7e3;"
-						>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-5" style="color: #6b6b65;" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
-							</svg>
-						</div>
-						<p class="text-xs" style="color: #6b6b65;">가격 차트가 곧 제공됩니다</p>
-					</div>
-				</div>
+				<!-- Chart -->
+				<PriceChart data={item.priceHistory} />
 
-				<!-- History list -->
-				<div>
-					{#each item.priceHistory as entry, i}
+				<!-- Recent history table -->
+				<div class="mt-6">
+					<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">최근 변동 내역</p>
+					{#each item.priceHistory.slice(0, 10) as entry, i}
 						<div
-							class="flex items-center justify-between py-3"
-							style="{i < item.priceHistory.length - 1 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.06);' : ''}"
+							class="flex items-center justify-between py-2.5"
+							style="{i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}"
 						>
 							<span class="text-sm" style="color: #6b6b65;">{entry.date}</span>
 							<div class="flex items-center gap-4">
 								<span class="text-sm font-medium tabular-nums" style="color: #1a1a17;">{formatKRW(entry.price)}</span>
 								{#if entry.change < 0}
-									<span class="w-24 text-right text-sm font-medium tabular-nums" style="color: #5aad9c;">
-										−{formatKRW(Math.abs(entry.change))}
+									<span class="w-20 text-right text-xs font-medium tabular-nums" style="color: #5aad9c;">
+										▼ {formatKRW(Math.abs(entry.change))}
 									</span>
 								{:else if entry.change > 0}
-									<span class="w-24 text-right text-sm font-medium tabular-nums" style="color: #d4183d;">
-										+{formatKRW(entry.change)}
+									<span class="w-20 text-right text-xs font-medium tabular-nums" style="color: #d4183d;">
+										▲ {formatKRW(entry.change)}
 									</span>
 								{:else}
-									<span class="w-24 text-right text-sm" style="color: #6b6b65; opacity: 0.5;">변동 없음</span>
+									<span class="w-20 text-right text-xs" style="color: #9b9b95;">—</span>
 								{/if}
 							</div>
 						</div>

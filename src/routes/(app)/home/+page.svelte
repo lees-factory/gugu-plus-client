@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { page } from '$app/stores';
 
 	const toggleSidebar = getContext<() => void>('toggleSidebar');
+
+	// /api/health 호출 결과 (+page.server.ts에서 fetch 후 전달)
+	const health = $derived($page.data.health);
 
 	// ── Mock data ──────────────────────────────────────────────
 
@@ -134,6 +138,10 @@
 	class="sticky top-0 z-10 bg-white px-6 py-5 sm:px-8 sm:py-6"
 	style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);"
 >
+	{#if health}
+		<!-- /api/health 호출 결과 (필요 없으면 제거) -->
+		<p class="mb-2 text-xs opacity-60">API health: {health.ok ? 'ok' : '—'} {health.timestamp ?? ''}</p>
+	{/if}
 	<div class="flex items-center gap-3">
 		<button
 			type="button"

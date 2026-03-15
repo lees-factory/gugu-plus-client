@@ -12,14 +12,7 @@
 	} = $props();
 
 	let url = $state('');
-	let frequency = $state('6h');
 	let loading = $state(false);
-
-	const frequencies = [
-		{ value: '1h', label: '1시간' },
-		{ value: '6h', label: '6시간' },
-		{ value: '24h', label: '24시간' }
-	];
 
 	const supportedSites = ['Amazon', 'eBay', 'AliExpress', 'Taobao', '1688', 'Coupang'];
 
@@ -28,7 +21,7 @@
 		if (!url.trim()) return;
 		loading = true;
 		await new Promise((r) => setTimeout(r, 800));
-		onAdd({ url: url.trim(), frequency });
+		onAdd({ url: url.trim(), frequency: '24h' });
 		loading = false;
 		url = '';
 		frequency = '6h';
@@ -103,26 +96,6 @@
 						/>
 					</div>
 					<p class="text-xs" style="color: #6b6b65;">지원: {supportedSites.join(', ')}</p>
-				</div>
-
-				<!-- Tracking Frequency -->
-				<div class="flex flex-col gap-2">
-					<label class="text-sm font-medium" style="color: #1a1a17;">가격 확인 주기</label>
-					<div class="grid grid-cols-3 gap-2.5">
-						{#each frequencies as f}
-							<button
-								type="button"
-								onclick={() => (frequency = f.value)}
-								class="rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
-								style="
-									background-color: {frequency === f.value ? '#2d2d2a' : '#f7f6f3'};
-									color: {frequency === f.value ? '#ffffff' : '#6b6b65'};
-								"
-							>
-								{f.label}
-							</button>
-						{/each}
-					</div>
 				</div>
 
 				<!-- Actions -->

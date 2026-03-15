@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
+	import type { ActionData } from './$types';
+
+	let { form }: { form: ActionData } = $props();
 
 	const email = $derived(page.url.searchParams.get('email') ?? '');
 
@@ -8,8 +11,6 @@
 	let inputs: HTMLInputElement[] = [];
 	let loading = $state(false);
 	let resending = $state(false);
-	let resent = $state(false);
-	let error = $state('');
 
 	const fullCode = $derived(code.join(''));
 	const isComplete = $derived(fullCode.length === 6);
@@ -18,72 +19,32 @@
 		const target = e.target as HTMLInputElement;
 		const val = target.value.replace(/\D/g, '').slice(-1);
 		code[index] = val;
-
-		if (val && index < 5) {
-			inputs[index + 1]?.focus();
-		}
+		if (val && index < 5) inputs[index + 1]?.focus();
 	}
 
 	function handleKeydown(index: number, e: KeyboardEvent) {
-		if (e.key === 'Backspace' && !code[index] && index > 0) {
-			inputs[index - 1]?.focus();
-		}
+		if (e.key === 'Backspace' && !code[index] && index > 0) inputs[index - 1]?.focus();
 	}
 
 	function handlePaste(e: ClipboardEvent) {
 		e.preventDefault();
 		const pasted = e.clipboardData?.getData('text').replace(/\D/g, '').slice(0, 6) ?? '';
-		pasted.split('').forEach((char, i) => {
-			if (i < 6) code[i] = char;
-		});
-		const nextEmpty = pasted.length < 6 ? pasted.length : 5;
-		inputs[nextEmpty]?.focus();
+		pasted.split('').forEach((char, i) => { if (i < 6) code[i] = char; });
+		inputs[Math.min(pasted.length, 5)]?.focus();
 	}
 
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		if (!isComplete) return;
-		error = '';
-		loading = true;
-		// TODO: 실제 인증 코드 검증 API 연동
-		await new Promise((r) => setTimeout(r, 800));
-		loading = false;
-		// 테스트용: 코드가 '123456'이면 성공
-		if (fullCode === '123456') {
-			goto('/');
-		} else {
-			error = 'Invalid code. Please try again.';
+	$effect(() => {
+		if (form?.error) {
 			code = ['', '', '', '', '', ''];
 			inputs[0]?.focus();
 		}
-	}
-
-	async function handleResend() {
-		resending = true;
-		resent = false;
-		// TODO: 실제 코드 재발송 API 연동
-		await new Promise((r) => setTimeout(r, 800));
-		resending = false;
-		resent = true;
-		setTimeout(() => (resent = false), 3000);
-	}
+	});
 </script>
 
 <div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
 	<div class="mb-6 text-center">
-		<div
-			class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl"
-			style="background-color: #e8f2f0;"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				class="size-7"
-				style="color: #5aad9c;"
-				aria-hidden="true"
-			>
+		<div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl" style="background-color: #e8f2f0;">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-7" style="color: #5aad9c;" aria-hidden="true">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
 			</svg>
 		</div>
@@ -94,7 +55,21 @@
 		</p>
 	</div>
 
-	<form onsubmit={handleSubmit} class="flex flex-col gap-5">
+	<form
+		method="POST"
+		action="?/verify"
+		use:enhance={() => {
+			loading = true;
+			return async ({ update }) => {
+				loading = false;
+				await update();
+			};
+		}}
+		class="flex flex-col gap-5"
+	>
+		<input type="hidden" name="token" value={fullCode} />
+		<input type="hidden" name="email" value={email} />
+
 		<div>
 			<div class="flex justify-center gap-2.5" onpaste={handlePaste}>
 				{#each code as _, i}
@@ -108,17 +83,13 @@
 						onkeydown={(e) => handleKeydown(i, e)}
 						aria-label={`Digit ${i + 1}`}
 						class="h-12 w-10 rounded-xl text-center text-lg font-semibold outline-none transition-all disabled:opacity-50"
-						style="
-							border: 1px solid rgba(45, 45, 42, 0.1);
-							background-color: #f7f6f3;
-							color: #1a1a17;
-						"
+						style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
 						disabled={loading}
 					/>
 				{/each}
 			</div>
-			{#if error}
-				<p class="mt-2 text-center text-xs" style="color: #d4183d;">{error}</p>
+			{#if form?.error}
+				<p class="mt-2 text-center text-xs" style="color: #d4183d;">{form.error}</p>
 			{/if}
 		</div>
 
@@ -133,18 +104,26 @@
 	</form>
 
 	<div class="mt-5 flex flex-col items-center gap-2 text-sm" style="color: #6b6b65;">
-		<p>
-			{"Didn't receive it? "}
-			<button
-				type="button"
-				onclick={handleResend}
-				disabled={resending}
-				class="font-medium underline-offset-2 hover:underline disabled:opacity-50"
-				style="color: #1a1a17;"
-			>
-				{resending ? 'Sending...' : resent ? 'Sent!' : 'Resend code'}
-			</button>
-		</p>
+		<div class="flex items-center gap-1">
+			<span>{"Didn't receive it?"}</span>
+			<form method="POST" action="?/resend" use:enhance={() => {
+				resending = true;
+				return async ({ update }) => {
+					resending = false;
+					await update();
+				};
+			}}>
+				<input type="hidden" name="email" value={email} />
+				<button
+					type="submit"
+					disabled={resending}
+					class="font-medium underline-offset-2 hover:underline disabled:opacity-50"
+					style="color: #1a1a17;"
+				>
+					{resending ? 'Sending...' : form?.resent ? 'Sent!' : 'Resend code'}
+				</button>
+			</form>
+		</div>
 		<a href="/auth/login" class="transition hover:opacity-70" style="color: #6b6b65;">
 			Back to login
 		</a>

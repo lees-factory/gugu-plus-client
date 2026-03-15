@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte';
 
 	let {
@@ -25,15 +24,12 @@
 	}
 
 	function logout() {
-		userMenuOpen = false;
 		auth.logout();
-		goto('/auth/login');
+		window.location.href = '/auth/logout';
 	}
 
 	const itemCount = $derived(0);
 	const usagePercent = $derived((itemCount / auth.plan.maxItems) * 100);
-
-	const textHidden = $derived(collapsed);
 </script>
 
 {#if userMenuOpen}
@@ -47,8 +43,15 @@
 	style="border-right: 1px solid rgba(45, 45, 42, 0.06);"
 >
 	<!-- Header -->
-	<div class="flex h-20 shrink-0 items-center px-5" style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);">
-		<a href="/" class="flex flex-1 items-center gap-2.5 overflow-hidden" title="Gugu Plus">
+	<div
+		class="flex h-20 shrink-0 items-center px-5 {collapsed ? 'md:justify-center md:px-0' : ''}"
+		style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);"
+	>
+		<a
+			href="/"
+			class="flex items-center gap-2.5 overflow-hidden {collapsed ? 'md:gap-0' : ''}"
+			title="Gugu Plus"
+		>
 			<div
 				class="flex size-9 shrink-0 items-center justify-center rounded-xl"
 				style="background: linear-gradient(135deg, #5aad9c 0%, #4a9384 100%);"
@@ -61,20 +64,18 @@
 					/>
 				</svg>
 			</div>
-			<span
-				class="whitespace-nowrap text-lg font-semibold transition-all duration-200
-					{textHidden ? 'md:w-0 md:opacity-0' : 'opacity-100'}"
-				style="color: #1a1a17;"
-			>
-				Gugu Plus
-			</span>
+			{#if !collapsed}
+				<span class="whitespace-nowrap text-lg font-semibold" style="color: #1a1a17;">
+					Gugu Plus
+				</span>
+			{/if}
 		</a>
 		<!-- 모바일 닫기 버튼 -->
 		<button
 			type="button"
 			onclick={onClose}
 			aria-label="사이드바 닫기"
-			class="flex size-8 items-center justify-center rounded-lg transition hover:bg-[#f7f6f3] md:hidden"
+			class="ml-auto flex size-8 items-center justify-center rounded-lg transition hover:bg-[#f7f6f3] md:hidden"
 			style="color: #6b6b65;"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4" aria-hidden="true">
@@ -89,10 +90,9 @@
 			<a
 				href={item.href}
 				title={item.label}
-				class="group flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium transition-all
-					{isActive(item.href)
-					? 'shadow-sm'
-					: 'hover:shadow-sm'}"
+				class="group flex h-10 items-center rounded-xl text-sm font-medium transition-all
+					{collapsed ? 'md:justify-center md:px-0' : 'gap-3 px-3.5'}
+					{isActive(item.href) ? 'shadow-sm' : 'hover:shadow-sm'}"
 				style="
 					background-color: {isActive(item.href) ? '#f7f6f3' : 'transparent'};
 					color: {isActive(item.href) ? '#1a1a17' : '#6b6b65'};
@@ -124,12 +124,9 @@
 						</svg>
 					{/if}
 				</span>
-				<span
-					class="whitespace-nowrap transition-all duration-200
-						{textHidden ? 'md:w-0 md:opacity-0' : 'opacity-100'}"
-				>
-					{item.label}
-				</span>
+				{#if !collapsed}
+					<span class="whitespace-nowrap">{item.label}</span>
+				{/if}
 			</a>
 		{/each}
 
@@ -138,7 +135,8 @@
 		<a
 			href="/add"
 			title="Add Item"
-			class="flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium transition-all hover:shadow-sm"
+			class="flex h-10 items-center rounded-xl text-sm font-medium transition-all hover:shadow-sm
+				{collapsed ? 'md:justify-center md:px-0' : 'gap-3 px-3.5'}"
 			style="color: #1a1a17;"
 		>
 			<span class="shrink-0">
@@ -146,15 +144,15 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
 				</svg>
 			</span>
-			<span class="whitespace-nowrap transition-all duration-200 {textHidden ? 'md:w-0 md:opacity-0' : 'opacity-100'}">
-				Add Item
-			</span>
+			{#if !collapsed}
+				<span class="whitespace-nowrap">Add Item</span>
+			{/if}
 		</a>
 	</nav>
 
 	<!-- Footer -->
 	<div class="shrink-0 p-5 space-y-4" style="border-top: 1px solid rgba(45, 45, 42, 0.06);">
-		{#if !textHidden}
+		{#if !collapsed}
 			<!-- Chrome Extension -->
 			<div class="rounded-xl p-3.5" style="background-color: #f7f6f3; border: 1px solid rgba(45, 45, 42, 0.06);">
 				<div class="flex items-center gap-1.5 text-xs" style="color: #6b6b65;">
@@ -195,7 +193,8 @@
 			<button
 				type="button"
 				onclick={() => (userMenuOpen = !userMenuOpen)}
-				class="flex w-full items-center gap-2.5 rounded-xl p-2.5 text-left transition-colors hover:bg-[#f7f6f3]"
+				class="flex w-full items-center rounded-xl p-2.5 text-left transition-colors hover:bg-[#f7f6f3]
+					{collapsed ? 'md:justify-center' : 'gap-2.5'}"
 				title={auth.user?.email ?? 'User'}
 			>
 				<div
@@ -206,7 +205,7 @@
 						<path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
 					</svg>
 				</div>
-				{#if !textHidden}
+				{#if !collapsed}
 					<div class="flex flex-1 flex-col overflow-hidden">
 						<span class="truncate text-xs font-medium" style="color: #1a1a17;">
 							{auth.user?.email?.split('@')[0] ?? 'User'}

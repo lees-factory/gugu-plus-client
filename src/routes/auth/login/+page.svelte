@@ -1,32 +1,11 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { auth } from '$lib/stores/auth.svelte';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let email = $state('');
-	let password = $state('');
+	let { form }: { form: ActionData } = $props();
+
 	let showPassword = $state(false);
 	let loading = $state(false);
-	let error = $state('');
-
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		error = '';
-		loading = true;
-		// TODO: 실제 로그인 API 연동
-		await new Promise((r) => setTimeout(r, 800));
-		auth.login(email);
-		loading = false;
-		goto('/');
-	}
-
-	async function handleGoogle() {
-		loading = true;
-		// TODO: Google OAuth 연동
-		await new Promise((r) => setTimeout(r, 800));
-		auth.login('user@gmail.com');
-		loading = false;
-		goto('/');
-	}
 </script>
 
 <div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
@@ -35,28 +14,35 @@
 		<p class="mt-1 text-sm" style="color: #6b6b65;">Continue building your price history.</p>
 	</div>
 
-	{#if error}
+	{#if form?.error}
 		<div class="mb-4 rounded-xl px-4 py-3 text-sm" style="background-color: #fee8e8; color: #d4183d;">
-			{error}
+			{form.error}
 		</div>
 	{/if}
 
-	<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+	<form
+		method="POST"
+		use:enhance={() => {
+			loading = true;
+			return async ({ update }) => {
+				loading = false;
+				await update();
+			};
+		}}
+		class="flex flex-col gap-4"
+	>
 		<div class="flex flex-col gap-2">
 			<label for="email" class="text-sm font-medium" style="color: #1a1a17;">Email</label>
 			<input
 				id="email"
+				name="email"
 				type="email"
-				bind:value={email}
+				value={form?.email ?? ''}
 				placeholder="you@example.com"
 				autocomplete="email"
 				required
 				class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
-				style="
-					border: 1px solid rgba(45, 45, 42, 0.1);
-					background-color: #f7f6f3;
-					color: #1a1a17;
-				"
+				style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
 			/>
 		</div>
 
@@ -65,17 +51,13 @@
 			<div class="relative">
 				<input
 					id="password"
+					name="password"
 					type={showPassword ? 'text' : 'password'}
-					bind:value={password}
 					placeholder="Enter your password"
 					autocomplete="current-password"
 					required
 					class="h-11 w-full rounded-xl px-4 pr-11 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
-					style="
-						border: 1px solid rgba(45, 45, 42, 0.1);
-						background-color: #f7f6f3;
-						color: #1a1a17;
-					"
+					style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
 				/>
 				<button
 					type="button"
@@ -116,9 +98,8 @@
 
 	<button
 		type="button"
-		onclick={handleGoogle}
-		disabled={loading}
-		class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-medium transition-all hover:shadow-sm focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		disabled
+		class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-medium transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
 		style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #ffffff; color: #1a1a17;"
 	>
 		<svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">

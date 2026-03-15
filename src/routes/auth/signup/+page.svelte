@@ -1,32 +1,16 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let email = $state('');
-	let password = $state('');
-	let confirm = $state('');
+	let { form }: { form: ActionData } = $props();
+
 	let showPassword = $state(false);
 	let loading = $state(false);
+	let password = $state('');
+	let confirm = $state('');
 
 	const passwordMismatch = $derived(password.length > 0 && confirm.length > 0 && password !== confirm);
-	const canSubmit = $derived(!!email && !!password && password === confirm && !loading);
-
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		if (!canSubmit) return;
-		loading = true;
-		// TODO: 실제 회원가입 API 연동
-		await new Promise((r) => setTimeout(r, 800));
-		loading = false;
-		goto(`/auth/verify?email=${encodeURIComponent(email)}`);
-	}
-
-	async function handleGoogle() {
-		loading = true;
-		// TODO: Google OAuth 연동
-		await new Promise((r) => setTimeout(r, 600));
-		loading = false;
-		goto('/'); // Google OAuth는 자체 인증 플로우 사용
-	}
+	const canSubmit = $derived(!loading && !passwordMismatch);
 </script>
 
 <div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
@@ -37,22 +21,50 @@
 		<p class="mt-1 text-sm" style="color: #6b6b65;">Track prices across global marketplaces.</p>
 	</div>
 
-	<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+	{#if form?.error}
+		<div class="mb-4 rounded-xl px-4 py-3 text-sm" style="background-color: #fee8e8; color: #d4183d;">
+			{form.error}
+		</div>
+	{/if}
+
+	<form
+		method="POST"
+		use:enhance={() => {
+			loading = true;
+			return async ({ update }) => {
+				loading = false;
+				await update();
+			};
+		}}
+		class="flex flex-col gap-4"
+	>
+		<div class="flex flex-col gap-2">
+			<label for="display_name" class="text-sm font-medium" style="color: #1a1a17;">Name</label>
+			<input
+				id="display_name"
+				name="display_name"
+				type="text"
+				value={form?.display_name ?? ''}
+				placeholder="Your name"
+				autocomplete="name"
+				required
+				class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
+				style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
+			/>
+		</div>
+
 		<div class="flex flex-col gap-2">
 			<label for="email" class="text-sm font-medium" style="color: #1a1a17;">Email</label>
 			<input
 				id="email"
+				name="email"
 				type="email"
-				bind:value={email}
+				value={form?.email ?? ''}
 				placeholder="you@example.com"
 				autocomplete="email"
 				required
 				class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
-				style="
-					border: 1px solid rgba(45, 45, 42, 0.1);
-					background-color: #f7f6f3;
-					color: #1a1a17;
-				"
+				style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
 			/>
 		</div>
 
@@ -61,17 +73,14 @@
 			<div class="relative">
 				<input
 					id="password"
+					name="password"
 					type={showPassword ? 'text' : 'password'}
 					bind:value={password}
 					placeholder="Create a password"
 					autocomplete="new-password"
 					required
 					class="h-11 w-full rounded-xl px-4 pr-11 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
-					style="
-						border: 1px solid rgba(45, 45, 42, 0.1);
-						background-color: #f7f6f3;
-						color: #1a1a17;
-					"
+					style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #f7f6f3; color: #1a1a17;"
 				/>
 				<button
 					type="button"
@@ -134,9 +143,8 @@
 
 	<button
 		type="button"
-		onclick={handleGoogle}
-		disabled={loading}
-		class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-medium transition-all hover:shadow-sm focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		disabled
+		class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-medium transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
 		style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #ffffff; color: #1a1a17;"
 	>
 		<svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
