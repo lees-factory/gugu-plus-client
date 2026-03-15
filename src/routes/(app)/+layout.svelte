@@ -3,6 +3,7 @@
 	import { setContext } from 'svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
+	import AppFooter from '$lib/components/AppFooter.svelte';
 
 	let { data, children } = $props();
 	let collapsed = $state(false);
@@ -30,7 +31,7 @@
 	setContext('toggleSidebar', toggleSidebar);
 </script>
 
-<div class="flex h-svh overflow-hidden bg-zinc-50">
+<div class="flex h-svh overflow-hidden bg-[#fafaf8]">
 	<AppSidebar {collapsed} {mobileOpen} onClose={() => (mobileOpen = false)} />
 
 	{#if mobileOpen}
@@ -48,6 +49,7 @@
 	>
 		<main class="flex-1 overflow-y-auto">
 			{@render children()}
+			<AppFooter />
 		</main>
 	</div>
 </div>

@@ -29,17 +29,17 @@
 	}
 </script>
 
-<div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+<div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
 	<div class="mb-6">
-		<h1 class="text-xl font-semibold tracking-tight text-zinc-900">
+		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">
 			Start building your price history
 		</h1>
-		<p class="mt-1 text-sm text-zinc-500">Track prices across global marketplaces.</p>
+		<p class="mt-1 text-sm" style="color: #6b6b65;">Track prices across global marketplaces.</p>
 	</div>
 
 	<form onsubmit={handleSubmit} class="flex flex-col gap-4">
-		<div class="flex flex-col gap-1.5">
-			<label for="email" class="text-sm font-medium text-zinc-700">Email</label>
+		<div class="flex flex-col gap-2">
+			<label for="email" class="text-sm font-medium" style="color: #1a1a17;">Email</label>
 			<input
 				id="email"
 				type="email"
@@ -47,12 +47,17 @@
 				placeholder="you@example.com"
 				autocomplete="email"
 				required
-				class="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10 disabled:cursor-not-allowed disabled:opacity-50"
+				class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
+				style="
+					border: 1px solid rgba(45, 45, 42, 0.1);
+					background-color: #f7f6f3;
+					color: #1a1a17;
+				"
 			/>
 		</div>
 
-		<div class="flex flex-col gap-1.5">
-			<label for="password" class="text-sm font-medium text-zinc-700">Password</label>
+		<div class="flex flex-col gap-2">
+			<label for="password" class="text-sm font-medium" style="color: #1a1a17;">Password</label>
 			<div class="relative">
 				<input
 					id="password"
@@ -61,13 +66,19 @@
 					placeholder="Create a password"
 					autocomplete="new-password"
 					required
-					class="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 pr-10 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10 disabled:cursor-not-allowed disabled:opacity-50"
+					class="h-11 w-full rounded-xl px-4 pr-11 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
+					style="
+						border: 1px solid rgba(45, 45, 42, 0.1);
+						background-color: #f7f6f3;
+						color: #1a1a17;
+					"
 				/>
 				<button
 					type="button"
 					onclick={() => (showPassword = !showPassword)}
 					aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
-					class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-600"
+					class="absolute right-3 top-1/2 -translate-y-1/2 transition hover:opacity-80"
+					style="color: #6b6b65;"
 				>
 					{#if showPassword}
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4" aria-hidden="true">
@@ -83,8 +94,8 @@
 			</div>
 		</div>
 
-		<div class="flex flex-col gap-1.5">
-			<label for="confirm" class="text-sm font-medium text-zinc-700">Confirm Password</label>
+		<div class="flex flex-col gap-2">
+			<label for="confirm" class="text-sm font-medium" style="color: #1a1a17;">Confirm Password</label>
 			<input
 				id="confirm"
 				type={showPassword ? 'text' : 'password'}
@@ -92,34 +103,41 @@
 				placeholder="Confirm your password"
 				autocomplete="new-password"
 				required
-				class="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10 disabled:cursor-not-allowed disabled:opacity-50"
+				class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
+				style="
+					border: 1px solid {passwordMismatch ? '#d4183d' : 'rgba(45, 45, 42, 0.1)'};
+					background-color: #f7f6f3;
+					color: #1a1a17;
+				"
 				aria-invalid={passwordMismatch}
 			/>
 			{#if passwordMismatch}
-				<p class="text-xs text-red-500">Passwords do not match.</p>
+				<p class="text-xs" style="color: #d4183d;">Passwords do not match.</p>
 			{/if}
 		</div>
 
 		<button
 			type="submit"
 			disabled={!canSubmit}
-			class="h-9 w-full rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="h-11 w-full rounded-xl px-4 text-sm font-medium transition-all hover:shadow-md focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			style="background-color: #2d2d2a; color: #ffffff;"
 		>
 			{loading ? 'Creating account...' : 'Create Free Account'}
 		</button>
 	</form>
 
-	<div class="my-4 flex items-center gap-3">
-		<div class="h-px flex-1 bg-zinc-200"></div>
-		<span class="text-xs text-zinc-400">or</span>
-		<div class="h-px flex-1 bg-zinc-200"></div>
+	<div class="my-5 flex items-center gap-3">
+		<div class="h-px flex-1" style="background-color: rgba(45, 45, 42, 0.08);"></div>
+		<span class="text-xs" style="color: #6b6b65;">or</span>
+		<div class="h-px flex-1" style="background-color: rgba(45, 45, 42, 0.08);"></div>
 	</div>
 
 	<button
 		type="button"
 		onclick={handleGoogle}
 		disabled={loading}
-		class="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+		class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-medium transition-all hover:shadow-sm focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #ffffff; color: #1a1a17;"
 	>
 		<svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
 			<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -130,13 +148,13 @@
 		Continue with Google
 	</button>
 
-	<p class="mt-4 text-center text-xs text-zinc-400">
+	<p class="mt-5 text-center text-xs" style="color: #6b6b65;">
 		Free plan includes 5 tracked items and 14 days of history.
 	</p>
 
-	<p class="mt-3 text-center text-sm text-zinc-500">
+	<p class="mt-3 text-center text-sm" style="color: #6b6b65;">
 		Already have an account?{' '}
-		<a href="/auth/login" class="font-medium text-zinc-900 underline-offset-2 hover:underline">
+		<a href="/auth/login" class="font-medium underline-offset-2 hover:underline" style="color: #1a1a17;">
 			Log in
 		</a>
 	</p>

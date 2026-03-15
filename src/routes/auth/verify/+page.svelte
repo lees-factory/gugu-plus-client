@@ -69,30 +69,34 @@
 	}
 </script>
 
-<div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+<div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
 	<div class="mb-6 text-center">
-		<div class="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-zinc-100">
+		<div
+			class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl"
+			style="background-color: #e8f2f0;"
+		>
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="1.5"
-				class="size-6 text-zinc-700"
+				class="size-7"
+				style="color: #5aad9c;"
 				aria-hidden="true"
 			>
 				<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
 			</svg>
 		</div>
-		<h1 class="text-xl font-semibold tracking-tight text-zinc-900">Check your email</h1>
-		<p class="mt-1.5 text-sm text-zinc-500">
+		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">Check your email</h1>
+		<p class="mt-1.5 text-sm" style="color: #6b6b65;">
 			We sent a 6-digit code to<br />
-			<span class="font-medium text-zinc-700">{email || 'your email'}</span>
+			<span class="font-medium" style="color: #1a1a17;">{email || 'your email'}</span>
 		</p>
 	</div>
 
 	<form onsubmit={handleSubmit} class="flex flex-col gap-5">
 		<div>
-			<div class="flex justify-center gap-2" onpaste={handlePaste}>
+			<div class="flex justify-center gap-2.5" onpaste={handlePaste}>
 				{#each code as _, i}
 					<input
 						bind:this={inputs[i]}
@@ -103,38 +107,45 @@
 						oninput={(e) => handleInput(i, e)}
 						onkeydown={(e) => handleKeydown(i, e)}
 						aria-label={`Digit ${i + 1}`}
-						class="h-12 w-10 rounded-md border border-zinc-200 bg-white text-center text-lg font-semibold text-zinc-900 outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10 disabled:opacity-50"
+						class="h-12 w-10 rounded-xl text-center text-lg font-semibold outline-none transition-all disabled:opacity-50"
+						style="
+							border: 1px solid rgba(45, 45, 42, 0.1);
+							background-color: #f7f6f3;
+							color: #1a1a17;
+						"
 						disabled={loading}
 					/>
 				{/each}
 			</div>
 			{#if error}
-				<p class="mt-2 text-center text-xs text-red-500">{error}</p>
+				<p class="mt-2 text-center text-xs" style="color: #d4183d;">{error}</p>
 			{/if}
 		</div>
 
 		<button
 			type="submit"
 			disabled={!isComplete || loading}
-			class="h-9 w-full rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="h-11 w-full rounded-xl px-4 text-sm font-medium transition-all hover:shadow-md focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			style="background-color: #2d2d2a; color: #ffffff;"
 		>
 			{loading ? 'Verifying...' : 'Verify email'}
 		</button>
 	</form>
 
-	<div class="mt-5 flex flex-col items-center gap-2 text-sm text-zinc-500">
+	<div class="mt-5 flex flex-col items-center gap-2 text-sm" style="color: #6b6b65;">
 		<p>
 			{"Didn't receive it? "}
 			<button
 				type="button"
 				onclick={handleResend}
 				disabled={resending}
-				class="font-medium text-zinc-900 underline-offset-2 hover:underline disabled:opacity-50"
+				class="font-medium underline-offset-2 hover:underline disabled:opacity-50"
+				style="color: #1a1a17;"
 			>
 				{resending ? 'Sending...' : resent ? 'Sent!' : 'Resend code'}
 			</button>
 		</p>
-		<a href="/auth/login" class="text-zinc-400 transition hover:text-zinc-700">
+		<a href="/auth/login" class="transition hover:opacity-70" style="color: #6b6b65;">
 			Back to login
 		</a>
 	</div>

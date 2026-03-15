@@ -46,59 +46,78 @@
 	<!-- Backdrop -->
 	<div class="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
 		<div
-			class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+			class="absolute inset-0 backdrop-blur-sm"
+			style="background-color: rgba(0, 0, 0, 0.4);"
 			role="presentation"
 			onclick={onClose}
 		></div>
 
 		<!-- Dialog: mobile bottom sheet / desktop centered modal -->
-		<div class="relative z-10 w-full rounded-t-2xl border border-zinc-200 bg-white shadow-xl sm:max-w-md sm:rounded-2xl">
+		<div
+			class="relative z-10 w-full bg-white shadow-2xl sm:max-w-lg"
+			style="border-radius: 1.5rem 1.5rem 1.5rem 1.5rem; border: 1px solid rgba(45, 45, 42, 0.06);"
+		>
 			<!-- Handle bar (모바일) -->
 			<div class="flex justify-center pt-3 sm:hidden">
-				<div class="h-1 w-10 rounded-full bg-zinc-200"></div>
+				<div class="h-1 w-10 rounded-full" style="background-color: #e8e7e3;"></div>
 			</div>
 
 			<!-- Header -->
-			<div class="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
-				<h2 class="text-base font-semibold text-zinc-900">상품 추가</h2>
+			<div class="flex items-center justify-between px-7 py-6" style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);">
+				<h2 class="text-lg font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">상품 추가</h2>
 				<button
 					type="button"
 					onclick={onClose}
-					class="flex size-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+					class="flex size-8 items-center justify-center rounded-lg transition hover:bg-[#f7f6f3]"
+					style="color: #6b6b65;"
 					aria-label="닫기"
 				>
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
 					</svg>
 				</button>
 			</div>
 
 			<!-- Body -->
-			<form onsubmit={handleSubmit} class="flex flex-col gap-5 p-5">
-				<div class="flex flex-col gap-1.5">
-					<label for="item-url" class="text-sm font-medium text-zinc-700">상품 URL</label>
-					<input
-						id="item-url"
-						type="url"
-						bind:value={url}
-						placeholder="https://www.amazon.com/dp/..."
-						required
-						autofocus
-						class="h-10 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/10"
-					/>
-					<p class="text-xs text-zinc-400">지원: {supportedSites.join(', ')}</p>
+			<form onsubmit={handleSubmit} class="flex flex-col gap-6 p-7">
+				<!-- URL Input -->
+				<div class="flex flex-col gap-2">
+					<label for="item-url" class="text-sm font-medium" style="color: #1a1a17;">상품 URL</label>
+					<div class="relative">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 top-1/2 -translate-y-1/2 size-4" style="color: #6b6b65;" aria-hidden="true">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+						</svg>
+						<input
+							id="item-url"
+							type="url"
+							bind:value={url}
+							placeholder="https://www.amazon.com/dp/..."
+							required
+							autofocus
+							class="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none transition-all"
+							style="
+								border: 1px solid rgba(45, 45, 42, 0.1);
+								background-color: #ffffff;
+								color: #1a1a17;
+							"
+						/>
+					</div>
+					<p class="text-xs" style="color: #6b6b65;">지원: {supportedSites.join(', ')}</p>
 				</div>
 
-				<div class="flex flex-col gap-1.5">
-					<label class="text-sm font-medium text-zinc-700">가격 확인 주기</label>
-					<div class="grid grid-cols-3 gap-2">
+				<!-- Tracking Frequency -->
+				<div class="flex flex-col gap-2">
+					<label class="text-sm font-medium" style="color: #1a1a17;">가격 확인 주기</label>
+					<div class="grid grid-cols-3 gap-2.5">
 						{#each frequencies as f}
 							<button
 								type="button"
 								onclick={() => (frequency = f.value)}
-								class="rounded-md border py-2.5 text-sm font-medium transition {frequency === f.value
-									? 'border-zinc-900 bg-zinc-900 text-white'
-									: 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'}"
+								class="rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
+								style="
+									background-color: {frequency === f.value ? '#2d2d2a' : '#f7f6f3'};
+									color: {frequency === f.value ? '#ffffff' : '#6b6b65'};
+								"
 							>
 								{f.label}
 							</button>
@@ -106,18 +125,21 @@
 					</div>
 				</div>
 
-				<div class="flex gap-2 pb-1">
+				<!-- Actions -->
+				<div class="flex gap-3 pt-1 pb-1">
 					<button
 						type="button"
 						onclick={onClose}
-						class="flex-1 rounded-md border border-zinc-200 bg-white py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+						class="flex-1 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm"
+						style="border: 1px solid rgba(45, 45, 42, 0.1); color: #6b6b65; background-color: #ffffff;"
 					>
 						취소
 					</button>
 					<button
 						type="submit"
 						disabled={!url.trim() || loading}
-						class="flex-1 rounded-md bg-zinc-900 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
+						class="flex-1 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+						style="background-color: #2d2d2a; color: #ffffff;"
 					>
 						{loading ? '추가 중...' : '추가하기'}
 					</button>
