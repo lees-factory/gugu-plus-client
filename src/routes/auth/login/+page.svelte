@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
 
 	let showPassword = $state(false);
 	let loading = $state(false);
+
+	const verified = $derived(page.url.searchParams.get('verified') === '1');
+	const verifiedEmail = $derived(page.url.searchParams.get('email') ?? '');
 </script>
 
 <div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
@@ -13,6 +17,12 @@
 		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">Welcome back</h1>
 		<p class="mt-1 text-sm" style="color: #6b6b65;">Continue building your price history.</p>
 	</div>
+
+	{#if verified}
+		<div class="mb-4 rounded-xl px-4 py-3 text-sm" style="background-color: #e8f2f0; color: #2d7a6b;">
+			Email verified! Log in to continue.
+		</div>
+	{/if}
 
 	{#if form?.error}
 		<div class="mb-4 rounded-xl px-4 py-3 text-sm" style="background-color: #fee8e8; color: #d4183d;">
@@ -37,7 +47,7 @@
 				id="email"
 				name="email"
 				type="email"
-				value={form?.email ?? ''}
+				value={form?.email ?? verifiedEmail}
 				placeholder="you@example.com"
 				autocomplete="email"
 				required

@@ -67,7 +67,7 @@
 		}}
 		class="flex flex-col gap-5"
 	>
-		<input type="hidden" name="token" value={fullCode} />
+		<input type="hidden" name="code" value={fullCode} />
 		<input type="hidden" name="email" value={email} />
 
 		<div>

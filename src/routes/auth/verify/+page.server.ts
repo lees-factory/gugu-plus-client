@@ -2,44 +2,35 @@ import { fail, redirect } from '@sveltejs/kit'
 import type { Actions } from './$types'
 
 const BACKEND = 'http://localhost:8080'
-const COOKIE_OPTS = { path: '/', maxAge: 60 * 60 * 24 * 7, httpOnly: true, sameSite: 'lax' } as const
 
 export const actions: Actions = {
-	verify: async ({ request, cookies }) => {
+	verify: async ({ request }) => {
 		const data = await request.formData()
-		const token = String(data.get('token') ?? '')
+		const code = String(data.get('code') ?? '')
 		const email = String(data.get('email') ?? '')
 
-		if (!token) {
-			return fail(400, { error: 'Verification code is required.' })
+		if (!code) {
+			return fail(400, { error: 'Verification code is required.', email })
 		}
 
 		const res = await fetch(`${BACKEND}/v1/auth/verify-email`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ token })
+			body: JSON.stringify({ code })
 		}).catch(() => null)
 
 		if (!res) {
-			return fail(503, { error: 'Cannot reach backend. Is the server running?' })
+			return fail(503, { error: 'Cannot reach backend. Is the server running.', email })
 		}
 
 		const body = await res.json().catch(() => ({}))
 
 		if (!res.ok) {
-			return fail(res.status, { error: body.message ?? 'Invalid code. Please try again.' })
+			return fail(res.status, { error: body.error?.message ?? 'Invalid code. Please try again.', email })
 		}
 
-		// 인증 후 자동 로그인
-		const accessToken = body.access_token ?? body.token ?? body.accessToken
-		if (accessToken) {
-			cookies.set('access_token', accessToken, COOKIE_OPTS)
-		}
-		if (email) {
-			cookies.set('session', encodeURIComponent(email), COOKIE_OPTS)
-		}
-
-		redirect(303, '/')
+		// 스펙: verify-email 응답은 user만 반환, 토큰 없음 → 로그인 페이지로 이동
+		redirect(303, `/auth/login?verified=1&email=${encodeURIComponent(email)}`)
 	},
 
 	resend: async ({ request }) => {
