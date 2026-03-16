@@ -1,13 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-
-const BACKEND = 'http://localhost:8080';
-const COOKIE_OPTS = {
-	path: '/',
-	maxAge: 60 * 60 * 24 * 7,
-	httpOnly: true,
-	sameSite: 'lax'
-} as const;
+import { authApi } from '$lib/api/auth';
+import { COOKIE_OPTS } from '$lib/api/config';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
@@ -19,28 +13,15 @@ export const actions: Actions = {
 			return fail(400, { error: 'Email and password are required.', email });
 		}
 
-		const res = await fetch(`${BACKEND}/v1/auth/login/email`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ email, password })
-		}).catch(() => null);
+		const result = await authApi.login(email, password);
 
-		if (!res) {
-			return fail(503, { error: 'Cannot reach backend. Is the server running?', email });
+		if (result.error) {
+			return fail(result.status, { error: result.error, email });
 		}
 
-		const body = await res.json().catch(() => ({}));
-		console.log('🚀 ~ body:', body);
+		console.log('🚀 ~ body:', result.data);
 
-		if (!res.ok) {
-			return fail(res.status, {
-				error: body.error?.message ?? 'Invalid email or password.',
-				email
-			});
-		}
-
-		// 스펙: { result, data: { user, tokens: { access_token, refresh_token, ... } } }
-		const tokens = body.data?.tokens;
+		const tokens = result.data?.data?.tokens;
 		if (tokens?.access_token) {
 			cookies.set('access_token', tokens.access_token, COOKIE_OPTS);
 		}
