@@ -28,11 +28,6 @@ export const settings = $state({
 	}
 });
 
-$effect(() => {
-	const e = auth.user?.email;
-	if (e) settings.email = e;
-});
-
 export async function handlePasswordChange() {
 	const p = settings.password;
 	p.error = '';

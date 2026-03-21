@@ -13,14 +13,6 @@ export const ENDPOINTS = {
 		logout: `${API_BASE}/v1/auth/logout`
 	},
 
-	integrations: {
-		aliexpress: {
-			authorizeUrl: `${API_BASE}/v1/integrations/aliexpress/authorize-url`,
-			exchangeCode: `${API_BASE}/v1/integrations/aliexpress/exchange-code`,
-			connectionStatus: `${API_BASE}/v1/integrations/aliexpress/connection-status`
-		}
-	},
-
 	/**
 	 * 브라우저 → 동일 출처 프록시(/api/v1/tracked-items…) → 백엔드 (Bearer)
 	 */
@@ -31,5 +23,11 @@ export const ENDPOINTS = {
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		selectSku: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`
+	},
+
+	/** 브라우저 → BFF → GET /v1/products/… (Bearer) */
+	products: {
+		detail: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}`,
+		skus: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/skus`
 	}
 } as const;

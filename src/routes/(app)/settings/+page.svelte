@@ -2,6 +2,16 @@
 	import { getContext } from 'svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import {
+		LANGUAGE_LABELS,
+		preferences,
+		setTargetCurrency,
+		setTargetLanguage,
+		TARGET_CURRENCIES,
+		TARGET_LANGUAGES,
+		type TargetCurrency,
+		type TargetLanguage
+	} from '$lib/stores/preferences.svelte';
+	import {
 		settings,
 		planLabel,
 		handlePasswordChange,
@@ -11,6 +21,11 @@
 	} from './settings-page.svelte';
 
 	const toggleSidebar = getContext<() => void>('toggleSidebar');
+
+	$effect(() => {
+		const e = auth.user?.email;
+		if (e) settings.email = e;
+	});
 </script>
 
 <!-- Sticky header -->
@@ -99,6 +114,59 @@
 							</a>
 						{/if}
 					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 언어 및 통화 -->
+		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
+			<h2 class="mb-2 text-base font-semibold" style="color: #1a1a17;">언어 및 통화</h2>
+			<p class="mb-6 text-sm" style="color: #6b6b65;">
+				가격 표시 통화와 콘텐츠 언어를 선택합니다. 브라우저에 저장됩니다.
+			</p>
+
+			<div class="space-y-5">
+				<div>
+					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-lang">
+						언어
+					</label>
+					<select
+						id="pref-lang"
+						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
+						style="
+							background-color: #f7f6f3;
+							border: 1px solid rgba(45, 45, 42, 0.1);
+							color: #1a1a17;
+							outline: none;
+						"
+						value={preferences.targetLanguage}
+						onchange={(e) => setTargetLanguage(e.currentTarget.value as TargetLanguage)}
+					>
+						{#each TARGET_LANGUAGES as code (code)}
+							<option value={code}>{code} — {LANGUAGE_LABELS[code]}</option>
+						{/each}
+					</select>
+				</div>
+				<div>
+					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-currency">
+						통화
+					</label>
+					<select
+						id="pref-currency"
+						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
+						style="
+							background-color: #f7f6f3;
+							border: 1px solid rgba(45, 45, 42, 0.1);
+							color: #1a1a17;
+							outline: none;
+						"
+						value={preferences.targetCurrency}
+						onchange={(e) => setTargetCurrency(e.currentTarget.value as TargetCurrency)}
+					>
+						{#each TARGET_CURRENCIES as code (code)}
+							<option value={code}>{code}</option>
+						{/each}
+					</select>
 				</div>
 			</div>
 		</section>
@@ -251,28 +319,19 @@
 			</div>
 		</section>
 
-		<!-- Danger Zone -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(212, 24, 61, 0.15);">
-			<h2 class="mb-1.5 text-base font-semibold" style="color: #d4183d;">위험 구역</h2>
-			<p class="mb-6 text-sm" style="color: #6b6b65;">아래 작업은 되돌릴 수 없습니다. 신중하게 진행해 주세요.</p>
-
-			<div class="rounded-xl p-4" style="background-color: #fff5f6; border: 1px solid rgba(212, 24, 61, 0.1);">
-				<div class="flex items-start justify-between gap-4">
-					<div>
-						<p class="text-sm font-medium" style="color: #1a1a17;">계정 탈퇴</p>
-						<p class="mt-0.5 text-xs leading-relaxed" style="color: #6b6b65;">
-							계정을 탈퇴하면 모든 추적 데이터와 히스토리가 30일 후 영구 삭제됩니다.
-						</p>
-					</div>
-					<button
-						type="button"
-						onclick={() => (settings.accountDelete.modalOpen = true)}
-						class="shrink-0 rounded-xl px-4 py-2 text-xs font-medium transition hover:opacity-90"
-						style="background-color: #fee8e8; color: #d4183d;"
-					>
-						탈퇴하기
-					</button>
-				</div>
+		<!-- 회원 탈퇴 -->
+		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
+			<h2 class="mb-4 text-base font-semibold" style="color: #1a1a17;">회원 탈퇴</h2>
+			<p class="mb-5 text-sm" style="color: #6b6b65;">탈퇴 시 계정 데이터가 삭제되며 복구할 수 없습니다.</p>
+			<div class="flex justify-end">
+				<button
+					type="button"
+					onclick={() => (settings.accountDelete.modalOpen = true)}
+					class="rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+					style="background-color: #d4183d;"
+				>
+					회원 탈퇴
+				</button>
 			</div>
 		</section>
 
@@ -293,14 +352,12 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
 				</svg>
 			</div>
-			<h3 class="mb-2 text-lg font-semibold" style="color: #1a1a17;">정말 탈퇴하시겠습니까?</h3>
-			<p class="mb-6 text-sm leading-relaxed" style="color: #6b6b65;">
-				모든 추적 상품, 가격 히스토리, 알림 설정이 30일 후 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
-			</p>
+			<h3 class="mb-2 text-lg font-semibold" style="color: #1a1a17;">탈퇴할까요?</h3>
+			<p class="mb-6 text-sm" style="color: #6b6b65;">복구할 수 없습니다. 확인을 위해 아래에 <strong>탈퇴</strong>를 입력하세요.</p>
 
 			<div class="mb-5">
 				<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="delete-confirm">
-					확인을 위해 <strong>탈퇴</strong>를 입력해 주세요.
+					확인 입력
 				</label>
 				<input
 					id="delete-confirm"

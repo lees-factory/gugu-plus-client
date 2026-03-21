@@ -54,6 +54,8 @@ export type SelectTrackedItemSkuBody = {
 /** GET /v1/tracked-items/ — 목록 항목 */
 export type TrackedItemSummary = {
 	tracked_item_id: string;
+	/** 있으면 상세 페이지에 사용 */
+	product_id?: string;
 	title: string;
 	market: ProductMarket;
 	main_image_url: string;
@@ -82,6 +84,7 @@ export const trackedItemsApi = {
 	create: (body: CreateTrackedItemBody) =>
 		apiPost<CreateTrackedItemSuccessResponse>(ENDPOINTS.trackedItems.create, body),
 
+	/** GET — BFF가 `user_id` 쿼리를 쿠키로 채움 */
 	list: () => apiGet<ListTrackedItemsSuccessResponse>(ENDPOINTS.trackedItems.list),
 
 	deleteItem: (trackedItemId: string) =>

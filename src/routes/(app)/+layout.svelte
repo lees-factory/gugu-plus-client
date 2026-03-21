@@ -1,13 +1,27 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { setContext } from 'svelte';
 	import { auth } from '$lib/stores/auth.svelte';
+	import { hydratePreferencesFromStorage } from '$lib/stores/preferences.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
 	import AppFooter from '$lib/components/AppFooter.svelte';
 
 	let { data, children } = $props();
 	let collapsed = $state(false);
 	let mobileOpen = $state(false);
+	let mainEl: HTMLElement | undefined = $state();
+
+	onMount(() => {
+		hydratePreferencesFromStorage();
+	});
+
+	afterNavigate(({ from, to, type }) => {
+		if (type === 'popstate') return;
+		if (from?.url.pathname === to?.url.pathname) return;
+		mainEl?.scrollTo(0, 0);
+	});
 
 	$effect(() => {
 		if (data.userEmail && !auth.user) {
@@ -47,7 +61,7 @@
 			? 'md:ml-16'
 			: 'md:ml-64'}"
 	>
-		<main class="flex-1 overflow-y-auto">
+		<main bind:this={mainEl} class="flex-1 overflow-y-auto">
 			{@render children()}
 			<AppFooter />
 		</main>

@@ -17,7 +17,7 @@
 </script>
 
 <a
-	href="/items/{item.id}"
+	href="/items/{item.productId}"
 	class="block rounded-2xl bg-white p-5 transition-all hover:shadow-lg sm:p-6"
 	style="border: 1px solid rgba(45, 45, 42, 0.06);"
 >

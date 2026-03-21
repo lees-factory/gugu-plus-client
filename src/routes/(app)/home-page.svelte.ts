@@ -15,6 +15,7 @@ function marketToSite(market: string): string {
 function summaryToCard(s: TrackedItemSummary): TrackedItem {
 	return {
 		id: s.tracked_item_id,
+		productId: s.product_id ?? s.tracked_item_id,
 		title: s.title,
 		site: marketToSite(s.market),
 		imageUrl: s.main_image_url
@@ -22,7 +23,10 @@ function summaryToCard(s: TrackedItemSummary): TrackedItem {
 }
 
 export function createHomePageModel() {
-	/** 한 객체로 묶어야 `home.loading` 등이 템플릿에서 안정적으로 갱신된다 (여러 `let $state` 반환 시 이슈 방지). */
+	/**
+	 * `$state` 객체를 그대로 노출해야 `{#each home.model.items}` 등이 갱신된다.
+	 * 반환 객체의 getter만 쓰면 Svelte 5가 내부 배열 할당을 추적하지 못하는 경우가 있다.
+	 */
 	const model = $state({
 		modalOpen: false,
 		items: [] as TrackedItem[],
@@ -71,23 +75,5 @@ export function createHomePageModel() {
 		await loadItems();
 	}
 
-	return {
-		get modalOpen() {
-			return model.modalOpen;
-		},
-		set modalOpen(v: boolean) {
-			model.modalOpen = v;
-		},
-		get items() {
-			return model.items;
-		},
-		get loading() {
-			return model.loading;
-		},
-		get listError() {
-			return model.listError;
-		},
-		loadItems,
-		handleAddItem
-	};
+	return { model, loadItems, handleAddItem };
 }

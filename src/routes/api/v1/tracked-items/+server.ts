@@ -8,7 +8,17 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		throw error(401, 'Unauthorized');
 	}
 
-	const target = `${API_BASE}/v1/tracked-items/${url.search}`;
+	const userId = cookies.get('user_id');
+	if (!userId) {
+		throw error(401, 'Unauthorized');
+	}
+
+	/** OpenAPI: `user_id` 쿼리 필수. 쿠키 값으로 넣어 클라이언트 위조 방지 */
+	const params = new URLSearchParams(url.searchParams);
+	params.set('user_id', userId);
+	const qs = params.toString();
+	const target = `${API_BASE}/v1/tracked-items/${qs ? `?${qs}` : ''}`;
+
 	const res = await fetch(target, {
 		headers: { Authorization: `Bearer ${accessToken}` }
 	});

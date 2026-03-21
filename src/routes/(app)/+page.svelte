@@ -59,8 +59,8 @@
 			</div>
 			<button
 				type="button"
-				onclick={() => (home.modalOpen = true)}
-				disabled={home.loading}
+				onclick={() => (home.model.modalOpen = true)}
+				disabled={home.model.loading}
 				class="flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-medium transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
 				style="background-color: #2d2d2a; color: #ffffff;"
 			>
@@ -82,7 +82,7 @@
 </div>
 
 <!-- Content -->
-{#if home.loading}
+{#if home.model.loading}
 	<div class="flex flex-col items-center justify-center gap-4 px-6 py-20 sm:px-8">
 		<svg class="size-8 animate-spin" viewBox="0 0 24 24" fill="none" style="color: #6b6b65;" aria-hidden="true">
 			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -90,9 +90,9 @@
 		</svg>
 		<p class="text-sm" style="color: #6b6b65;">목록을 불러오는 중…</p>
 	</div>
-{:else if home.listError}
+{:else if home.model.listError}
 	<div class="mx-auto max-w-md px-6 py-16 text-center sm:px-8">
-		<p class="text-sm" style="color: #d4183d;">{home.listError}</p>
+		<p class="text-sm" style="color: #d4183d;">{home.model.listError}</p>
 		<button
 			type="button"
 			onclick={() => home.loadItems()}
@@ -102,8 +102,8 @@
 			다시 시도
 		</button>
 	</div>
-{:else if home.items.length === 0}
-	<EmptyState onAdd={() => (home.modalOpen = true)} />
+{:else if home.model.items.length === 0}
+	<EmptyState onAdd={() => (home.model.modalOpen = true)} />
 {:else}
 	<div class="max-w-[1400px] p-6 sm:p-8 lg:p-10">
 		<!-- Chrome extension banner -->
@@ -157,7 +157,7 @@
 
 		<!-- Items list -->
 		<div class="space-y-4">
-			{#each home.items as item (item.id)}
+			{#each home.model.items as item (item.id)}
 				<ItemCard {item} />
 			{/each}
 		</div>
@@ -165,7 +165,7 @@
 {/if}
 
 <AddItemModal
-	open={home.modalOpen}
-	onClose={() => (home.modalOpen = false)}
+	open={home.model.modalOpen}
+	onClose={() => (home.model.modalOpen = false)}
 	onAdd={home.handleAddItem}
 />
