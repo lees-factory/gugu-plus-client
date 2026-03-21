@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { parseCommerceProductUrl } from '$lib/commerce/parse-product-url';
 	import type { AddItemData } from '$lib/types';
 
 	let {
@@ -8,29 +9,47 @@
 	}: {
 		open: boolean;
 		onClose: () => void;
-		onAdd: (data: AddItemData) => void;
+		onAdd: (data: AddItemData) => void | Promise<void>;
 	} = $props();
 
 	let url = $state('');
 	let loading = $state(false);
+	let submitError = $state<string | null>(null);
 
 	const supportedSites = ['Amazon', 'eBay', 'AliExpress', 'Taobao', '1688', 'Coupang'];
 
+	const parsed = $derived(parseCommerceProductUrl(url));
+
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
+		submitError = null;
 		if (!url.trim()) return;
+
+		const commerce = parseCommerceProductUrl(url);
+		if (!commerce.ok) {
+			submitError = commerce.message;
+			return;
+		}
+
 		loading = true;
-		await new Promise((r) => setTimeout(r, 800));
-		onAdd({ url: url.trim(), frequency: '24h' });
-		loading = false;
-		url = '';
-		frequency = '6h';
-		onClose();
+		try {
+			await onAdd({ url: url.trim(), frequency: '24h', commerce });
+			url = '';
+			onClose();
+		} catch (e) {
+			submitError = e instanceof Error ? e.message : '오류가 발생했습니다.';
+		} finally {
+			loading = false;
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
 	}
+
+	$effect(() => {
+		if (open) submitError = null;
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -84,9 +103,8 @@
 							id="item-url"
 							type="url"
 							bind:value={url}
-							placeholder="https://www.amazon.com/dp/..."
+							placeholder="https://www.aliexpress.com/item/..."
 							required
-							autofocus
 							class="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none transition-all"
 							style="
 								border: 1px solid rgba(45, 45, 42, 0.1);
@@ -95,7 +113,45 @@
 							"
 						/>
 					</div>
-					<p class="text-xs" style="color: #6b6b65;">지원: {supportedSites.join(', ')}</p>
+
+					{#if url.trim()}
+						<div class="flex flex-wrap items-center gap-2 pt-0.5">
+							{#if parsed.ok}
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+									style="border-color: rgba(90, 173, 156, 0.45); background-color: rgba(90, 173, 156, 0.1); color: #2d6b5e;"
+								>
+									<span class="size-1.5 rounded-full" style="background-color: #5aad9c;"></span>
+									{parsed.displayName}
+								</span>
+								<span class="text-xs tabular-nums" style="color: #6b6b65;">
+									상품 ID · {parsed.external_product_id}
+								</span>
+							{:else if parsed.displayName}
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+									style="border-color: rgba(212, 24, 61, 0.25); background-color: rgba(212, 24, 61, 0.06); color: #8a2f3d;"
+								>
+									<span class="size-1.5 rounded-full" style="background-color: #d4183d;"></span>
+									{parsed.displayName}
+								</span>
+								<span class="text-xs" style="color: #6b6b65;">{parsed.message}</span>
+							{:else}
+								<span
+									class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
+									style="border-color: rgba(45, 45, 42, 0.12); background-color: #f7f6f3; color: #6b6b65;"
+								>
+									{parsed.message}
+								</span>
+							{/if}
+						</div>
+					{/if}
+
+					<p class="text-xs" style="color: #6b6b65;">지원 예정·일부 지원: {supportedSites.join(', ')}</p>
+
+					{#if submitError}
+						<p class="text-xs font-medium" style="color: #c41e3a;" role="alert">{submitError}</p>
+					{/if}
 				</div>
 
 				<!-- Actions -->
@@ -110,7 +166,7 @@
 					</button>
 					<button
 						type="submit"
-						disabled={!url.trim() || loading}
+						disabled={!url.trim() || loading || !parsed.ok}
 						class="flex-1 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
 						style="background-color: #2d2d2a; color: #ffffff;"
 					>

@@ -13,6 +13,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	cookies.delete('session', { path: '/' });
 	cookies.delete('access_token', { path: '/' });
 	cookies.delete('refresh_token', { path: '/' });
+	cookies.delete('user_id', { path: '/' });
 
 	redirect(303, '/auth/login');
 };

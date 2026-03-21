@@ -1,0 +1,226 @@
+import { auth } from '$lib/stores/auth.svelte';
+
+export type ChartEntry = { date: string; price: number; change: number };
+
+export type ChartPeriod = '7' | '14' | '30' | '90' | 'all';
+
+export const PRICE_CHART_PERIODS: { value: ChartPeriod; label: string; proOnly: boolean }[] = [
+	{ value: '7', label: '7일', proOnly: false },
+	{ value: '14', label: '14일', proOnly: false },
+	{ value: '30', label: '30일', proOnly: true },
+	{ value: '90', label: '90일', proOnly: true },
+	{ value: 'all', label: '전체', proOnly: true }
+];
+
+export const PRICE_CHART_LAYOUT = {
+	VW: 600,
+	VH: 210,
+	PL: 68,
+	PR: 16,
+	PT: 18,
+	PB: 34
+} as const;
+
+export function buildSmoothPath(pts: { x: number; y: number }[]): string {
+	if (pts.length < 2) return '';
+	let d = `M${pts[0].x},${pts[0].y}`;
+	for (let i = 1; i < pts.length; i++) {
+		const p = pts[i - 1];
+		const c = pts[i];
+		const mx = (p.x + c.x) / 2;
+		d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`;
+	}
+	return d;
+}
+
+export function fmtPriceChart(n: number) {
+	return `₩${n.toLocaleString('ko-KR')}`;
+}
+
+export function fmtPriceChartShort(n: number) {
+	if (Math.abs(n) >= 10000) {
+		const v = n / 10000;
+		return `${v % 1 === 0 ? v : v.toFixed(1)}만`;
+	}
+	return n.toLocaleString();
+}
+
+export function priceChartChangeColor(v: number) {
+	return v < 0 ? '#5aad9c' : v > 0 ? '#d4183d' : '#6b6b65';
+}
+
+/**
+ * PriceChart 전용 rune 모델. 컴포넌트 최상단에서 한 번만 호출하고,
+ * `getData`는 최신 `data` prop을 읽는 함수로 넘긴다.
+ */
+export function createPriceChartModel(getData: () => ChartEntry[]) {
+	const { VW, VH, PL, PR, PT, PB } = PRICE_CHART_LAYOUT;
+	const cW = VW - PL - PR;
+	const cH = VH - PT - PB;
+
+	let selectedPeriod = $state<ChartPeriod>('14');
+	let hoverIdx = $state<number | null>(null);
+
+	const isPro = $derived(auth.plan.type === 'pro');
+
+	$effect(() => {
+		if (!isPro && (selectedPeriod === '30' || selectedPeriod === '90' || selectedPeriod === 'all')) {
+			selectedPeriod = '14';
+		}
+	});
+
+	const chartData = $derived.by(() => {
+		const data = getData();
+		const n =
+			selectedPeriod === 'all'
+				? data.length
+				: selectedPeriod === '7'
+					? 7
+					: selectedPeriod === '14'
+						? 14
+						: selectedPeriod === '30'
+							? 30
+							: 90;
+		return [...data.slice(0, Math.min(n, data.length))].reverse();
+	});
+
+	const stats = $derived.by(() => {
+		if (chartData.length === 0) return null;
+		const prices = chartData.map((d) => d.price);
+		const min = Math.min(...prices);
+		const max = Math.max(...prices);
+		const avg = Math.round(prices.reduce((s, p) => s + p, 0) / prices.length);
+		const first = chartData[0].price;
+		const last = chartData[chartData.length - 1].price;
+		const change = first === 0 ? 0 : ((last - first) / first) * 100;
+		return { min, max, avg, change };
+	});
+
+	const svgPoints = $derived.by(() => {
+		if (chartData.length < 2) return [];
+		const prices = chartData.map((d) => d.price);
+		const lo = Math.min(...prices);
+		const hi = Math.max(...prices);
+		const range = hi - lo || lo * 0.1 || 1;
+		const yMin = lo - range * 0.15;
+		const yMax = hi + range * 0.15;
+		const yRange = yMax - yMin;
+		const n = chartData.length;
+		return chartData.map((d, i) => ({
+			x: PL + (i / (n - 1)) * cW,
+			y: PT + (1 - (d.price - yMin) / yRange) * cH,
+			price: d.price,
+			date: d.date
+		}));
+	});
+
+	const yGrid = $derived.by(() => {
+		if (chartData.length === 0) return [];
+		const prices = chartData.map((d) => d.price);
+		const lo = Math.min(...prices);
+		const hi = Math.max(...prices);
+		const range = hi - lo || lo * 0.1 || 1;
+		const yMin = lo - range * 0.15;
+		const yMax = hi + range * 0.15;
+		const yRange = yMax - yMin;
+		return [0, 0.25, 0.5, 0.75, 1].map((t) => ({
+			y: PT + (1 - t) * cH,
+			price: Math.round(yMin + yRange * t)
+		}));
+	});
+
+	const xLabels = $derived.by(() => {
+		const pts = svgPoints;
+		if (pts.length === 0) return [];
+		const maxL = Math.min(6, pts.length);
+		const step = (pts.length - 1) / (maxL - 1);
+		const seen: number[] = [];
+		return Array.from({ length: maxL }, (_, i) => {
+			const idx = Math.round(i * step);
+			if (seen.includes(idx)) return null;
+			seen.push(idx);
+			return {
+				x: pts[idx].x,
+				label: chartData[idx].date.replace('월 ', '/').replace('일', '')
+			};
+		}).filter(Boolean) as { x: number; label: string }[];
+	});
+
+	const minIdx = $derived(
+		chartData.length === 0
+			? -1
+			: chartData.reduce((best, d, i) => (d.price < chartData[best].price ? i : best), 0)
+	);
+	const maxIdx = $derived(
+		chartData.length === 0
+			? -1
+			: chartData.reduce((best, d, i) => (d.price > chartData[best].price ? i : best), 0)
+	);
+
+	const linePath = $derived(buildSmoothPath(svgPoints));
+	const fillPath = $derived(
+		svgPoints.length >= 2
+			? `${linePath} L${svgPoints[svgPoints.length - 1].x},${PT + cH} L${svgPoints[0].x},${PT + cH} Z`
+			: ''
+	);
+
+	const hoverPt = $derived(hoverIdx !== null ? svgPoints[hoverIdx] : null);
+
+	const tooltipX = $derived(
+		hoverPt ? (hoverPt.x + 118 > VW ? hoverPt.x - 120 : hoverPt.x + 10) : 0
+	);
+	const tooltipY = $derived(hoverPt ? Math.max(PT, hoverPt.y - 36) : 0);
+
+	function onMouseMove(e: MouseEvent) {
+		const svg = e.currentTarget as SVGSVGElement;
+		const rect = svg.getBoundingClientRect();
+		const mx = ((e.clientX - rect.left) / rect.width) * VW;
+		if (svgPoints.length === 0) return;
+		let best = 0;
+		let bestD = Infinity;
+		for (let i = 0; i < svgPoints.length; i++) {
+			const d = Math.abs(svgPoints[i].x - mx);
+			if (d < bestD) {
+				bestD = d;
+				best = i;
+			}
+		}
+		hoverIdx = best;
+	}
+
+	function clearHover() {
+		hoverIdx = null;
+	}
+
+	return {
+		VW,
+		VH,
+		PL,
+		PR,
+		PT,
+		PB,
+		cW,
+		cH,
+		periods: PRICE_CHART_PERIODS,
+		selectedPeriod,
+		isPro,
+		chartData,
+		stats,
+		svgPoints,
+		yGrid,
+		xLabels,
+		minIdx,
+		maxIdx,
+		linePath,
+		fillPath,
+		hoverIdx,
+		hoverPt,
+		tooltipX,
+		tooltipY,
+		onMouseMove,
+		clearHover,
+		fmt: fmtPriceChart,
+		fmtShort: fmtPriceChartShort,
+		changeColor: priceChartChangeColor
+	};
+}

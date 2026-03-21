@@ -11,7 +11,7 @@
 
 	$effect(() => {
 		if (data.userEmail && !auth.user) {
-			auth.initialize(data.userEmail);
+			auth.initialize(data.userEmail, data.userId);
 		}
 	});
 

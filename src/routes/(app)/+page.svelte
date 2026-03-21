@@ -1,51 +1,18 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { getContext } from 'svelte';
 	import ItemCard from '$lib/components/ItemCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import AddItemModal from '$lib/components/AddItemModal.svelte';
-	import {
-		productDetailDummy,
-		productDetailDummyEarpods,
-		type ProductDetailResponse
-	} from '$lib/data/product-dummy';
-	import type { TrackedItem, AddItemData } from '$lib/types';
+	import { createHomePageModel } from './home-page.svelte';
 
 	const toggleSidebar = getContext<() => void>('toggleSidebar');
 
-	let modalOpen = $state(false);
+	const home = createHomePageModel();
 
-	function sourceToSite(source: string): string {
-		const map: Record<string, string> = {
-			aliexpress: 'AliExpress',
-			amazon: 'Amazon',
-			ebay: 'eBay',
-			taobao: 'Taobao'
-		};
-		return map[source.toLowerCase()] ?? source;
-	}
-
-	function toTrackedItem(resp: ProductDetailResponse, id: string): TrackedItem | null {
-		if (!resp.success || !resp.data) return null;
-		const { data } = resp;
-		return {
-			id,
-			title: data.title,
-			site: sourceToSite(data.source),
-			imageUrl: data.main_image
-		};
-	}
-
-	let items = $state<TrackedItem[]>(
-		[
-			toTrackedItem(productDetailDummyEarpods, 'earpods'),
-			toTrackedItem(productDetailDummy, 'tshirt')
-		].filter((i): i is TrackedItem => i !== null)
-	);
-
-	function handleAddItem(data: AddItemData) {
-		// TODO: 실제 API 연동
-		console.log('Adding item:', data);
-	}
+	onMount(() => {
+		void home.loadItems();
+	});
 </script>
 
 <!-- Sticky header -->
@@ -92,8 +59,9 @@
 			</div>
 			<button
 				type="button"
-				onclick={() => (modalOpen = true)}
-				class="flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-medium transition-all hover:shadow-md"
+				onclick={() => (home.modalOpen = true)}
+				disabled={home.loading}
+				class="flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-medium transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
 				style="background-color: #2d2d2a; color: #ffffff;"
 			>
 				<svg
@@ -114,8 +82,28 @@
 </div>
 
 <!-- Content -->
-{#if items.length === 0}
-	<EmptyState onAdd={() => (modalOpen = true)} />
+{#if home.loading}
+	<div class="flex flex-col items-center justify-center gap-4 px-6 py-20 sm:px-8">
+		<svg class="size-8 animate-spin" viewBox="0 0 24 24" fill="none" style="color: #6b6b65;" aria-hidden="true">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+			<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+		</svg>
+		<p class="text-sm" style="color: #6b6b65;">목록을 불러오는 중…</p>
+	</div>
+{:else if home.listError}
+	<div class="mx-auto max-w-md px-6 py-16 text-center sm:px-8">
+		<p class="text-sm" style="color: #d4183d;">{home.listError}</p>
+		<button
+			type="button"
+			onclick={() => home.loadItems()}
+			class="mt-4 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+			style="background-color: #2d2d2a;"
+		>
+			다시 시도
+		</button>
+	</div>
+{:else if home.items.length === 0}
+	<EmptyState onAdd={() => (home.modalOpen = true)} />
 {:else}
 	<div class="max-w-[1400px] p-6 sm:p-8 lg:p-10">
 		<!-- Chrome extension banner -->
@@ -169,11 +157,15 @@
 
 		<!-- Items list -->
 		<div class="space-y-4">
-			{#each items as item (item.id)}
+			{#each home.items as item (item.id)}
 				<ItemCard {item} />
 			{/each}
 		</div>
 	</div>
 {/if}
 
-<AddItemModal open={modalOpen} onClose={() => (modalOpen = false)} onAdd={handleAddItem} />
+<AddItemModal
+	open={home.modalOpen}
+	onClose={() => (home.modalOpen = false)}
+	onAdd={home.handleAddItem}
+/>

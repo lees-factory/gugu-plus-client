@@ -7,6 +7,7 @@ export const load: LayoutServerLoad = ({ cookies }) => {
 		redirect(303, '/auth/login')
 	}
 	return {
-		userEmail: decodeURIComponent(session)
+		userEmail: decodeURIComponent(session),
+		userId: cookies.get('user_id') ?? null
 	}
 }

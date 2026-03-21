@@ -1,78 +1,16 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte';
+	import {
+		settings,
+		planLabel,
+		handlePasswordChange,
+		handleNotifSave,
+		handleDeleteAccount,
+		closeDeleteModal
+	} from './settings-page.svelte';
 
 	const toggleSidebar = getContext<() => void>('toggleSidebar');
-
-	// Profile
-	let emailValue = $state(auth.user?.email ?? '');
-
-	// Password change
-	let currentPassword = $state('');
-	let newPassword = $state('');
-	let confirmPassword = $state('');
-	let passwordLoading = $state(false);
-	let passwordSuccess = $state(false);
-	let passwordError = $state('');
-
-	// Notifications
-	let emailNotif = $state(true);
-	let notifSaveLoading = $state(false);
-	let notifSaveSuccess = $state(false);
-
-	// Delete account
-	let deleteConfirmText = $state('');
-	let deleteLoading = $state(false);
-	let showDeleteModal = $state(false);
-
-	const planLabel: Record<string, string> = {
-		free: 'Free',
-		pro: 'Pro'
-	};
-
-	async function handlePasswordChange() {
-		passwordError = '';
-		if (!currentPassword || !newPassword || !confirmPassword) {
-			passwordError = '모든 항목을 입력해 주세요.';
-			return;
-		}
-		if (newPassword !== confirmPassword) {
-			passwordError = '새 비밀번호가 일치하지 않습니다.';
-			return;
-		}
-		if (newPassword.length < 8) {
-			passwordError = '비밀번호는 8자 이상이어야 합니다.';
-			return;
-		}
-		passwordLoading = true;
-		// TODO: 실제 API 연동
-		await new Promise((r) => setTimeout(r, 800));
-		passwordLoading = false;
-		passwordSuccess = true;
-		currentPassword = '';
-		newPassword = '';
-		confirmPassword = '';
-		setTimeout(() => (passwordSuccess = false), 3000);
-	}
-
-	async function handleNotifSave() {
-		notifSaveLoading = true;
-		// TODO: 실제 API 연동
-		await new Promise((r) => setTimeout(r, 500));
-		notifSaveLoading = false;
-		notifSaveSuccess = true;
-		setTimeout(() => (notifSaveSuccess = false), 3000);
-	}
-
-	async function handleDeleteAccount() {
-		if (deleteConfirmText !== '탈퇴') return;
-		deleteLoading = true;
-		// TODO: 실제 API 연동
-		await new Promise((r) => setTimeout(r, 1000));
-		auth.logout();
-		goto('/auth/login');
-	}
 </script>
 
 <!-- Sticky header -->
@@ -116,7 +54,7 @@
 					<input
 						id="email"
 						type="email"
-						value={emailValue}
+						value={settings.email}
 						disabled
 						class="w-full rounded-xl px-4 py-2.5 text-sm"
 						style="
@@ -177,7 +115,7 @@
 					<input
 						id="current-pw"
 						type="password"
-						bind:value={currentPassword}
+						bind:value={settings.password.current}
 						placeholder="현재 비밀번호 입력"
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
@@ -195,7 +133,7 @@
 					<input
 						id="new-pw"
 						type="password"
-						bind:value={newPassword}
+						bind:value={settings.password.next}
 						placeholder="8자 이상"
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
@@ -213,7 +151,7 @@
 					<input
 						id="confirm-pw"
 						type="password"
-						bind:value={confirmPassword}
+						bind:value={settings.password.confirm}
 						placeholder="새 비밀번호 재입력"
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
@@ -225,19 +163,19 @@
 					/>
 				</div>
 
-				{#if passwordError}
-					<p class="text-xs" style="color: #d4183d;">{passwordError}</p>
+				{#if settings.password.error}
+					<p class="text-xs" style="color: #d4183d;">{settings.password.error}</p>
 				{/if}
 
 				<div class="flex items-center gap-3 pt-1">
 					<button
 						type="button"
 						onclick={handlePasswordChange}
-						disabled={passwordLoading}
+						disabled={settings.password.loading}
 						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
 						style="background-color: #2d2d2a;"
 					>
-						{#if passwordLoading}
+						{#if settings.password.loading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
 								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -245,7 +183,7 @@
 						{/if}
 						변경하기
 					</button>
-					{#if passwordSuccess}
+					{#if settings.password.success}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -272,14 +210,15 @@
 					<button
 						type="button"
 						role="switch"
-						aria-checked={emailNotif}
-						onclick={() => (emailNotif = !emailNotif)}
+						aria-checked={settings.notifications.email}
+						title={settings.notifications.email ? '이메일 알림 켜짐' : '이메일 알림 꺼짐'}
+						onclick={() => (settings.notifications.email = !settings.notifications.email)}
 						class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none"
-						style="width: 44px; height: 24px; background-color: {emailNotif ? '#2d2d2a' : 'rgba(45,45,42,0.2)'};"
+						style="width: 44px; height: 24px; background-color: {settings.notifications.email ? '#2d2d2a' : 'rgba(45,45,42,0.2)'};"
 					>
 						<span
 							class="absolute rounded-full bg-white transition-all duration-200"
-							style="width: 18px; height: 18px; top: 3px; left: {emailNotif ? '23px' : '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
+							style="width: 18px; height: 18px; top: 3px; left: {settings.notifications.email ? '23px' : '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
 						></span>
 					</button>
 				</div>
@@ -288,11 +227,11 @@
 					<button
 						type="button"
 						onclick={handleNotifSave}
-						disabled={notifSaveLoading}
+						disabled={settings.notifications.saveLoading}
 						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
 						style="background-color: #2d2d2a;"
 					>
-						{#if notifSaveLoading}
+						{#if settings.notifications.saveLoading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
 								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -300,7 +239,7 @@
 						{/if}
 						저장
 					</button>
-					{#if notifSaveSuccess}
+					{#if settings.notifications.saveSuccess}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -327,7 +266,7 @@
 					</div>
 					<button
 						type="button"
-						onclick={() => (showDeleteModal = true)}
+						onclick={() => (settings.accountDelete.modalOpen = true)}
 						class="shrink-0 rounded-xl px-4 py-2 text-xs font-medium transition hover:opacity-90"
 						style="background-color: #fee8e8; color: #d4183d;"
 					>
@@ -341,12 +280,12 @@
 </div>
 
 <!-- Delete Account Modal -->
-{#if showDeleteModal}
+{#if settings.accountDelete.modalOpen}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4"
 		style="background-color: rgba(0,0,0,0.4);"
 		role="presentation"
-		onclick={(e) => { if (e.target === e.currentTarget) showDeleteModal = false; }}
+		onclick={(e) => { if (e.target === e.currentTarget) closeDeleteModal(); }}
 	>
 		<div class="w-full max-w-md rounded-2xl bg-white p-7 shadow-xl">
 			<div class="mb-5 flex size-12 items-center justify-center rounded-xl" style="background-color: #fee8e8;">
@@ -366,7 +305,7 @@
 				<input
 					id="delete-confirm"
 					type="text"
-					bind:value={deleteConfirmText}
+					bind:value={settings.accountDelete.confirmText}
 					placeholder="탈퇴"
 					class="w-full rounded-xl px-4 py-2.5 text-sm"
 					style="
@@ -381,7 +320,7 @@
 			<div class="flex gap-3">
 				<button
 					type="button"
-					onclick={() => { showDeleteModal = false; deleteConfirmText = ''; }}
+					onclick={closeDeleteModal}
 					class="flex-1 rounded-xl py-2.5 text-sm font-medium transition hover:bg-[#efefed]"
 					style="background-color: #f7f6f3; color: #1a1a17;"
 				>
@@ -390,11 +329,11 @@
 				<button
 					type="button"
 					onclick={handleDeleteAccount}
-					disabled={deleteConfirmText !== '탈퇴' || deleteLoading}
+					disabled={settings.accountDelete.confirmText !== '탈퇴' || settings.accountDelete.loading}
 					class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-40"
 					style="background-color: #d4183d;"
 				>
-					{#if deleteLoading}
+					{#if settings.accountDelete.loading}
 						<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
 							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>

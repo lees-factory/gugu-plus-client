@@ -21,7 +21,7 @@ curl -X POST http://localhost:8080/v1/auth/register/email \
     "email": "user@example.com",
     "password": "secret123!",
     "display_name": "Gugu User"
-  }'
+  }'(failed)net::ERR_CONNECTION_REFUSED
 ```
 
 이메일 로그인:

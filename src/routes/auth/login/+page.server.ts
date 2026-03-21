@@ -19,9 +19,9 @@ export const actions: Actions = {
 			return fail(result.status, { error: result.error, email });
 		}
 
-		console.log('🚀 ~ body:', result.data);
-
-		const tokens = result.data?.data?.tokens;
+		const payload = result.data?.data;
+		const tokens = payload?.tokens;
+		const user = payload?.user;
 		if (tokens?.access_token) {
 			cookies.set('access_token', tokens.access_token, COOKIE_OPTS);
 		}
@@ -29,6 +29,9 @@ export const actions: Actions = {
 			cookies.set('refresh_token', tokens.refresh_token, COOKIE_OPTS);
 		}
 		cookies.set('session', encodeURIComponent(email), COOKIE_OPTS);
+		if (user?.id) {
+			cookies.set('user_id', user.id, COOKIE_OPTS);
+		}
 
 		redirect(303, '/');
 	}

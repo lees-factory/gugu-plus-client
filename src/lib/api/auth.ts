@@ -1,4 +1,4 @@
-import { apiCall } from './client';
+import { apiPost } from './client';
 import { ENDPOINTS } from './endpoints';
 
 export interface AuthUser {
@@ -47,49 +47,33 @@ export type OAuthProvider = 'google' | 'kakao' | 'naver' | 'apple';
 
 export const authApi = {
 	login: (email: string, password: string) =>
-		apiCall<LoginResponse>(ENDPOINTS.auth.login, {
-			method: 'POST',
-			body: JSON.stringify({ email, password })
-		}),
+		apiPost<LoginResponse>(ENDPOINTS.auth.loginEmail, { email, password }),
 
 	oauthLogin: (payload: {
 		provider: OAuthProvider;
 		subject: string;
 		email: string;
 		display_name?: string;
-	}) =>
-		apiCall<OAuthLoginResponse>(ENDPOINTS.auth.oauthLogin, {
-			method: 'POST',
-			body: JSON.stringify(payload)
-		}),
+	}) => apiPost<OAuthLoginResponse>(ENDPOINTS.auth.oauthLogin, payload),
 
 	register: (email: string, password: string, display_name: string) =>
-		apiCall<RegisterResponse>(ENDPOINTS.auth.register, {
-			method: 'POST',
-			body: JSON.stringify({ email, password, display_name })
-		}),
+		apiPost<RegisterResponse>(ENDPOINTS.auth.registerEmail, { email, password, display_name }),
 
-	verify: (code: string) =>
-		apiCall<VerifyResponse>(ENDPOINTS.auth.verify, {
-			method: 'POST',
-			body: JSON.stringify({ code })
-		}),
+	verify: (code: string) => apiPost<VerifyResponse>(ENDPOINTS.auth.verifyEmail, { code }),
 
 	resendVerification: (email: string) =>
-		apiCall(ENDPOINTS.auth.register, {
-			method: 'POST',
-			body: JSON.stringify({ email, password: '', display_name: email.split('@')[0] })
+		apiPost(ENDPOINTS.auth.registerEmail, {
+			email,
+			password: '',
+			display_name: email.split('@')[0]
 		}),
 
 	refresh: (refresh_token: string, device_name?: string) =>
-		apiCall<{ result: string; data: AuthTokens }>(ENDPOINTS.auth.refresh, {
-			method: 'POST',
-			body: JSON.stringify({ refresh_token, device_name })
+		apiPost<{ result: string; data: AuthTokens }>(ENDPOINTS.auth.refresh, {
+			refresh_token,
+			device_name
 		}),
 
 	logout: (refresh_token: string) =>
-		apiCall<{ result: string }>(ENDPOINTS.auth.logout, {
-			method: 'POST',
-			body: JSON.stringify({ refresh_token })
-		})
+		apiPost<{ result: string }>(ENDPOINTS.auth.logout, { refresh_token })
 };

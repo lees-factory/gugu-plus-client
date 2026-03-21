@@ -39,6 +39,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 			event.cookies.delete('session', { path: '/' });
 			event.cookies.delete('access_token', { path: '/' });
 			event.cookies.delete('refresh_token', { path: '/' });
+			event.cookies.delete('user_id', { path: '/' });
 			redirect(303, '/auth/login');
 		}
 
