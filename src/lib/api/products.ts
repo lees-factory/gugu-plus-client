@@ -17,7 +17,13 @@ export type ProductSku = {
 	price: string;
 	original_price: string;
 	currency: string;
-	image_url: string;
+	/** 옵션별 썸네일; 없으면 빈 문자열 등으로 올 수 있음 */
+	image_url?: string;
+	/** 일부 응답에서 camelCase로 올 수 있음 */
+	imageUrl?: string;
+	/** JSON 배열 문자열, 원소는 `{ "색상"?, "크기"? }` 형태 */
+	sku_properties?: string;
+	origin_sku_id?: string;
 };
 
 export type ProductDetailData = {

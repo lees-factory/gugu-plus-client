@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { t } from '$lib/i18n/t';
 import {
 	mapProductDetail,
 	formatDisplayPrice,
@@ -7,7 +8,14 @@ import {
 import type { ProductDetailData, ProductSku } from '$lib/api/products';
 import { trackedItemsApi } from '$lib/api/tracked-items';
 
-const SIZE_ORDER = ['S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL'];
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
+
+function getSizeRank(size: string): number {
+	const parts = size.toUpperCase().trim().split(/\s+/);
+	const last = parts[parts.length - 1];
+	const idx = SIZE_ORDER.indexOf(last);
+	return idx >= 0 ? idx : 999;
+}
 
 const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 	Amazon: { bg: '#fef3e8', text: '#c97d32' },
@@ -17,7 +25,7 @@ const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 	'1688': { bg: '#fef5e8', text: '#c99532' }
 };
 
-export type ColorOption = { value: string; image: string | null };
+export type MatrixColorOption = { value: string; image: string | null };
 
 export function createItemDetailPageModel(
 	getProduct: () => ProductDetailData | null | undefined,
@@ -30,61 +38,157 @@ export function createItemDetailPageModel(
 	);
 
 	const ui = $state({
-		selectedColor: '',
-		selectedSize: '',
+		selectedSkuId: '',
+		propColor: '',
+		propSize: '',
 		alertEnabled: false,
 		imgError: false,
 		deleting: false
 	});
 
-	$effect(() => {
-		if (!item) return;
-		const first = item.skus[0];
-		ui.selectedColor = first?.colorCode ?? '';
-		ui.selectedSize = first?.size ?? '';
-		ui.alertEnabled = item.alertEnabled;
-		ui.imgError = false;
-	});
+	let prevProductId = $state('');
 
-	const colorOptions = $derived.by<ColorOption[]>(() => {
-		if (!item) return [];
+	const needColor = $derived(
+		!!item && item.skus.some((s) => s.propColor != null && s.propColor !== '')
+	);
+	const needSize = $derived(
+		!!item && item.skus.some((s) => s.propSize != null && s.propSize !== '')
+	);
+
+	const matrixColorOptions = $derived.by<MatrixColorOption[]>(() => {
+		if (!item?.variantMatrix) return [];
 		const seen = new Set<string>();
-		const opts: ColorOption[] = [];
+		const opts: MatrixColorOption[] = [];
 		for (const s of item.skus) {
-			if (!seen.has(s.colorCode)) {
-				seen.add(s.colorCode);
-				opts.push({ value: s.colorCode, image: s.image });
-			}
+			const v = s.propColor;
+			if (!v || seen.has(v)) continue;
+			seen.add(v);
+			const img =
+				s.image ??
+				item.skus.find((x) => x.propColor === v && x.image)?.image ??
+				null;
+			opts.push({ value: v, image: img });
 		}
 		return opts;
 	});
 
-	const sizeOptions = $derived.by<string[]>(() => {
-		if (!item || !ui.selectedColor) return [];
+	/** $effect 전 첫 프레임에 ui.propColor가 ''이면 필터가 비어 크기 줄이 통째로 사라짐 → 첫 SKU 색상으로 폴백 */
+	const effectivePropColor = $derived(
+		ui.propColor || item?.skus[0]?.propColor || ''
+	);
+
+	const matrixSizeOptions = $derived.by(() => {
+		if (!item?.variantMatrix || !needSize) return [] as string[];
 		const sizes = item.skus
-			.filter((s: ParsedSku) => s.colorCode === ui.selectedColor && s.size !== '')
-			.map((s: ParsedSku) => s.size);
-		return [...new Set(sizes)].sort((a, b) => {
-			const ai = SIZE_ORDER.indexOf(a);
-			const bi = SIZE_ORDER.indexOf(b);
-			return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+			.map((s) => s.propSize)
+			.filter((x): x is string => !!x && x !== '');
+		const uniq = [...new Set(sizes)];
+		uniq.sort((a, b) => {
+			const ra = getSizeRank(a);
+			const rb = getSizeRank(b);
+			if (ra !== rb) return ra - rb;
+			return a.localeCompare(b, 'ko', { numeric: true });
 		});
+		return uniq;
 	});
 
-	const hasColors = $derived(colorOptions.length > 1);
-	const hasSizes = $derived(sizeOptions.length > 0);
+	const availableSizesForColor = $derived.by(() => {
+		if (!item?.variantMatrix || !needSize) return new Set<string>();
+		if (!needColor) return new Set(matrixSizeOptions);
+		return new Set(
+			item.skus
+				.filter((s) => s.propColor === effectivePropColor)
+				.map((s) => s.propSize)
+				.filter((x): x is string => !!x && x !== '')
+		);
+	});
+
+	const effectivePropSize = $derived.by(() => {
+		if (!item?.variantMatrix || !needSize) return ui.propSize;
+		const available = [...availableSizesForColor];
+		if (available.length === 0) return matrixSizeOptions[0] ?? ui.propSize;
+		if (available.includes(ui.propSize)) return ui.propSize;
+		return available[0];
+	});
+
+	const showColorRow = $derived(
+		!!item?.variantMatrix && needColor && matrixColorOptions.length > 1
+	);
+	const showSizeRow = $derived(
+		!!item?.variantMatrix && needSize && matrixSizeOptions.length > 1
+	);
+
+	const showMatrixPanel = $derived(
+		!!item?.variantMatrix && item.skus.length > 1 && (showColorRow || showSizeRow)
+	);
+
+	const showFlatPanel = $derived(
+		!!item && !item.variantMatrix && item.skus.length > 1
+	);
+
+	const showFlatMatrixFallback = $derived(
+		!!item?.variantMatrix && item.skus.length > 1 && !showColorRow && !showSizeRow
+	);
+
+	$effect(() => {
+		if (!item) return;
+		if (item.productId !== prevProductId) {
+			prevProductId = item.productId;
+			const first = item.skus[0];
+			if (item.variantMatrix) {
+				ui.propColor = first.propColor ?? '';
+				ui.propSize = first.propSize ?? '';
+			}
+			ui.selectedSkuId = first?.skuId ?? '';
+		}
+		ui.alertEnabled = item.alertEnabled;
+		ui.imgError = false;
+	});
+
+	$effect(() => {
+		if (!item?.skus.length) return;
+		if (item.variantMatrix && !showFlatMatrixFallback) return;
+		const valid = item.skus.some((s) => s.skuId === ui.selectedSkuId);
+		if (!valid) {
+			ui.selectedSkuId = item.skus[0]?.skuId ?? '';
+		}
+	});
 
 	const currentSku = $derived.by<ParsedSku | null>(() => {
 		if (!item) return null;
 		if (item.skus.length === 1) return item.skus[0];
-		return (
-			item.skus.find(
-				(s) => s.colorCode === ui.selectedColor && s.size === ui.selectedSize
-			) ?? item.skus[0]
-		);
+
+		if (item.variantMatrix && showFlatMatrixFallback) {
+			const byId = item.skus.find((s) => s.skuId === ui.selectedSkuId);
+			return byId ?? item.skus[0];
+		}
+
+		if (item.variantMatrix) {
+			const match = item.skus.find((s) => {
+				if (needColor) {
+					if (s.propColor == null || s.propColor === '') return false;
+					if (s.propColor !== effectivePropColor) return false;
+				}
+				if (needSize) {
+					if (s.propSize == null || s.propSize === '') return false;
+					if (s.propSize !== effectivePropSize) return false;
+				}
+				return true;
+			});
+			return match ?? item.skus[0];
+		}
+
+		const byId = item.skus.find((s) => s.skuId === ui.selectedSkuId);
+		return byId ?? item.skus[0];
 	});
 
-	const displayImage = $derived(currentSku?.image ?? item?.imageUrl ?? '');
+	const displayImage = $derived.by(() => {
+		if (!item) return '';
+		const sku = currentSku;
+		if (sku?.image) return sku.image;
+		return item.imageUrl ?? '';
+	});
+
 	const displayPrice = $derived(currentSku?.price ?? 0);
 	const originalPrice = $derived(currentSku?.originalPrice ?? null);
 	const discountPct = $derived(
@@ -102,18 +206,18 @@ export function createItemDetailPageModel(
 		SITE_COLORS[item?.site ?? ''] ?? { bg: '#f7f6f3', text: '#6b6b65' }
 	);
 
-	function selectColor(color: string) {
-		ui.selectedColor = color;
-		const sizes = item?.skus
-			.filter((s) => s.colorCode === color && s.size !== '')
-			.map((s) => s.size);
-		if (sizes && sizes.length > 0 && !sizes.includes(ui.selectedSize)) {
-			ui.selectedSize = sizes[0];
-		}
+	const hasSkuList = $derived(showFlatPanel || showFlatMatrixFallback);
+
+	function selectSku(skuId: string) {
+		ui.selectedSkuId = skuId;
 	}
 
-	function selectSize(size: string) {
-		ui.selectedSize = size;
+	function selectMatrixColor(value: string) {
+		ui.propColor = value;
+	}
+
+	function selectMatrixSize(value: string) {
+		ui.propSize = value;
 	}
 
 	function toggleAlert() {
@@ -125,7 +229,7 @@ export function createItemDetailPageModel(
 	}
 
 	async function handleDelete() {
-		if (!confirm('이 상품 추적을 중단하시겠습니까?')) return;
+		if (!confirm(t('confirm_delete_track'))) return;
 		if (!item?.trackedItemId) return;
 		ui.deleting = true;
 		try {
@@ -134,7 +238,7 @@ export function createItemDetailPageModel(
 				alert(res.error);
 				return;
 			}
-			await goto('/');
+			await goto('/items');
 		} finally {
 			ui.deleting = false;
 		}
@@ -147,18 +251,28 @@ export function createItemDetailPageModel(
 	return {
 		item,
 		ui,
-		colorOptions,
-		sizeOptions,
-		hasColors,
-		hasSizes,
+		effectivePropColor,
+		effectivePropSize,
+		needColor,
+		needSize,
+		matrixColorOptions,
+		matrixSizeOptions,
+		availableSizesForColor,
+		showColorRow,
+		showSizeRow,
+		showMatrixPanel,
+		showFlatPanel,
+		showFlatMatrixFallback,
+		hasSkuList,
 		currentSku,
 		displayImage,
 		displayPrice,
 		originalPrice,
 		discountPct,
 		siteBadgeStyle,
-		selectColor,
-		selectSize,
+		selectSku,
+		selectMatrixColor,
+		selectMatrixSize,
 		toggleAlert,
 		onImageError,
 		handleDelete,

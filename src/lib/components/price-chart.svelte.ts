@@ -1,16 +1,19 @@
 import { auth } from '$lib/stores/auth.svelte';
+import { t } from '$lib/i18n/t';
 
 export type ChartEntry = { date: string; price: number; change: number };
 
 export type ChartPeriod = '7' | '14' | '30' | '90' | 'all';
 
-export const PRICE_CHART_PERIODS: { value: ChartPeriod; label: string; proOnly: boolean }[] = [
-	{ value: '7', label: '7일', proOnly: false },
-	{ value: '14', label: '14일', proOnly: false },
-	{ value: '30', label: '30일', proOnly: true },
-	{ value: '90', label: '90일', proOnly: true },
-	{ value: 'all', label: '전체', proOnly: true }
-];
+export function getPriceChartPeriods(): { value: ChartPeriod; label: string; proOnly: boolean }[] {
+	return [
+		{ value: '7', label: t('chart_period_7'), proOnly: false },
+		{ value: '14', label: t('chart_period_14'), proOnly: false },
+		{ value: '30', label: t('chart_period_30'), proOnly: true },
+		{ value: '90', label: t('chart_period_90'), proOnly: true },
+		{ value: 'all', label: t('chart_period_all'), proOnly: true }
+	];
+}
 
 export const PRICE_CHART_LAYOUT = {
 	VW: 600,
@@ -201,7 +204,7 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		PB,
 		cW,
 		cH,
-		periods: PRICE_CHART_PERIODS,
+		periods: getPriceChartPeriods(),
 		selectedPeriod,
 		isPro,
 		chartData,

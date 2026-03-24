@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { localizeHref } from '$lib/paraglide/runtime.js';
 	import { auth } from '$lib/stores/auth.svelte';
+	import { t } from '$lib/i18n/t';
 	import {
 		LANGUAGE_LABELS,
 		preferences,
@@ -37,7 +39,7 @@
 		<button
 			type="button"
 			onclick={toggleSidebar}
-			aria-label="Toggle sidebar"
+			aria-label={t('aria_toggle_sidebar')}
 			class="flex size-9 shrink-0 items-center justify-center rounded-xl transition hover:bg-[#f7f6f3]"
 			style="color: #6b6b65;"
 		>
@@ -46,8 +48,8 @@
 			</svg>
 		</button>
 		<div>
-			<h1 class="text-2xl font-semibold sm:text-3xl" style="color: #1a1a17; letter-spacing: -0.02em;">설정</h1>
-			<p class="mt-0.5 hidden text-sm sm:block" style="color: #6b6b65;">계정 및 알림 설정을 관리합니다.</p>
+			<h1 class="text-2xl font-semibold sm:text-3xl" style="color: #1a1a17; letter-spacing: -0.02em;">{t('settings_title')}</h1>
+			<p class="mt-0.5 hidden text-sm sm:block" style="color: #6b6b65;">{t('settings_subtitle')}</p>
 		</div>
 	</div>
 </div>
@@ -58,13 +60,13 @@
 
 		<!-- Account Info -->
 		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">계정 정보</h2>
+			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_account')}</h2>
 
 			<div class="space-y-5">
 				<!-- Email -->
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="email">
-						이메일
+						{t('settings_email')}
 					</label>
 					<input
 						id="email"
@@ -79,18 +81,18 @@
 							outline: none;
 						"
 					/>
-					<p class="mt-1.5 text-xs" style="color: #6b6b65;">이메일은 변경할 수 없습니다. 변경이 필요한 경우 support@gugu.plus로 문의해 주세요.</p>
+					<p class="mt-1.5 text-xs" style="color: #6b6b65;">{t('settings_email_hint')}</p>
 				</div>
 
 				<!-- Plan -->
 				<div class="flex items-center justify-between rounded-xl p-4" style="background-color: #f7f6f3;">
 					<div>
-						<p class="text-sm font-medium" style="color: #1a1a17;">현재 플랜</p>
+						<p class="text-sm font-medium" style="color: #1a1a17;">{t('settings_plan_current')}</p>
 						<p class="mt-0.5 text-xs" style="color: #6b6b65;">
 							{#if auth.plan.type === 'free'}
-								최대 5개 상품 추적 · 14일 히스토리
+								{t('settings_plan_free_desc')}
 							{:else}
-								최대 50개 상품 추적 · 무제한 히스토리
+								{t('settings_plan_pro_desc')}
 							{/if}
 						</p>
 					</div>
@@ -106,11 +108,11 @@
 						</span>
 						{#if auth.plan.type === 'free'}
 							<a
-								href="/plan"
+								href={localizeHref('/plan')}
 								class="rounded-xl px-3.5 py-2 text-xs font-medium text-white transition hover:opacity-90"
 								style="background-color: #2d2d2a;"
 							>
-								업그레이드
+								{t('settings_upgrade')}
 							</a>
 						{/if}
 					</div>
@@ -120,15 +122,15 @@
 
 		<!-- 언어 및 통화 -->
 		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-2 text-base font-semibold" style="color: #1a1a17;">언어 및 통화</h2>
+			<h2 class="mb-2 text-base font-semibold" style="color: #1a1a17;">{t('settings_lang_currency')}</h2>
 			<p class="mb-6 text-sm" style="color: #6b6b65;">
-				가격 표시 통화와 콘텐츠 언어를 선택합니다. 브라우저에 저장됩니다.
+				{t('settings_lang_currency_desc')}
 			</p>
 
 			<div class="space-y-5">
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-lang">
-						언어
+						{t('settings_language')}
 					</label>
 					<select
 						id="pref-lang"
@@ -149,7 +151,7 @@
 				</div>
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-currency">
-						통화
+						{t('settings_currency')}
 					</label>
 					<select
 						id="pref-currency"
@@ -173,18 +175,18 @@
 
 		<!-- Password Change -->
 		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">비밀번호 변경</h2>
+			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_password')}</h2>
 
 			<div class="space-y-4">
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="current-pw">
-						현재 비밀번호
+						{t('settings_password_current')}
 					</label>
 					<input
 						id="current-pw"
 						type="password"
 						bind:value={settings.password.current}
-						placeholder="현재 비밀번호 입력"
+						placeholder={t('settings_password_placeholder_current')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
 							background-color: #f7f6f3;
@@ -196,13 +198,13 @@
 				</div>
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="new-pw">
-						새 비밀번호
+						{t('settings_password_new')}
 					</label>
 					<input
 						id="new-pw"
 						type="password"
 						bind:value={settings.password.next}
-						placeholder="8자 이상"
+						placeholder={t('settings_password_placeholder_new')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
 							background-color: #f7f6f3;
@@ -214,13 +216,13 @@
 				</div>
 				<div>
 					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="confirm-pw">
-						새 비밀번호 확인
+						{t('settings_password_confirm')}
 					</label>
 					<input
 						id="confirm-pw"
 						type="password"
 						bind:value={settings.password.confirm}
-						placeholder="새 비밀번호 재입력"
+						placeholder={t('settings_password_placeholder_confirm')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
 							background-color: #f7f6f3;
@@ -249,14 +251,14 @@
 								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
 							</svg>
 						{/if}
-						변경하기
+						{t('settings_password_submit')}
 					</button>
 					{#if settings.password.success}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 							</svg>
-							변경되었습니다.
+							{t('settings_password_success')}
 						</span>
 					{/if}
 				</div>
@@ -265,21 +267,21 @@
 
 		<!-- Notifications -->
 		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">알림 설정</h2>
+			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_notifications')}</h2>
 
 			<div class="space-y-4">
 				<div class="flex items-center justify-between gap-4">
 					<div>
-						<p class="text-sm font-medium" style="color: #1a1a17;">이메일 알림</p>
+						<p class="text-sm font-medium" style="color: #1a1a17;">{t('settings_notif_email')}</p>
 						<p class="mt-0.5 text-xs leading-relaxed" style="color: #6b6b65;">
-							추적 중인 상품의 가격이 변동되면 이메일로 알려드립니다.
+							{t('settings_notif_email_desc')}
 						</p>
 					</div>
 					<button
 						type="button"
 						role="switch"
 						aria-checked={settings.notifications.email}
-						title={settings.notifications.email ? '이메일 알림 켜짐' : '이메일 알림 꺼짐'}
+						title={settings.notifications.email ? t('settings_notif_on') : t('settings_notif_off')}
 						onclick={() => (settings.notifications.email = !settings.notifications.email)}
 						class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none"
 						style="width: 44px; height: 24px; background-color: {settings.notifications.email ? '#2d2d2a' : 'rgba(45,45,42,0.2)'};"
@@ -305,14 +307,14 @@
 								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
 							</svg>
 						{/if}
-						저장
+						{t('settings_save')}
 					</button>
 					{#if settings.notifications.saveSuccess}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 							</svg>
-							저장되었습니다.
+							{t('settings_saved')}
 						</span>
 					{/if}
 				</div>
@@ -321,8 +323,8 @@
 
 		<!-- 회원 탈퇴 -->
 		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-4 text-base font-semibold" style="color: #1a1a17;">회원 탈퇴</h2>
-			<p class="mb-5 text-sm" style="color: #6b6b65;">탈퇴 시 계정 데이터가 삭제되며 복구할 수 없습니다.</p>
+			<h2 class="mb-4 text-base font-semibold" style="color: #1a1a17;">{t('settings_delete_account')}</h2>
+			<p class="mb-5 text-sm" style="color: #6b6b65;">{t('settings_delete_account_desc')}</p>
 			<div class="flex justify-end">
 				<button
 					type="button"
@@ -330,7 +332,7 @@
 					class="rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
 					style="background-color: #d4183d;"
 				>
-					회원 탈퇴
+					{t('settings_delete_account_btn')}
 				</button>
 			</div>
 		</section>
@@ -352,18 +354,19 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
 				</svg>
 			</div>
-			<h3 class="mb-2 text-lg font-semibold" style="color: #1a1a17;">탈퇴할까요?</h3>
-			<p class="mb-6 text-sm" style="color: #6b6b65;">복구할 수 없습니다. 확인을 위해 아래에 <strong>탈퇴</strong>를 입력하세요.</p>
+			<h3 class="mb-2 text-lg font-semibold" style="color: #1a1a17;">{t('settings_delete_modal_title')}</h3>
+			<p class="mb-2 text-sm" style="color: #6b6b65;">{t('settings_delete_modal_intro')}</p>
+			<p class="mb-6 text-sm font-semibold" style="color: #1a1a17;">{t('settings_delete_confirm_word')}</p>
 
 			<div class="mb-5">
 				<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="delete-confirm">
-					확인 입력
+					{t('settings_delete_confirm_label')}
 				</label>
 				<input
 					id="delete-confirm"
 					type="text"
 					bind:value={settings.accountDelete.confirmText}
-					placeholder="탈퇴"
+					placeholder={t('settings_delete_confirm_word')}
 					class="w-full rounded-xl px-4 py-2.5 text-sm"
 					style="
 						background-color: #f7f6f3;
@@ -381,12 +384,12 @@
 					class="flex-1 rounded-xl py-2.5 text-sm font-medium transition hover:bg-[#efefed]"
 					style="background-color: #f7f6f3; color: #1a1a17;"
 				>
-					취소
+					{t('settings_delete_cancel')}
 				</button>
 				<button
 					type="button"
 					onclick={handleDeleteAccount}
-					disabled={settings.accountDelete.confirmText !== '탈퇴' || settings.accountDelete.loading}
+					disabled={settings.accountDelete.confirmText !== t('settings_delete_confirm_word') || settings.accountDelete.loading}
 					class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-40"
 					style="background-color: #d4183d;"
 				>
@@ -396,7 +399,7 @@
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
 						</svg>
 					{/if}
-					탈퇴하기
+					{t('settings_delete_submit')}
 				</button>
 			</div>
 		</div>

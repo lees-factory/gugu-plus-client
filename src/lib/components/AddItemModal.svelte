@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { parseCommerceProductUrl } from '$lib/commerce/parse-product-url';
+	import { t } from '$lib/i18n/t';
 	import type { AddItemData } from '$lib/types';
 
 	let {
@@ -37,7 +38,7 @@
 			url = '';
 			onClose();
 		} catch (e) {
-			submitError = e instanceof Error ? e.message : '오류가 발생했습니다.';
+			submitError = e instanceof Error ? e.message : t('error_generic');
 		} finally {
 			loading = false;
 		}
@@ -76,13 +77,13 @@
 
 			<!-- Header -->
 			<div class="flex items-center justify-between px-7 py-6" style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);">
-				<h2 class="text-lg font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">상품 추가</h2>
+				<h2 class="text-lg font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">{t('modal_add_title')}</h2>
 				<button
 					type="button"
 					onclick={onClose}
 					class="flex size-8 items-center justify-center rounded-lg transition hover:bg-[#f7f6f3]"
 					style="color: #6b6b65;"
-					aria-label="닫기"
+					aria-label={t('aria_close')}
 				>
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -94,7 +95,7 @@
 			<form onsubmit={handleSubmit} class="flex flex-col gap-6 p-7">
 				<!-- URL Input -->
 				<div class="flex flex-col gap-2">
-					<label for="item-url" class="text-sm font-medium" style="color: #1a1a17;">상품 URL</label>
+					<label for="item-url" class="text-sm font-medium" style="color: #1a1a17;">{t('modal_product_url')}</label>
 					<div class="relative">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 top-1/2 -translate-y-1/2 size-4" style="color: #6b6b65;" aria-hidden="true">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
@@ -103,7 +104,7 @@
 							id="item-url"
 							type="url"
 							bind:value={url}
-							placeholder="https://www.aliexpress.com/item/..."
+							placeholder={t('modal_url_placeholder')}
 							required
 							class="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none transition-all"
 							style="
@@ -125,7 +126,7 @@
 									{parsed.displayName}
 								</span>
 								<span class="text-xs tabular-nums" style="color: #6b6b65;">
-									상품 ID · {parsed.external_product_id}
+									{t('modal_product_id_prefix')} {parsed.external_product_id}
 								</span>
 							{:else if parsed.displayName}
 								<span
@@ -147,7 +148,7 @@
 						</div>
 					{/if}
 
-					<p class="text-xs" style="color: #6b6b65;">지원 예정·일부 지원: {supportedSites.join(', ')}</p>
+					<p class="text-xs" style="color: #6b6b65;">{t('modal_supported_sites', { sites: supportedSites.join(', ') })}</p>
 
 					{#if submitError}
 						<p class="text-xs font-medium" style="color: #c41e3a;" role="alert">{submitError}</p>
@@ -162,7 +163,7 @@
 						class="flex-1 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm"
 						style="border: 1px solid rgba(45, 45, 42, 0.1); color: #6b6b65; background-color: #ffffff;"
 					>
-						취소
+						{t('modal_cancel')}
 					</button>
 					<button
 						type="submit"
@@ -170,7 +171,7 @@
 						class="flex-1 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
 						style="background-color: #2d2d2a; color: #ffffff;"
 					>
-						{loading ? '추가 중...' : '추가하기'}
+						{loading ? t('modal_add_loading') : t('modal_add_submit')}
 					</button>
 				</div>
 			</form>

@@ -1,7 +1,13 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { ProductDetailData, ProductSku } from '$lib/api/products';
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: PageLoad = async ({ fetch, params, parent }) => {
+	const { userEmail } = await parent();
+	if (!userEmail) {
+		redirect(303, '/auth/login');
+	}
+
 	const id = params.id;
 	if (!id) {
 		return {
@@ -15,6 +21,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
 	const [res, resSkus] = await Promise.all([fetch(base), fetch(`${base}/skus`)]);
 
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+	console.log('🚀 ~ load ~ json:', json);
 
 	if (!res.ok) {
 		const err = json?.error as { message?: string } | string | undefined;
@@ -40,6 +47,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
 			skus = arr as ProductSku[];
 		}
 	}
+	// console.log('🚀 ~ load ~ skus:', skus);
 
 	return {
 		product: payload as ProductDetailData,

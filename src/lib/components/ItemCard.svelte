@@ -1,7 +1,17 @@
 <script lang="ts">
+	import { localizeHref } from '$lib/paraglide/runtime.js';
+	import { t } from '$lib/i18n/t';
 	import type { TrackedItem } from '$lib/types';
 
-	let { item }: { item: TrackedItem } = $props();
+	let {
+		item,
+		onDelete,
+		deleting = false
+	}: {
+		item: TrackedItem;
+		onDelete: () => void;
+		deleting?: boolean;
+	} = $props();
 
 	let imgError = $state(false);
 
@@ -16,12 +26,14 @@
 	const siteStyle = $derived(siteColors[item.site] ?? { bg: '#f7f6f3', text: '#6b6b65' });
 </script>
 
-<a
-	href="/items/{item.productId}"
-	class="block rounded-2xl bg-white p-5 transition-all hover:shadow-lg sm:p-6"
+<div
+	class="flex rounded-2xl bg-white transition-all hover:shadow-lg"
 	style="border: 1px solid rgba(45, 45, 42, 0.06);"
 >
-	<div class="flex gap-5">
+	<a
+		href={localizeHref(`/items/${item.productId}`)}
+		class="flex min-w-0 flex-1 gap-5 p-5 sm:p-6"
+	>
 		<!-- Image -->
 		<div
 			class="size-20 shrink-0 overflow-hidden rounded-xl sm:size-24"
@@ -45,9 +57,8 @@
 
 		<!-- Content -->
 		<div class="min-w-0 flex-1">
-			<!-- Title & site badge -->
-			<div class="flex items-start gap-3 mb-2">
-				<h3 class="line-clamp-2 text-sm font-medium flex-1 sm:text-base" style="color: #1a1a17; line-height: 1.5;">
+			<div class="mb-2 flex items-start gap-3">
+				<h3 class="line-clamp-2 flex-1 text-sm font-medium sm:text-base" style="color: #1a1a17; line-height: 1.5;">
 					{item.title}
 				</h3>
 				<span
@@ -58,13 +69,33 @@
 				</span>
 			</div>
 
-			<!-- Chevron hint -->
-			<div class="flex items-center gap-1.5 mt-3">
-				<span class="text-xs" style="color: #6b6b65;">자세히 보기</span>
+			<div class="mt-3 flex items-center gap-1.5">
+				<span class="text-xs" style="color: #6b6b65;">{t('item_view_details')}</span>
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5" style="color: #6b6b65;" aria-hidden="true">
 					<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 				</svg>
 			</div>
 		</div>
+	</a>
+
+	<div
+		class="flex shrink-0 flex-col justify-center border-l border-[rgba(45,45,42,0.08)] px-2 py-3 sm:px-3"
+	>
+		<button
+			type="button"
+			onclick={(e) => {
+				e.preventDefault();
+				onDelete();
+			}}
+			disabled={deleting}
+			aria-label={t('aria_delete_track')}
+			class="flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-medium transition hover:bg-[#fee8e8] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-row sm:gap-1.5 sm:px-3"
+			style="color: #d4183d;"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-5 sm:size-4" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+			</svg>
+			<span class="hidden sm:inline">{deleting ? t('item_deleting') : t('item_delete')}</span>
+		</button>
 	</div>
-</a>
+</div>

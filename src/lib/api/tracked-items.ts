@@ -87,6 +87,7 @@ export const trackedItemsApi = {
 	/** GET — BFF가 `user_id` 쿼리를 쿠키로 채움 */
 	list: () => apiGet<ListTrackedItemsSuccessResponse>(ENDPOINTS.trackedItems.list),
 
+	/** DELETE — BFF가 `user_id` 쿼리를 쿠키로 채움 */
 	deleteItem: (trackedItemId: string) =>
 		apiDelete<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.delete(trackedItemId)),
 

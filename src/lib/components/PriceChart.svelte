@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { t } from '$lib/i18n/t';
 	import type { ChartEntry } from './price-chart.svelte';
 	import { createPriceChartModel } from './price-chart.svelte';
 
@@ -41,7 +42,7 @@
 		class="w-full"
 		style="display: block;"
 		role="img"
-		aria-label="가격 추이 차트"
+		aria-label={t('chart_aria_label')}
 		onmousemove={chart.onMouseMove}
 		onmouseleave={chart.clearHover}
 	>
@@ -145,19 +146,19 @@
 {#if chart.isPro && chart.stats}
 	<div class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
-			<p class="mb-1.5 text-xs" style="color: #9b9b95;">최저가</p>
+			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_min')}</p>
 			<p class="text-sm font-semibold tabular-nums" style="color: #5aad9c;">{chart.fmt(chart.stats.min)}</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
-			<p class="mb-1.5 text-xs" style="color: #9b9b95;">최고가</p>
+			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_max')}</p>
 			<p class="text-sm font-semibold tabular-nums" style="color: #d4183d;">{chart.fmt(chart.stats.max)}</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
-			<p class="mb-1.5 text-xs" style="color: #9b9b95;">평균가</p>
+			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_avg')}</p>
 			<p class="text-sm font-semibold tabular-nums" style="color: #1a1a17;">{chart.fmt(chart.stats.avg)}</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
-			<p class="mb-1.5 text-xs" style="color: #9b9b95;">기간 변동</p>
+			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_change')}</p>
 			<p
 				class="text-sm font-semibold tabular-nums"
 				style="color: {chart.stats.change <= 0 ? '#5aad9c' : '#d4183d'};"
@@ -173,7 +174,7 @@
 			class="grid grid-cols-2 gap-2.5 sm:grid-cols-4"
 			style="filter: blur(5px); pointer-events: none; user-select: none;"
 		>
-			{#each ['최저가', '최고가', '평균가', '기간 변동'] as label (label)}
+			{#each [t('chart_stat_min'), t('chart_stat_max'), t('chart_stat_avg'), t('chart_stat_change')] as label (label)}
 				<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 					<p class="mb-1.5 text-xs" style="color: #9b9b95;">{label}</p>
 					<p class="text-sm font-semibold" style="color: #1a1a17;">₩000,000</p>
@@ -188,9 +189,9 @@
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5 shrink-0" style="color: #6b6b65;" aria-hidden="true">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
 				</svg>
-				<span class="text-xs" style="color: #6b6b65;">고급 통계는</span>
-				<a href={resolve('/plan')} class="text-xs font-semibold" style="color: #1a1a17; text-decoration: underline; text-underline-offset: 2px;">Pro 플랜</a>
-				<span class="text-xs" style="color: #6b6b65;">전용입니다.</span>
+				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_lock')} </span>
+				<a href={resolve('/plan')} class="text-xs font-semibold" style="color: #1a1a17; text-decoration: underline; text-underline-offset: 2px;">{t('chart_pro_link')}</a>
+				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_suffix')}</span>
 			</div>
 		</div>
 	</div>

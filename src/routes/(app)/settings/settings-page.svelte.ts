@@ -1,5 +1,6 @@
 import { goto } from '$app/navigation';
 import { auth } from '$lib/stores/auth.svelte';
+import { t } from '$lib/i18n/t';
 
 export const planLabel: Record<string, string> = {
 	free: 'Free',
@@ -66,7 +67,7 @@ export async function handleNotifSave() {
 
 export async function handleDeleteAccount() {
 	const d = settings.accountDelete;
-	if (d.confirmText !== '탈퇴') return;
+	if (d.confirmText !== t('settings_delete_confirm_word')) return;
 	d.loading = true;
 	// TODO: 실제 API 연동
 	await new Promise((r) => setTimeout(r, 1000));
