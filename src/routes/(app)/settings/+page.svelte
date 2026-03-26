@@ -32,24 +32,12 @@
 
 <!-- Sticky header -->
 <div
-	class="sticky top-0 z-10 bg-white px-6 py-5 sm:px-8 sm:py-6"
-	style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);"
+	class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 backdrop-blur-2xl px-6 py-5 sm:px-8 sm:py-6"
 >
 	<div class="flex items-center gap-3">
-		<button
-			type="button"
-			onclick={toggleSidebar}
-			aria-label={t('aria_toggle_sidebar')}
-			class="flex size-9 shrink-0 items-center justify-center rounded-xl transition hover:bg-[#f7f6f3]"
-			style="color: #6b6b65;"
-		>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-			</svg>
-		</button>
 		<div>
-			<h1 class="text-2xl font-semibold sm:text-3xl" style="color: #1a1a17; letter-spacing: -0.02em;">{t('settings_title')}</h1>
-			<p class="mt-0.5 hidden text-sm sm:block" style="color: #6b6b65;">{t('settings_subtitle')}</p>
+			<h1 class="text-2xl font-semibold sm:text-3xl text-zinc-900 tracking-tight">{t('settings_title')}</h1>
+			<p class="mt-0.5 hidden text-sm sm:block text-zinc-500">{t('settings_subtitle')}</p>
 		</div>
 	</div>
 </div>
@@ -59,13 +47,13 @@
 	<div class="mx-auto max-w-2xl space-y-6">
 
 		<!-- Account Info -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_account')}</h2>
+		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_account')}</h2>
 
 			<div class="space-y-5">
 				<!-- Email -->
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="email">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="email">
 						{t('settings_email')}
 					</label>
 					<input
@@ -75,20 +63,20 @@
 						disabled
 						class="w-full rounded-xl px-4 py-2.5 text-sm"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #6b6b65;
 							outline: none;
 						"
 					/>
-					<p class="mt-1.5 text-xs" style="color: #6b6b65;">{t('settings_email_hint')}</p>
+					<p class="mt-1.5 text-xs text-zinc-500">{t('settings_email_hint')}</p>
 				</div>
 
 				<!-- Plan -->
-				<div class="flex items-center justify-between rounded-xl p-4" style="background-color: #f7f6f3;">
+				<div class="flex items-center justify-between rounded-2xl p-4" style="background-color: #f5f5f4;">
 					<div>
-						<p class="text-sm font-medium" style="color: #1a1a17;">{t('settings_plan_current')}</p>
-						<p class="mt-0.5 text-xs" style="color: #6b6b65;">
+						<p class="text-sm font-medium text-zinc-900">{t('settings_plan_current')}</p>
+						<p class="mt-0.5 text-xs text-zinc-500">
 							{#if auth.plan.type === 'free'}
 								{t('settings_plan_free_desc')}
 							{:else}
@@ -110,7 +98,7 @@
 							<a
 								href={localizeHref('/plan')}
 								class="rounded-xl px-3.5 py-2 text-xs font-medium text-white transition hover:opacity-90"
-								style="background-color: #2d2d2a;"
+								style="background: linear-gradient(to right, #292524, #3f3f46);"
 							>
 								{t('settings_upgrade')}
 							</a>
@@ -121,22 +109,22 @@
 		</section>
 
 		<!-- 언어 및 통화 -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-2 text-base font-semibold" style="color: #1a1a17;">{t('settings_lang_currency')}</h2>
-			<p class="mb-6 text-sm" style="color: #6b6b65;">
+		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+			<h2 class="mb-2 text-base font-semibold text-zinc-900">{t('settings_lang_currency')}</h2>
+			<p class="mb-6 text-sm text-zinc-500">
 				{t('settings_lang_currency_desc')}
 			</p>
 
 			<div class="space-y-5">
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-lang">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="pref-lang">
 						{t('settings_language')}
 					</label>
 					<select
 						id="pref-lang"
 						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #1a1a17;
 							outline: none;
@@ -150,14 +138,14 @@
 					</select>
 				</div>
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="pref-currency">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="pref-currency">
 						{t('settings_currency')}
 					</label>
 					<select
 						id="pref-currency"
 						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #1a1a17;
 							outline: none;
@@ -174,12 +162,12 @@
 		</section>
 
 		<!-- Password Change -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_password')}</h2>
+		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_password')}</h2>
 
 			<div class="space-y-4">
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="current-pw">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="current-pw">
 						{t('settings_password_current')}
 					</label>
 					<input
@@ -189,7 +177,7 @@
 						placeholder={t('settings_password_placeholder_current')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #1a1a17;
 							outline: none;
@@ -197,7 +185,7 @@
 					/>
 				</div>
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="new-pw">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="new-pw">
 						{t('settings_password_new')}
 					</label>
 					<input
@@ -207,7 +195,7 @@
 						placeholder={t('settings_password_placeholder_new')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #1a1a17;
 							outline: none;
@@ -215,7 +203,7 @@
 					/>
 				</div>
 				<div>
-					<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="confirm-pw">
+					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="confirm-pw">
 						{t('settings_password_confirm')}
 					</label>
 					<input
@@ -225,7 +213,7 @@
 						placeholder={t('settings_password_placeholder_confirm')}
 						class="w-full rounded-xl px-4 py-2.5 text-sm transition"
 						style="
-							background-color: #f7f6f3;
+							background-color: #f5f5f4;
 							border: 1px solid rgba(45, 45, 42, 0.1);
 							color: #1a1a17;
 							outline: none;
@@ -234,7 +222,7 @@
 				</div>
 
 				{#if settings.password.error}
-					<p class="text-xs" style="color: #d4183d;">{settings.password.error}</p>
+					<p class="text-xs text-rose-600">{settings.password.error}</p>
 				{/if}
 
 				<div class="flex items-center gap-3 pt-1">
@@ -243,7 +231,7 @@
 						onclick={handlePasswordChange}
 						disabled={settings.password.loading}
 						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-						style="background-color: #2d2d2a;"
+						style="background: linear-gradient(to right, #292524, #3f3f46);"
 					>
 						{#if settings.password.loading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -266,14 +254,14 @@
 		</section>
 
 		<!-- Notifications -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-6 text-base font-semibold" style="color: #1a1a17;">{t('settings_notifications')}</h2>
+		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_notifications')}</h2>
 
 			<div class="space-y-4">
 				<div class="flex items-center justify-between gap-4">
 					<div>
-						<p class="text-sm font-medium" style="color: #1a1a17;">{t('settings_notif_email')}</p>
-						<p class="mt-0.5 text-xs leading-relaxed" style="color: #6b6b65;">
+						<p class="text-sm font-medium text-zinc-900">{t('settings_notif_email')}</p>
+						<p class="mt-0.5 text-xs leading-relaxed text-zinc-500">
 							{t('settings_notif_email_desc')}
 						</p>
 					</div>
@@ -299,7 +287,7 @@
 						onclick={handleNotifSave}
 						disabled={settings.notifications.saveLoading}
 						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-						style="background-color: #2d2d2a;"
+						style="background: linear-gradient(to right, #292524, #3f3f46);"
 					>
 						{#if settings.notifications.saveLoading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -322,9 +310,9 @@
 		</section>
 
 		<!-- 회원 탈퇴 -->
-		<section class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-			<h2 class="mb-4 text-base font-semibold" style="color: #1a1a17;">{t('settings_delete_account')}</h2>
-			<p class="mb-5 text-sm" style="color: #6b6b65;">{t('settings_delete_account_desc')}</p>
+		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+			<h2 class="mb-4 text-base font-semibold text-zinc-900">{t('settings_delete_account')}</h2>
+			<p class="mb-5 text-sm text-zinc-500">{t('settings_delete_account_desc')}</p>
 			<div class="flex justify-end">
 				<button
 					type="button"
@@ -348,18 +336,18 @@
 		role="presentation"
 		onclick={(e) => { if (e.target === e.currentTarget) closeDeleteModal(); }}
 	>
-		<div class="w-full max-w-md rounded-2xl bg-white p-7 shadow-xl">
+		<div class="w-full max-w-md rounded-3xl bg-white/60 backdrop-blur-sm p-7 shadow-xl">
 			<div class="mb-5 flex size-12 items-center justify-center rounded-xl" style="background-color: #fee8e8;">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-6" style="color: #d4183d;" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-6 text-rose-600" aria-hidden="true">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
 				</svg>
 			</div>
-			<h3 class="mb-2 text-lg font-semibold" style="color: #1a1a17;">{t('settings_delete_modal_title')}</h3>
-			<p class="mb-2 text-sm" style="color: #6b6b65;">{t('settings_delete_modal_intro')}</p>
-			<p class="mb-6 text-sm font-semibold" style="color: #1a1a17;">{t('settings_delete_confirm_word')}</p>
+			<h3 class="mb-2 text-lg font-semibold text-zinc-900">{t('settings_delete_modal_title')}</h3>
+			<p class="mb-2 text-sm text-zinc-500">{t('settings_delete_modal_intro')}</p>
+			<p class="mb-6 text-sm font-semibold text-zinc-900">{t('settings_delete_confirm_word')}</p>
 
 			<div class="mb-5">
-				<label class="mb-1.5 block text-sm font-medium" style="color: #1a1a17;" for="delete-confirm">
+				<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="delete-confirm">
 					{t('settings_delete_confirm_label')}
 				</label>
 				<input
@@ -369,7 +357,7 @@
 					placeholder={t('settings_delete_confirm_word')}
 					class="w-full rounded-xl px-4 py-2.5 text-sm"
 					style="
-						background-color: #f7f6f3;
+						background-color: #f5f5f4;
 						border: 1px solid rgba(45, 45, 42, 0.1);
 						color: #1a1a17;
 						outline: none;
@@ -382,7 +370,7 @@
 					type="button"
 					onclick={closeDeleteModal}
 					class="flex-1 rounded-xl py-2.5 text-sm font-medium transition hover:bg-[#efefed]"
-					style="background-color: #f7f6f3; color: #1a1a17;"
+					style="background-color: #f5f5f4; color: #1a1a17;"
 				>
 					{t('settings_delete_cancel')}
 				</button>

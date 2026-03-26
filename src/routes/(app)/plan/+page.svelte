@@ -45,26 +45,14 @@
 
 <!-- Sticky header -->
 <div
-	class="sticky top-0 z-10 bg-white px-6 py-5 sm:px-8 sm:py-6"
-	style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);"
+	class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 backdrop-blur-2xl px-6 py-5 sm:px-8 sm:py-6"
 >
 	<div class="flex items-center gap-3">
-		<button
-			type="button"
-			onclick={toggleSidebar}
-			aria-label="Toggle sidebar"
-			class="flex size-9 shrink-0 items-center justify-center rounded-xl transition hover:bg-[#f7f6f3]"
-			style="color: #6b6b65;"
-		>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-			</svg>
-		</button>
 		<div>
-			<h1 class="text-2xl font-semibold sm:text-3xl" style="color: #1a1a17; letter-spacing: -0.02em;">
+			<h1 class="text-2xl font-semibold sm:text-3xl text-zinc-900 tracking-tight">
 				Plans
 			</h1>
-			<p class="mt-0.5 hidden text-sm sm:block" style="color: #6b6b65;">
+			<p class="mt-0.5 hidden text-sm sm:block text-zinc-500">
 				나에게 맞는 플랜을 선택하세요
 			</p>
 		</div>
@@ -79,16 +67,16 @@
 		{#if currentPlan === 'free'}
 			<div
 				class="mb-8 flex items-center gap-4 rounded-2xl p-5"
-				style="background-color: #f7f6f3; border: 1px solid rgba(45, 45, 42, 0.06);"
+				style="background-color: #f5f5f4; border: 1px solid rgba(45, 45, 42, 0.06);"
 			>
 				<div class="flex size-10 shrink-0 items-center justify-center rounded-xl" style="background-color: #e8e7e3;">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5" style="color: #6b6b65;" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-zinc-500" aria-hidden="true">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
 					</svg>
 				</div>
 				<div>
-					<p class="text-sm font-medium" style="color: #1a1a17;">현재 Free 플랜 사용 중</p>
-					<p class="mt-0.5 text-xs" style="color: #6b6b65;">
+					<p class="text-sm font-medium text-zinc-900">현재 Free 플랜 사용 중</p>
+					<p class="mt-0.5 text-xs text-zinc-500">
 						Pro로 업그레이드하면 50개 상품과 무제한 히스토리를 사용할 수 있어요.
 					</p>
 				</div>
@@ -104,7 +92,7 @@
 					</svg>
 				</div>
 				<div>
-					<p class="text-sm font-medium" style="color: #1a1a17;">현재 Pro 플랜 사용 중</p>
+					<p class="text-sm font-medium text-zinc-900">현재 Pro 플랜 사용 중</p>
 					<p class="mt-0.5 text-xs" style="color: #4a9384;">모든 기능을 이용할 수 있어요.</p>
 				</div>
 			</div>
@@ -115,17 +103,17 @@
 			class="mb-8 rounded-2xl p-5"
 			style="background: linear-gradient(135deg, #f7f6f3 0%, #f4f3ef 100%); border: 1px solid rgba(45, 45, 42, 0.06);"
 		>
-			<p class="text-sm font-medium mb-1" style="color: #1a1a17;">
+			<p class="text-sm font-medium mb-1 text-zinc-900">
 				📊 Daily price tracking for long-term insights.
 			</p>
-			<p class="text-xs leading-relaxed" style="color: #6b6b65;">
+			<p class="text-xs leading-relaxed text-zinc-500">
 				Gugu Plus는 매일 1회 가격을 수집해 장기 히스토리 데이터를 쌓아드립니다. 빠른 알림 서비스가 아닌, 데이터 기반 구매 판단 도구입니다. 지금 시작할수록 더 풍부한 데이터가 쌓입니다.
 			</p>
 		</div>
 
 		<!-- Billing toggle -->
 		<div class="mb-8 flex justify-center">
-			<div class="flex items-center gap-1 rounded-xl p-1" style="background-color: #f4f3ef;">
+			<div class="flex items-center gap-1 rounded-2xl p-1" style="background-color: #f5f5f4;">
 				<button
 					type="button"
 					onclick={() => (billingCycle = 'monthly')}
@@ -161,24 +149,24 @@
 
 			<!-- Free -->
 			<div
-				class="flex flex-col rounded-2xl bg-white p-7"
-				style="border: 1px solid rgba(45, 45, 42, 0.08);"
+				class="flex flex-col rounded-3xl bg-white/60 backdrop-blur-sm p-7"
+				
 			>
 				<div class="mb-6">
 					<div class="mb-4 flex items-center justify-between">
-						<span class="rounded-lg px-3 py-1 text-xs font-semibold" style="background-color: #f4f3ef; color: #6b6b65;">
+						<span class="rounded-lg px-3 py-1 text-xs font-semibold" style="background-color: #f5f5f4; color: #6b6b65;">
 							FREE
 						</span>
 						{#if currentPlan === 'free'}
-							<span class="rounded-lg px-3 py-1 text-xs font-medium" style="background-color: #f7f6f3; color: #6b6b65; border: 1px solid rgba(45,45,42,0.08);">
+							<span class="rounded-lg px-3 py-1 text-xs font-medium" style="background-color: #f5f5f4; color: #6b6b65; border: 1px solid rgba(45,45,42,0.08);">
 								현재 플랜
 							</span>
 						{/if}
 					</div>
 					<div class="mb-1 flex items-baseline gap-1">
-						<span class="text-4xl font-semibold" style="color: #1a1a17;">₩0</span>
+						<span class="text-4xl font-semibold text-zinc-900">₩0</span>
 					</div>
-					<p class="text-sm" style="color: #6b6b65;">영원히 무료</p>
+					<p class="text-sm text-zinc-500">영원히 무료</p>
 				</div>
 
 				<ul class="mb-7 flex flex-col gap-3.5">
@@ -186,13 +174,13 @@
 						<li class="flex items-start gap-3 text-sm">
 							{#if feature.included}
 								<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full" style="background-color: #e8f2f0;">
-									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3" style="color: #5aad9c;" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3 text-emerald-600" aria-hidden="true">
 										<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 									</svg>
 								</div>
-								<span style="color: #1a1a17;">{feature.text}</span>
+								<span class="text-zinc-900">{feature.text}</span>
 							{:else}
-								<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full" style="background-color: #f4f3ef;">
+								<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full" style="background-color: #f5f5f4;">
 									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3" style="color: #6b6b65; opacity: 0.4;" aria-hidden="true">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
 									</svg>
@@ -209,15 +197,14 @@
 							type="button"
 							disabled
 							class="w-full rounded-xl py-3 text-sm font-medium"
-							style="border: 1px solid rgba(45, 45, 42, 0.1); color: #6b6b65; background-color: #f7f6f3; cursor: default;"
+							style="border: 1px solid rgba(45, 45, 42, 0.1); color: #6b6b65; background-color: #f5f5f4; cursor: default;"
 						>
 							현재 플랜
 						</button>
 					{:else}
 						<button
 							type="button"
-							class="w-full rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm"
-							style="border: 1px solid rgba(45, 45, 42, 0.1); color: #6b6b65; background-color: #ffffff;"
+							class="w-full rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm border border-zinc-200/80 text-zinc-500 bg-white"
 						>
 							다운그레이드
 						</button>
@@ -264,7 +251,7 @@
 						</div>
 						<p class="text-sm" style="color: rgba(255,255,255,0.5);">
 							연 ₩{yearlyPrice.toLocaleString()} 청구 ·
-							<span style="color: #5aad9c;">₩{yearlySavings.toLocaleString()} 절약</span>
+							<span class="text-emerald-600">₩{yearlySavings.toLocaleString()} 절약</span>
 						</p>
 					{/if}
 				</div>
@@ -273,7 +260,7 @@
 					{#each proFeatures as feature}
 						<li class="flex items-start gap-3 text-sm">
 							<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full" style="background-color: rgba(90,173,156,0.2);">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3" style="color: #5aad9c;" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3 text-emerald-600" aria-hidden="true">
 									<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 								</svg>
 							</div>
@@ -315,13 +302,13 @@
 		<!-- Comparison table -->
 		<div class="mt-10">
 			<h2 class="mb-5 text-lg font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">플랜 비교</h2>
-			<div class="overflow-hidden rounded-2xl bg-white" style="border: 1px solid rgba(45, 45, 42, 0.08);">
+			<div class="overflow-hidden rounded-3xl bg-white/60 backdrop-blur-sm" >
 				<table class="w-full text-sm">
 					<thead>
-						<tr style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);">
+						<tr class="border-b border-zinc-100">
 							<th class="px-6 py-4 text-left font-medium" style="color: #6b6b65; width: 50%;">기능</th>
-							<th class="px-6 py-4 text-center font-medium" style="color: #6b6b65;">Free</th>
-							<th class="px-6 py-4 text-center font-medium" style="color: #1a1a17;">Pro</th>
+							<th class="px-6 py-4 text-center font-medium text-zinc-500">Free</th>
+							<th class="px-6 py-4 text-center font-medium text-zinc-900">Pro</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -335,8 +322,8 @@
 							{ label: '이메일 알림', free: '✓', pro: '✓' },
 						] as row, i}
 							<tr style="{i < 6 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.04);' : ''}">
-								<td class="px-6 py-3.5" style="color: #1a1a17;">{row.label}</td>
-								<td class="px-6 py-3.5 text-center" style="color: #6b6b65;">{row.free}</td>
+								<td class="px-6 py-3.5 text-zinc-900">{row.label}</td>
+								<td class="px-6 py-3.5 text-center text-zinc-500">{row.free}</td>
 								<td class="px-6 py-3.5 text-center font-medium" style="color: {row.pro === row.free ? '#6b6b65' : '#1a1a17'};">{row.pro}</td>
 							</tr>
 						{/each}
@@ -367,9 +354,9 @@
 						a: '신용카드, 체크카드, 카카오페이, 네이버페이를 지원합니다. 안전한 결제를 위해 SSL 암호화를 사용합니다.'
 					}
 				] as faq}
-					<div class="rounded-2xl bg-white p-6" style="border: 1px solid rgba(45, 45, 42, 0.06);">
-						<h3 class="mb-2 text-sm font-semibold" style="color: #1a1a17;">{faq.q}</h3>
-						<p class="text-sm leading-relaxed" style="color: #6b6b65;">{faq.a}</p>
+					<div class="rounded-3xl bg-white/60 backdrop-blur-sm p-6" >
+						<h3 class="mb-2 text-sm font-semibold text-zinc-900">{faq.q}</h3>
+						<p class="text-sm leading-relaxed text-zinc-500">{faq.a}</p>
 					</div>
 				{/each}
 			</div>
@@ -382,17 +369,17 @@
 				{ icon: 'refresh', text: '언제든 취소 가능' },
 				{ icon: 'data', text: '데이터 절대 삭제 없음' }
 			] as signal}
-				<div class="flex items-center gap-2 text-sm" style="color: #6b6b65;">
+				<div class="flex items-center gap-2 text-sm text-zinc-500">
 					{#if signal.icon === 'shield'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0" style="color: #5aad9c;" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0 text-emerald-600" aria-hidden="true">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
 						</svg>
 					{:else if signal.icon === 'refresh'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0" style="color: #5aad9c;" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0 text-emerald-600" aria-hidden="true">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
 						</svg>
 					{:else}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0" style="color: #5aad9c;" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 shrink-0 text-emerald-600" aria-hidden="true">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 8.485-7.5 11.9-7.5 11.9s-7.5-3.415-7.5-11.9a7.5 7.5 0 0 1 15 0Z" />
 						</svg>
 					{/if}

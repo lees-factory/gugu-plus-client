@@ -6,35 +6,23 @@
 	const year = new Date().getFullYear();
 </script>
 
-<footer class="mt-auto px-6 py-6 sm:px-8" style="border-top: 1px solid rgba(45, 45, 42, 0.06);">
+<footer class="mt-auto border-t border-zinc-200/60 px-6 py-6 sm:px-8">
 	<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-		<p class="text-xs" style="color: #6b6b65;">
+		<p class="text-xs text-zinc-400">
 			{t('footer_copyright', { year })}
 		</p>
 		<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
 			<LocaleToggle />
-			<div class="flex items-center gap-5 text-xs" style="color: #6b6b65;">
-				<a
-					href={localizeHref('/terms')}
-					class="transition hover:opacity-70"
-					style="color: #6b6b65;"
-				>
+			<div class="flex items-center gap-5 text-xs text-zinc-400">
+				<a href={localizeHref('/terms')} class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_terms')}
 				</a>
-				<span style="opacity: 0.3;">·</span>
-				<a
-					href={localizeHref('/privacy')}
-					class="transition hover:opacity-70"
-					style="color: #6b6b65;"
-				>
+				<span class="opacity-30">·</span>
+				<a href={localizeHref('/privacy')} class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_privacy')}
 				</a>
-				<span style="opacity: 0.3;">·</span>
-				<a
-					href="mailto:support@gugu.plus"
-					class="transition hover:opacity-70"
-					style="color: #6b6b65;"
-				>
+				<span class="opacity-30">·</span>
+				<a href="mailto:support@gugu.plus" class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_contact')}
 				</a>
 			</div>

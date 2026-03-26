@@ -59,6 +59,16 @@ export type TrackedItemSummary = {
 	title: string;
 	market: ProductMarket;
 	main_image_url: string;
+	/** 백엔드가 내려주면 목록에서 가격·추세 표시 */
+	current_price?: string;
+	currency?: string;
+	target_price?: string;
+	alert_threshold?: string;
+	/** 일부 API 변형 */
+	alert_price?: string;
+	price_change_percent?: string;
+	change_percent?: string;
+	last_change_percent?: string;
 };
 
 export type ListTrackedItemsSuccessResponse = {

@@ -1,27 +1,7 @@
 import { normalizeTrackedItemsList, trackedItemsApi } from '$lib/api/tracked-items';
 import { t } from '$lib/i18n/t';
 import type { TrackedItem, AddItemData } from '$lib/types';
-import type { TrackedItemSummary } from '$lib/api/tracked-items';
-
-function marketToSite(market: string): string {
-	const map: Record<string, string> = {
-		ALIEXPRESS: 'AliExpress',
-		AMAZON: 'Amazon',
-		EBAY: 'eBay',
-		TAOBAO: 'Taobao'
-	};
-	return map[market] ?? market;
-}
-
-function summaryToCard(s: TrackedItemSummary): TrackedItem {
-	return {
-		id: s.tracked_item_id,
-		productId: s.product_id ?? s.tracked_item_id,
-		title: s.title,
-		site: marketToSite(s.market),
-		imageUrl: s.main_image_url
-	};
-}
+import { summaryToCard } from '$lib/tracked-items/map-summary';
 
 export function createHomePageModel() {
 	/**
