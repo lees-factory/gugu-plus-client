@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	let email = $state('');
 	let loading = $state(false);
 	let sent = $state(false);
@@ -18,7 +19,7 @@
 	<div class="mb-6">
 		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">Reset your password</h1>
 		{#if !sent}
-			<p class="mt-1 text-sm" style="color: #6b6b65;">{"Enter your email and we'll send you a reset link."}</p>
+			<p class="mt-1 text-sm" style="color: #6b6b65;">Enter your email and we'll send you a reset link.</p>
 		{/if}
 	</div>
 
@@ -44,7 +45,7 @@
 				Check your email for reset instructions.
 			</p>
 			<a
-				href="/auth/login"
+				href={resolve('/auth/login')}
 				class="flex h-11 w-full items-center justify-center rounded-xl px-4 text-sm font-medium transition-all hover:shadow-sm focus-visible:outline-none"
 				style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #ffffff; color: #1a1a17;"
 			>
@@ -81,7 +82,7 @@
 			</button>
 
 			<a
-				href="/auth/login"
+				href={resolve('/auth/login')}
 				class="text-center text-sm transition hover:opacity-70"
 				style="color: #6b6b65;"
 			>

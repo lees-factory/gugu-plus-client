@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import type { ActionData } from './$types';
 
@@ -72,13 +73,13 @@
 
 		<div>
 			<div class="flex justify-center gap-2.5" onpaste={handlePaste}>
-				{#each code as _, i}
+				{#each code as digit, i (i)}
 					<input
 						bind:this={inputs[i]}
 						type="text"
 						inputmode="numeric"
 						maxlength="1"
-						value={code[i]}
+						value={digit}
 						oninput={(e) => handleInput(i, e)}
 						onkeydown={(e) => handleKeydown(i, e)}
 						aria-label={`Digit ${i + 1}`}
@@ -105,7 +106,7 @@
 
 	<div class="mt-5 flex flex-col items-center gap-2 text-sm" style="color: #6b6b65;">
 		<div class="flex items-center gap-1">
-			<span>{"Didn't receive it?"}</span>
+			<span>Didn't receive it?</span>
 			<form method="POST" action="?/resend" use:enhance={() => {
 				resending = true;
 				return async ({ update }) => {
@@ -124,7 +125,7 @@
 				</button>
 			</form>
 		</div>
-		<a href="/auth/login" class="transition hover:opacity-70" style="color: #6b6b65;">
+		<a href={resolve('/auth/login')} class="transition hover:opacity-70" style="color: #6b6b65;">
 			Back to login
 		</a>
 	</div>

@@ -1,4 +1,6 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapProductDetail,
@@ -27,7 +29,7 @@ const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 
 export type MatrixColorOption = { value: string; image: string | null };
 
-export function createItemDetailPageModel(
+export function createItemDetailPage(
 	getProduct: () => ProductDetailData | null | undefined,
 	getSkus: () => ProductSku[] | null | undefined
 ) {
@@ -57,7 +59,7 @@ export function createItemDetailPageModel(
 
 	const matrixColorOptions = $derived.by<MatrixColorOption[]>(() => {
 		if (!item?.variantMatrix) return [];
-		const seen = new Set<string>();
+		const seen = new SvelteSet<string>();
 		const opts: MatrixColorOption[] = [];
 		for (const s of item.skus) {
 			const v = s.propColor;
@@ -82,7 +84,7 @@ export function createItemDetailPageModel(
 		const sizes = item.skus
 			.map((s) => s.propSize)
 			.filter((x): x is string => !!x && x !== '');
-		const uniq = [...new Set(sizes)];
+		const uniq = [...new SvelteSet(sizes)];
 		uniq.sort((a, b) => {
 			const ra = getSizeRank(a);
 			const rb = getSizeRank(b);
@@ -93,9 +95,9 @@ export function createItemDetailPageModel(
 	});
 
 	const availableSizesForColor = $derived.by(() => {
-		if (!item?.variantMatrix || !needSize) return new Set<string>();
-		if (!needColor) return new Set(matrixSizeOptions);
-		return new Set(
+		if (!item?.variantMatrix || !needSize) return new SvelteSet<string>();
+		if (!needColor) return new SvelteSet(matrixSizeOptions);
+		return new SvelteSet(
 			item.skus
 				.filter((s) => s.propColor === effectivePropColor)
 				.map((s) => s.propSize)
@@ -198,7 +200,7 @@ export function createItemDetailPageModel(
 	);
 
 	$effect(() => {
-		displayImage;
+		void displayImage;
 		ui.imgError = false;
 	});
 
@@ -238,7 +240,7 @@ export function createItemDetailPageModel(
 				alert(res.error);
 				return;
 			}
-			await goto('/items');
+			await goto(resolve('/items'));
 		} finally {
 			ui.deleting = false;
 		}

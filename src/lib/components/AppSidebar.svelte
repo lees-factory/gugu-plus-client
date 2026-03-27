@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { deLocalizeHref, localizeHref } from '$lib/paraglide/runtime.js';
+	import { resolve } from '$app/paths';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { t } from '$lib/i18n/t';
 
@@ -11,14 +11,14 @@
 	}: { collapsed: boolean; mobileOpen: boolean; onClose: () => void } = $props();
 
 	const navItems = $derived([
-		{ href: localizeHref('/'), path: '/', label: t('nav_home') },
-		{ href: localizeHref('/items'), path: '/items', label: t('nav_tracked_items') },
-		{ href: localizeHref('/plan'), path: '/plan', label: t('nav_plan') },
-		{ href: localizeHref('/settings'), path: '/settings', label: t('nav_settings') }
+		{ path: '/' as const, label: t('nav_home') },
+		{ path: '/items' as const, label: t('nav_tracked_items') },
+		{ path: '/plan' as const, label: t('nav_plan') },
+		{ path: '/settings' as const, label: t('nav_settings') }
 	]);
 
 	function isActive(path: string) {
-		const base = deLocalizeHref(page.url.pathname);
+		const base = page.url.pathname;
 		if (path === '/') return base === '/' || base === '';
 		return base.startsWith(path);
 	}
@@ -36,7 +36,7 @@
 		style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);"
 	>
 		<a
-			href={localizeHref('/')}
+			href={resolve('/')}
 			onclick={onClose}
 			class="flex items-center gap-3 overflow-hidden"
 			title={t('brand_name')}
@@ -69,9 +69,9 @@
 
 	<!-- Navigation -->
 	<nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
-		{#each navItems as item}
+		{#each navItems as item (item.path)}
 			<a
-				href={item.href}
+				href={resolve(item.path)}
 				onclick={onClose}
 				title={item.label}
 				class="group flex items-center rounded-2xl text-sm font-medium transition-all duration-200
@@ -151,7 +151,7 @@
 					</div>
 					{#if auth.plan.type === 'free'}
 						<a
-							href={localizeHref('/plan')}
+							href={resolve('/plan')}
 							class="text-xs font-semibold text-stone-700 transition hover:text-stone-900"
 						>
 							{t('sidebar_upgrade_pro')} →
@@ -164,7 +164,7 @@
 		<!-- Collapsed: just upgrade icon -->
 		<div class="shrink-0 flex flex-col items-center gap-3 p-3" style="border-top: 1px solid rgba(0, 0, 0, 0.06);">
 			<a
-				href={localizeHref('/plan')}
+				href={resolve('/plan')}
 				title={t('sidebar_upgrade_pro')}
 				class="flex size-10 items-center justify-center rounded-2xl text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5"
 				style="background: linear-gradient(135deg, #292524 0%, #3f3f46 100%);"

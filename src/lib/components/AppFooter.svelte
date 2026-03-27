@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { localizeHref } from '$lib/paraglide/runtime.js';
+	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
 	import LocaleToggle from '$lib/components/LocaleToggle.svelte';
 
@@ -14,15 +14,15 @@
 		<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
 			<LocaleToggle />
 			<div class="flex items-center gap-5 text-xs text-zinc-400">
-				<a href={localizeHref('/terms')} class="transition-all duration-200 hover:text-zinc-700">
+				<a href={resolve('/terms')} class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_terms')}
 				</a>
 				<span class="opacity-30">·</span>
-				<a href={localizeHref('/privacy')} class="transition-all duration-200 hover:text-zinc-700">
+				<a href={resolve('/privacy')} class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_privacy')}
 				</a>
 				<span class="opacity-30">·</span>
-				<a href="mailto:support@gugu.plus" class="transition-all duration-200 hover:text-zinc-700">
+				<a href="mailto:support@priceeye.com" class="transition-all duration-200 hover:text-zinc-700">
 					{t('footer_contact')}
 				</a>
 			</div>

@@ -1,74 +1,28 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { localizeHref } from '$lib/paraglide/runtime.js';
+	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
-	import { createItemDetailPageModel } from './item-detail-page.svelte';
+	import { createItemDetailPage } from './item-detail-page.svelte';
 	import PriceChart from '$lib/components/PriceChart.svelte';
 
 	let { data }: PageProps = $props();
 
-	const page = createItemDetailPageModel(() => data.product, () => data.skus);
+	const page = createItemDetailPage(() => data.product, () => data.skus);
 
-	// item / 정적 파생값 - 초기 렌더 이후 변하지 않음
 	const item = $derived(page.item);
-	const siteBadgeStyle = $derived(page.siteBadgeStyle);
-	const showMatrixPanel = $derived(page.showMatrixPanel);
-	const showColorRow = $derived(page.showColorRow);
-	const matrixColorOptions = $derived(page.matrixColorOptions);
-	const showSizeRow = $derived(page.showSizeRow);
-	const matrixSizeOptions = $derived(page.matrixSizeOptions);
-	const hasSkuList = $derived(page.hasSkuList);
-
-	// 인터랙션 반응형 값 — page.ui($state 프록시)를 직접 읽어서 컴포넌트 컨텍스트에서 계산
-	const effectivePropColor = $derived(
-		page.ui.propColor || item?.skus[0]?.propColor || ''
-	);
-	const availableSizesForColor = $derived(
-		new Set(
-			item?.skus
-				.filter((s) => s.propColor === effectivePropColor)
-				.map((s) => s.propSize)
-				.filter((x): x is string => !!x && x !== '') ?? []
-		)
-	);
-	const effectivePropSize = $derived.by(() => {
-		const ordered = matrixSizeOptions.filter((sz) => availableSizesForColor.has(sz));
-		if (!ordered.length) return page.ui.propSize;
-		if (ordered.includes(page.ui.propSize)) return page.ui.propSize;
-		return ordered[0];
-	});
-	const currentSku = $derived.by(() => {
-		if (!item) return null;
-		if (item.skus.length === 1) return item.skus[0];
-		if (item.variantMatrix) {
-			const match = item.skus.find(
-				(s) => s.propColor === effectivePropColor && s.propSize === effectivePropSize
-			);
-			return match ?? item.skus.find((s) => s.propColor === effectivePropColor) ?? item.skus[0];
-		}
-		return item.skus.find((s) => s.skuId === page.ui.selectedSkuId) ?? item.skus[0];
-	});
-	const displayImage = $derived(currentSku?.image ?? item?.imageUrl ?? '');
-	const displayPrice = $derived(currentSku?.price ?? 0);
-	const originalPrice = $derived(currentSku?.originalPrice ?? null);
-	const discountPct = $derived(
-		originalPrice && originalPrice > displayPrice
-			? Math.round((1 - displayPrice / originalPrice) * 100)
-			: null
-	);
 </script>
 
 {#if data.error}
 	<div class="flex flex-col items-center justify-center gap-4 p-12 text-center">
 		<p class="text-sm text-rose-600">{data.error}</p>
-		<a href={localizeHref('/items')} class="text-sm font-medium underline underline-offset-2 text-zinc-900">
+		<a href={resolve('/items')} class="text-sm font-medium underline underline-offset-2 text-zinc-900">
 			{t('back_to_dashboard')}
 		</a>
 	</div>
 {:else if !item}
 	<div class="flex flex-col items-center justify-center gap-4 p-12 text-center">
 		<p class="text-sm text-zinc-500">{t('not_found')}</p>
-		<a href={localizeHref('/items')} class="text-sm font-medium underline underline-offset-2 text-zinc-900">
+		<a href={resolve('/items')} class="text-sm font-medium underline underline-offset-2 text-zinc-900">
 			{t('back_to_dashboard')}
 		</a>
 	</div>
@@ -76,7 +30,7 @@
 	<!-- Sticky header -->
 	<div class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 backdrop-blur-2xl px-6 py-4 sm:px-8">
 		<a
-			href={localizeHref('/items')}
+			href={resolve('/items')}
 			class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-all duration-200 hover:text-zinc-900"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
@@ -96,7 +50,7 @@
 				<a
 					href={item.url}
 					target="_blank"
-					rel="noopener noreferrer"
+					rel="external noopener noreferrer"
 					class="mt-1 inline-flex items-center gap-1 text-xs text-zinc-400 transition-all duration-200 hover:text-zinc-700"
 				>
 					{t('detail_view_on_site', { site: item.site })}
@@ -128,10 +82,10 @@
 			<div class="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
 				<!-- Image -->
 				<div class="flex items-center justify-center overflow-hidden rounded-3xl bg-white/60 backdrop-blur-sm border border-zinc-200/60 p-6">
-					{#if !page.ui.imgError && displayImage}
-						{#key `${currentSku?.skuId ?? ''}|${displayImage}`}
+					{#if !page.ui.imgError && page.displayImage}
+						{#key `${page.currentSku?.skuId ?? ''}|${page.displayImage}`}
 							<img
-								src={displayImage}
+								src={page.displayImage}
 								alt={item.title}
 								class="max-h-72 w-full rounded-xl object-contain sm:max-h-96"
 								onerror={page.onImageError}
@@ -153,25 +107,25 @@
 						<p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">{t('detail_current_price')}</p>
 						<div class="flex items-end gap-2.5">
 							<p class="text-3xl font-semibold tabular-nums tracking-tight text-zinc-900 sm:text-4xl">
-								{page.fmt(displayPrice)}
+								{page.fmt(page.displayPrice)}
 							</p>
-							{#if discountPct}
+							{#if page.discountPct}
 								<span class="mb-1 rounded-xl bg-rose-50 border border-rose-100/50 px-2.5 py-0.5 text-sm font-semibold text-rose-600">
-									-{discountPct}%
+									-{page.discountPct}%
 								</span>
 							{/if}
 						</div>
-						{#if originalPrice && originalPrice > displayPrice}
+						{#if page.originalPrice && page.originalPrice > page.displayPrice}
 							<p class="mt-1 text-sm tabular-nums line-through text-zinc-400">
-								{page.fmt(originalPrice)}
+								{page.fmt(page.originalPrice)}
 							</p>
 						{/if}
-						{#if originalPrice && originalPrice > displayPrice}
-							<div class="mt-4 inline-flex items-center gap-1.5 rounded-2xl border border-emerald-100/50 bg-gradient-to-r from-emerald-50 to-teal-50 px-3.5 py-2 text-sm font-semibold text-emerald-700">
+						{#if page.originalPrice && page.originalPrice > page.displayPrice}
+							<div class="mt-4 inline-flex items-center gap-1.5 rounded-2xl border border-emerald-100/50 bg-linear-to-r from-emerald-50 to-teal-50 px-3.5 py-2 text-sm font-semibold text-emerald-700">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
 								</svg>
-								{t('detail_savings', { amount: page.fmt(originalPrice - displayPrice) })}
+								{t('detail_savings', { amount: page.fmt(page.originalPrice - page.displayPrice) })}
 							</div>
 						{/if}
 					</div>
@@ -220,13 +174,13 @@
 			</div>
 
 			<!-- sku_properties: 색상 / 크기 매트릭스 -->
-			{#if showMatrixPanel}
+			{#if page.showMatrixPanel}
 				<div class="rounded-3xl bg-white/60 backdrop-blur-sm border border-zinc-200/60 p-6 space-y-6">
-					{#if showColorRow}
+					{#if page.showColorRow}
 						<div>
 							<p class="mb-3 text-sm font-medium text-zinc-900">{t('detail_prop_color')}</p>
 							<div class="flex flex-wrap gap-2.5">
-								{#each matrixColorOptions as opt}
+								{#each page.matrixColorOptions as opt (opt.value)}
 									{#if opt.image}
 										<button
 											type="button"
@@ -234,8 +188,8 @@
 											title={opt.value}
 											class="size-12 cursor-pointer overflow-hidden rounded-xl border-2 transition sm:size-14"
 											style="
-												border-color: {effectivePropColor === opt.value ? '#2d2d2a' : 'transparent'};
-												box-shadow: {effectivePropColor === opt.value ? '0 1px 4px rgba(0,0,0,0.12)' : 'none'};
+												border-color: {page.effectivePropColor === opt.value ? '#2d2d2a' : 'transparent'};
+												box-shadow: {page.effectivePropColor === opt.value ? '0 1px 4px rgba(0,0,0,0.12)' : 'none'};
 											"
 										>
 											<img src={opt.image} alt={opt.value} class="size-full object-cover pointer-events-none" />
@@ -246,9 +200,9 @@
 											onclick={() => page.selectMatrixColor(opt.value)}
 											class="rounded-xl border px-3.5 py-2 text-sm font-medium transition"
 											style="
-												border-color: {effectivePropColor === opt.value ? '#2d2d2a' : 'rgba(45, 45, 42, 0.1)'};
-												background-color: {effectivePropColor === opt.value ? '#2d2d2a' : 'transparent'};
-												color: {effectivePropColor === opt.value ? '#ffffff' : '#1a1a17'};
+												border-color: {page.effectivePropColor === opt.value ? '#2d2d2a' : 'rgba(45, 45, 42, 0.1)'};
+												background-color: {page.effectivePropColor === opt.value ? '#2d2d2a' : 'transparent'};
+												color: {page.effectivePropColor === opt.value ? '#ffffff' : '#1a1a17'};
 											"
 										>
 											{opt.value}
@@ -259,18 +213,18 @@
 						</div>
 					{/if}
 
-					{#if showSizeRow}
+					{#if page.showSizeRow}
 						<div>
 							<p class="mb-3 text-sm font-medium text-zinc-900">{t('detail_prop_size')}</p>
 							<div class="flex flex-wrap gap-2.5">
-								{#each matrixSizeOptions as sz}
-									{@const avail = availableSizesForColor.has(sz)}
-									{@const selected = effectivePropSize === sz}
+								{#each page.matrixSizeOptions as sz (sz)}
+									{@const avail = page.availableSizesForColor.has(sz)}
+									{@const selected = page.effectivePropSize === sz}
 									<button
 										type="button"
 										onclick={() => page.selectMatrixSize(sz)}
 										disabled={!avail}
-										class="min-w-[3rem] rounded-xl border px-3.5 py-2 text-sm font-medium transition"
+										class="min-w-12 rounded-xl border px-3.5 py-2 text-sm font-medium transition"
 										style="
 											border-color: {selected ? '#2d2d2a' : avail ? 'rgba(45, 45, 42, 0.1)' : 'rgba(45, 45, 42, 0.05)'};
 											background-color: {selected ? '#2d2d2a' : 'transparent'};
@@ -286,14 +240,14 @@
 						</div>
 					{/if}
 
-					{#if currentSku}
+					{#if page.currentSku}
 						<div class="rounded-xl px-5 py-3.5 text-sm" style="background-color: #f7f6f3;">
 							<span class="text-zinc-500">{t('detail_selected_option')}</span>
 							<span class="ml-1.5 font-medium text-zinc-900">
-								{currentSku.skuName}
+								{page.currentSku.skuName}
 							</span>
 							<span class="ml-3 font-semibold tabular-nums text-zinc-900">
-								{page.fmt(currentSku.price)}
+								{page.fmt(page.currentSku.price)}
 							</span>
 						</div>
 					{/if}
@@ -301,7 +255,7 @@
 			{/if}
 
 			<!-- sku_properties 없음: 전체 SKU 행 목록 -->
-			{#if hasSkuList}
+			{#if page.hasSkuList}
 				<div class="rounded-3xl bg-white/60 backdrop-blur-sm p-6 space-y-5 border border-zinc-200/60">
 					<p class="text-sm font-medium text-zinc-900">
 						{t('detail_sku_list_heading', { count: item.skus.length })}
@@ -341,14 +295,14 @@
 						{/each}
 					</div>
 
-					{#if currentSku}
+					{#if page.currentSku}
 						<div class="rounded-xl px-5 py-3.5 text-sm" style="background-color: #f7f6f3;">
 							<span class="text-zinc-500">{t('detail_selected_option')}</span>
 							<span class="ml-1.5 font-medium text-zinc-900">
-								{currentSku.skuName}
+								{page.currentSku.skuName}
 							</span>
 							<span class="ml-3 font-semibold tabular-nums text-zinc-900">
-								{page.fmt(currentSku.price)}
+								{page.fmt(page.currentSku.price)}
 							</span>
 						</div>
 					{/if}
@@ -363,7 +317,7 @@
 
 				<div class="mt-6">
 					<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">{t('detail_recent_changes')}</p>
-					{#each item.priceHistory.slice(0, 10) as entry, i}
+					{#each item.priceHistory.slice(0, 10) as entry, i (i)}
 						<div
 							class="flex items-center justify-between py-2.5"
 							style="{i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}"

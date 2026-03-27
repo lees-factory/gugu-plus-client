@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import { localizeHref } from '$lib/paraglide/runtime.js';
+	import { resolve } from '$app/paths';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { t } from '$lib/i18n/t';
 	import {
@@ -21,8 +20,6 @@
 		handleDeleteAccount,
 		closeDeleteModal
 	} from './settings-page.svelte';
-
-	const toggleSidebar = getContext<() => void>('toggleSidebar');
 
 	$effect(() => {
 		const e = auth.user?.email;
@@ -96,7 +93,7 @@
 						</span>
 						{#if auth.plan.type === 'free'}
 							<a
-								href={localizeHref('/plan')}
+								href={resolve('/plan')}
 								class="rounded-xl px-3.5 py-2 text-xs font-medium text-white transition hover:opacity-90"
 								style="background: linear-gradient(to right, #292524, #3f3f46);"
 							>

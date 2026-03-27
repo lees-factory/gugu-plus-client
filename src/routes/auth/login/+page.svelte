@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import type { ActionData } from './$types';
 
@@ -122,10 +123,10 @@
 	</button>
 
 	<div class="mt-6 flex flex-col items-center gap-2 text-sm">
-		<a href="/auth/forgot" class="transition hover:opacity-80" style="color: #6b6b65;">Forgot password?</a>
+		<a href={resolve('/auth/forgot')} class="transition hover:opacity-80" style="color: #6b6b65;">Forgot password?</a>
 		<p style="color: #6b6b65;">
-			{"Don't have an account? "}
-			<a href="/auth/signup" class="font-medium underline-offset-2 hover:underline" style="color: #1a1a17;">
+			Don't have an account?
+			<a href={resolve('/auth/signup')} class="font-medium underline-offset-2 hover:underline" style="color: #1a1a17;">
 				Sign up
 			</a>
 		</p>

@@ -34,13 +34,13 @@
 		<div class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
 
 			<p class="mb-8 text-sm leading-relaxed" style="color: #6b6b65;">
-				본 이용약관은 Gugu Plus(이하 "서비스")를 이용하는 회원과 운영자 간의 권리·의무 및 책임 사항을 규정합니다. 서비스를 이용하면 본 약관에 동의한 것으로 간주합니다.
+				본 이용약관은 Price Eye(이하 "서비스")를 이용하는 회원과 운영자 간의 권리·의무 및 책임 사항을 규정합니다. 서비스를 이용하면 본 약관에 동의한 것으로 간주합니다.
 			</p>
 
 			{#each [
 				{
 					title: '제1조 (서비스 목적)',
-					body: 'Gugu Plus는 Amazon, eBay, AliExpress, Taobao 등 주요 글로벌 쇼핑 플랫폼의 상품 가격을 매일 수집하여 장기 히스토리 데이터를 제공하는 개인용 가격 추적 도구입니다. 본 서비스는 실시간 알림 서비스가 아니며, 매일 1회 데이터를 갱신합니다.'
+					body: 'Price Eye는 Amazon, eBay, AliExpress, Taobao 등 주요 글로벌 쇼핑 플랫폼의 상품 가격을 매일 수집하여 장기 히스토리 데이터를 제공하는 개인용 가격 추적 도구입니다. 본 서비스는 실시간 알림 서비스가 아니며, 매일 1회 데이터를 갱신합니다.'
 				},
 				{
 					title: '제2조 (회원 가입 및 계정)',
@@ -52,7 +52,7 @@
 				},
 				{
 					title: '제4조 (환불 정책)',
-					body: '결제 후 7일 이내 환불 요청 시 전액 환불됩니다. 7일 이후에는 남은 구독 기간에 비례하여 환불됩니다. 환불 요청은 support@gugu.plus로 문의하시기 바랍니다. 연간 구독을 취소할 경우 즉시 청구가 중단되며, 남은 기간은 일할 계산으로 환불됩니다.'
+					body: '결제 후 7일 이내 환불 요청 시 전액 환불됩니다. 7일 이후에는 남은 구독 기간에 비례하여 환불됩니다. 환불 요청은 support@priceeye.com로 문의하시기 바랍니다. 연간 구독을 취소할 경우 즉시 청구가 중단되며, 남은 기간은 일할 계산으로 환불됩니다.'
 				},
 				{
 					title: '제5조 (데이터 정책)',
@@ -64,7 +64,7 @@
 				},
 				{
 					title: '제7조 (책임의 한계)',
-					body: 'Gugu Plus는 수집된 가격 데이터의 완전한 정확성을 보장하지 않습니다. 제3자 쇼핑 플랫폼의 정책 변경, 서버 장애, 또는 불가항력적 사유로 인한 데이터 누락에 대해 책임을 지지 않습니다. 서비스를 통해 제공되는 정보를 구매 결정의 유일한 근거로 사용하는 것은 권장하지 않습니다.'
+					body: 'Price Eye는 수집된 가격 데이터의 완전한 정확성을 보장하지 않습니다. 제3자 쇼핑 플랫폼의 정책 변경, 서버 장애, 또는 불가항력적 사유로 인한 데이터 누락에 대해 책임을 지지 않습니다. 서비스를 통해 제공되는 정보를 구매 결정의 유일한 근거로 사용하는 것은 권장하지 않습니다.'
 				},
 				{
 					title: '제8조 (약관 변경)',
@@ -72,9 +72,9 @@
 				},
 				{
 					title: '제9조 (분쟁 해결)',
-					body: '본 약관과 관련한 분쟁은 대한민국 법령을 적용하며, 소송이 필요한 경우 운영자의 소재지를 관할하는 법원을 1심 법원으로 합니다. 분쟁 발생 시 먼저 support@gugu.plus로 연락하여 협의를 통한 해결을 시도합니다.'
+					body: '본 약관과 관련한 분쟁은 대한민국 법령을 적용하며, 소송이 필요한 경우 운영자의 소재지를 관할하는 법원을 1심 법원으로 합니다. 분쟁 발생 시 먼저 support@priceeye.com로 연락하여 협의를 통한 해결을 시도합니다.'
 				}
-			] as section, i}
+			] as section, i (i)}
 				<div class="{i < 8 ? 'mb-7' : ''}">
 					<h2 class="mb-3 text-sm font-semibold" style="color: #1a1a17;">{section.title}</h2>
 					<p class="text-sm leading-relaxed" style="color: #6b6b65;">{section.body}</p>
@@ -82,7 +82,7 @@
 			{/each}
 
 			<div class="mt-8 rounded-xl p-4 text-xs leading-relaxed" style="background-color: #f7f6f3; color: #6b6b65;">
-				문의: <a href="mailto:support@gugu.plus" class="underline underline-offset-2" style="color: #1a1a17;">support@gugu.plus</a>
+				문의: <a href="mailto:support@priceeye.com" class="underline underline-offset-2" style="color: #1a1a17;">support@priceeye.com</a>
 				· 시행일: {effectiveDate}
 			</div>
 		</div>

@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
 import { t } from '$lib/i18n/t';
 
@@ -72,7 +73,7 @@ export async function handleDeleteAccount() {
 	// TODO: 실제 API 연동
 	await new Promise((r) => setTimeout(r, 1000));
 	auth.logout();
-	goto('/auth/login');
+	goto(resolve('/auth/login'));
 }
 
 export function closeDeleteModal() {

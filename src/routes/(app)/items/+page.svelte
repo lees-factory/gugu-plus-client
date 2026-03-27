@@ -1,86 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { localizeHref } from '$lib/paraglide/runtime.js';
 	import { auth } from '$lib/stores/auth.svelte';
 	import ItemCard from '$lib/components/ItemCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import AddItemModal from '$lib/components/AddItemModal.svelte';
 	import { t } from '$lib/i18n/t';
-	import { createHomePageModel } from './items-page.svelte';
-	import type { TrackedItem } from '$lib/types';
+	import { resolve } from '$app/paths';
+	import { createItemsPage } from './items-page.svelte';
 
-	const home = createHomePageModel();
-
-	type SortKey = 'recent' | 'title' | 'site' | 'price';
-
-	let searchQuery = $state('');
-	let marketplace = $state('all');
-	let sortBy = $state<SortKey>('recent');
-	let filterOpen = $state(false);
-
-	function setSortFromSelect(ev: Event) {
-		const v = (ev.currentTarget as HTMLSelectElement).value;
-		if (v === 'recent' || v === 'title' || v === 'site' || v === 'price') sortBy = v;
-	}
-
-	const marketplaceSites = $derived(
-		[...new Set(home.model.items.map((i) => i.site))].sort((a, b) => a.localeCompare(b))
-	);
-
-	const displayedItems = $derived.by(() => {
-		let list: TrackedItem[] = home.model.items;
-		const q = searchQuery.trim().toLowerCase();
-		if (q) {
-			list = list.filter(
-				(i) => i.title.toLowerCase().includes(q) || i.site.toLowerCase().includes(q)
-			);
-		}
-		if (marketplace !== 'all') {
-			list = list.filter((i) => i.site === marketplace);
-		}
-		const sorted = [...list];
-		if (sortBy === 'title') {
-			sorted.sort((a, b) => a.title.localeCompare(b.title));
-		} else if (sortBy === 'site') {
-			sorted.sort(
-				(a, b) => a.site.localeCompare(b.site) || a.title.localeCompare(b.title)
-			);
-		} else if (sortBy === 'price') {
-			sorted.sort((a, b) => {
-				const pa = a.currentPrice;
-				const pb = b.currentPrice;
-				if (pa == null && pb == null) return 0;
-				if (pa == null) return 1;
-				if (pb == null) return -1;
-				return pa - pb;
-			});
-		}
-		return sorted;
-	});
-
-	onMount(() => {
-		if (auth.user) {
-			void home.loadItems();
-		} else {
-			home.model.loading = false;
-		}
-	});
-
-	function handleAddClick() {
-		if (!auth.user) {
-			goto(localizeHref('/auth/login'));
-			return;
-		}
-		home.model.modalOpen = true;
-	}
+	const page = createItemsPage();
 </script>
 
 <div class="space-y-10 p-6 sm:p-8 lg:p-10">
 	<!-- Page header (aligned with web-ref Watchlist) -->
 	<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 		<div class="max-w-2xl">
-			<div class="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-100/50 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1.5">
+			<div class="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-100/50 bg-linear-to-r from-amber-50 to-orange-50 px-3 py-1.5">
 				<svg
 					viewBox="0 0 24 24"
 					fill="currentColor"
@@ -99,7 +33,7 @@
 				class="flex flex-wrap items-baseline gap-x-1.5 text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl"
 			>
 				<span>{t('items_heading_my')}</span>
-				<span class="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{t('items_heading_watchlist')}</span>
+				<span class="bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{t('items_heading_watchlist')}</span>
 			</h1>
 			<p class="mt-6 max-w-xl text-base leading-relaxed text-zinc-600">
 				{t('items_page_desc')}
@@ -107,8 +41,8 @@
 		</div>
 		<button
 			type="button"
-			onclick={handleAddClick}
-			disabled={home.model.loading}
+			onclick={page.handleAddClick}
+			disabled={page.model.loading}
 			class="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-900/15 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
 			style="background: linear-gradient(to right, #292524, #3f3f46);"
 		>
@@ -120,7 +54,7 @@
 	</div>
 
 	<!-- Content area -->
-	{#if home.model.loading}
+	{#if page.model.loading}
 		<div class="flex flex-col items-center justify-center gap-4 py-20">
 			<svg class="size-8 animate-spin text-zinc-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
 				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -144,14 +78,14 @@
 			</div>
 			<div class="flex gap-3">
 				<a
-					href={localizeHref('/auth/login')}
+					href={resolve('/auth/login')}
 					class="rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
 					style="background: linear-gradient(to right, #292524, #3f3f46);"
 				>
 					{t('guest_login')}
 				</a>
 				<a
-					href={localizeHref('/auth/signup')}
+					href={resolve('/auth/signup')}
 					class="rounded-2xl border border-zinc-200/60 bg-white/60 px-6 py-3 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-white"
 				>
 					{t('guest_signup')}
@@ -159,12 +93,12 @@
 			</div>
 		</div>
 
-	{:else if home.model.listError}
+	{:else if page.model.listError}
 		<div class="mx-auto max-w-md py-16 text-center">
-			<p class="text-sm text-rose-600">{home.model.listError}</p>
+			<p class="text-sm text-rose-600">{page.model.listError}</p>
 			<button
 				type="button"
-				onclick={() => home.loadItems()}
+				onclick={() => page.loadItems()}
 				class="mt-4 rounded-2xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
 				style="background: linear-gradient(to right, #292524, #3f3f46);"
 			>
@@ -190,7 +124,7 @@
 				</svg>
 				<input
 					type="search"
-					bind:value={searchQuery}
+					bind:value={page.searchQuery}
 					placeholder={t('items_search_placeholder')}
 					class="h-12 w-full rounded-2xl border border-zinc-200/60 bg-white/50 pl-11 pr-4 text-sm font-normal outline-none transition-all placeholder:text-zinc-400 focus:border-stone-300 focus:bg-white focus:ring-4 focus:ring-stone-100/50"
 				/>
@@ -198,10 +132,10 @@
 			<div class="flex items-center gap-3">
 				<button
 					type="button"
-					onclick={() => (filterOpen = !filterOpen)}
-					aria-expanded={filterOpen}
+					onclick={page.toggleFilterOpen}
+					aria-expanded={page.filterOpen}
 					class="inline-flex h-12 items-center justify-center rounded-2xl border px-5 text-sm font-medium transition-all duration-200
-						{filterOpen
+						{page.filterOpen
 						? 'border-stone-200/80 bg-zinc-100/80 text-stone-800'
 						: 'border-zinc-200/60 bg-white text-zinc-700 hover:bg-zinc-50'}"
 				>
@@ -214,7 +148,7 @@
 						fill="none"
 						stroke="currentColor"
 						stroke-width="2"
-						class="ml-2 size-4 transition-transform duration-300 {filterOpen ? 'rotate-180' : ''}"
+						class="ml-2 size-4 transition-transform duration-300 {page.filterOpen ? 'rotate-180' : ''}"
 						aria-hidden="true"
 					>
 						<path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
@@ -223,7 +157,7 @@
 			</div>
 		</div>
 
-		{#if filterOpen}
+		{#if page.filterOpen}
 			<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 shadow-sm backdrop-blur-sm">
 				<div class="grid gap-6 md:grid-cols-2">
 					<div>
@@ -235,11 +169,11 @@
 						</label>
 						<select
 							id="items-marketplace"
-							bind:value={marketplace}
+							bind:value={page.marketplace}
 							class="mt-2 w-full rounded-xl border border-zinc-200/60 bg-zinc-50/80 p-3 text-sm font-medium outline-none transition-colors focus:border-stone-300"
 						>
 							<option value="all">{t('items_market_all')}</option>
-							{#each marketplaceSites as site (site)}
+							{#each page.marketplaceSites as site (site)}
 								<option value={site}>{site}</option>
 							{/each}
 						</select>
@@ -250,8 +184,8 @@
 						</label>
 						<select
 							id="items-sort"
-							value={sortBy}
-							onchange={setSortFromSelect}
+							value={page.sortBy}
+							onchange={page.setSortFromSelect}
 							class="mt-2 w-full rounded-xl border border-zinc-200/60 bg-zinc-50/80 p-3 text-sm font-medium outline-none transition-colors focus:border-stone-300"
 						>
 							<option value="recent">{t('items_sort_recent')}</option>
@@ -264,10 +198,10 @@
 			</div>
 		{/if}
 
-		{#if home.model.items.length === 0}
-			<EmptyState onAdd={() => (home.model.modalOpen = true)} />
+		{#if page.model.items.length === 0}
+			<EmptyState onAdd={() => (page.model.modalOpen = true)} />
 
-		{:else if displayedItems.length === 0}
+		{:else if page.displayedItems.length === 0}
 			<p class="py-16 text-center text-sm text-zinc-500">{t('items_no_results')}</p>
 
 		{:else}
@@ -288,7 +222,7 @@
 				</div>
 				<button
 					type="button"
-					onclick={() => window.open('https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb', '_blank')}
+					onclick={page.openChromeExtensionStore}
 					class="hidden shrink-0 rounded-2xl border border-zinc-200/60 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-all duration-200 hover:shadow-sm sm:block"
 				>
 					{t('home_install')}
@@ -312,11 +246,11 @@
 
 			<!-- Items list -->
 			<div class="flex flex-col gap-3">
-				{#each displayedItems as item (item.id)}
+				{#each page.displayedItems as item (item.id)}
 					<ItemCard
 						{item}
-						deleting={home.model.deletingId === item.id}
-						onDelete={() => home.deleteItem(item.id)}
+						deleting={page.model.deletingId === item.id}
+						onDelete={() => page.deleteItem(item.id)}
 					/>
 				{/each}
 			</div>
@@ -325,7 +259,7 @@
 </div>
 
 <AddItemModal
-	open={home.model.modalOpen}
-	onClose={() => (home.model.modalOpen = false)}
-	onAdd={home.handleAddItem}
+	open={page.model.modalOpen}
+	onClose={() => (page.model.modalOpen = false)}
+	onAdd={page.handleAddItem}
 />

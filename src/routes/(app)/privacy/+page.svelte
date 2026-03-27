@@ -34,7 +34,7 @@
 		<div class="rounded-2xl bg-white p-7 sm:p-8" style="border: 1px solid rgba(45, 45, 42, 0.06);">
 
 			<p class="mb-8 text-sm leading-relaxed" style="color: #6b6b65;">
-				Gugu Plus(이하 "서비스")는 개인정보 보호법 및 관련 법령을 준수하며, 이용자의 개인정보를 소중히 보호합니다. 본 방침은 서비스가 수집하는 정보와 그 이용 방법을 설명합니다.
+				Price Eye(이하 "서비스")는 개인정보 보호법 및 관련 법령을 준수하며, 이용자의 개인정보를 소중히 보호합니다. 본 방침은 서비스가 수집하는 정보와 그 이용 방법을 설명합니다.
 			</p>
 
 			<!-- Quick summary -->
@@ -45,7 +45,7 @@
 					{ icon: 'collect', label: '수집 최소화', desc: '서비스 운영에 필요한 최소한의 정보만 수집합니다.' },
 					{ icon: 'no-sell', label: '제3자 미판매', desc: '개인정보를 제3자에게 판매하거나 임의로 제공하지 않습니다.' },
 					{ icon: 'delete', label: '삭제 보장', desc: '요청 시 30일 이내 모든 개인정보를 삭제합니다.' }
-				] as item}
+				] as item (item.icon)}
 					<div class="rounded-xl p-4 text-center" style="background-color: #f7f6f3;">
 						<p class="mb-1 text-xs font-semibold" style="color: #1a1a17;">{item.label}</p>
 						<p class="text-xs leading-relaxed" style="color: #6b6b65;">{item.desc}</p>
@@ -76,7 +76,7 @@
 				},
 				{
 					title: '제6조 (이용자 권리)',
-					body: '이용자는 언제든지 다음 권리를 행사할 수 있습니다.\n\n• 개인정보 열람·수정: 서비스 내 설정 메뉴에서 직접 변경 가능\n• 계정 탈퇴 및 데이터 삭제: 설정 > 계정 탈퇴 또는 이메일 요청\n• 마케팅 수신 거부: 이메일 하단 수신 거부 링크 또는 이메일 요청\n\n권리 행사 요청은 support@gugu.plus로 문의하시면 7영업일 이내 처리됩니다.'
+					body: '이용자는 언제든지 다음 권리를 행사할 수 있습니다.\n\n• 개인정보 열람·수정: 서비스 내 설정 메뉴에서 직접 변경 가능\n• 계정 탈퇴 및 데이터 삭제: 설정 > 계정 탈퇴 또는 이메일 요청\n• 마케팅 수신 거부: 이메일 하단 수신 거부 링크 또는 이메일 요청\n\n권리 행사 요청은 support@priceeye.com로 문의하시면 7영업일 이내 처리됩니다.'
 				},
 				{
 					title: '제7조 (개인정보 보호 조치)',
@@ -84,9 +84,9 @@
 				},
 				{
 					title: '제8조 (개인정보 보호책임자)',
-					body: '개인정보 관련 문의는 아래 담당자에게 연락해 주시기 바랍니다.\n\n이메일: support@gugu.plus\n응답 시간: 영업일 기준 2일 이내'
+					body: '개인정보 관련 문의는 아래 담당자에게 연락해 주시기 바랍니다.\n\n이메일: support@priceeye.com\n응답 시간: 영업일 기준 2일 이내'
 				}
-			] as section, i}
+			] as section, i (i)}
 				<div class="{i < 7 ? 'mb-7' : ''}">
 					<h2 class="mb-3 text-sm font-semibold" style="color: #1a1a17;">{section.title}</h2>
 					<p class="whitespace-pre-line text-sm leading-relaxed" style="color: #6b6b65;">{section.body}</p>
@@ -94,7 +94,7 @@
 			{/each}
 
 			<div class="mt-8 rounded-xl p-4 text-xs leading-relaxed" style="background-color: #f7f6f3; color: #6b6b65;">
-				문의: <a href="mailto:support@gugu.plus" class="underline underline-offset-2" style="color: #1a1a17;">support@gugu.plus</a>
+				문의: <a href="mailto:support@priceeye.com" class="underline underline-offset-2" style="color: #1a1a17;">support@priceeye.com</a>
 				· 시행일: {effectiveDate}
 			</div>
 		</div>
