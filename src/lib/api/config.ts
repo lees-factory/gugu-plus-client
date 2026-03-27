@@ -4,5 +4,6 @@ export const COOKIE_OPTS = {
 	path: '/',
 	maxAge: 60 * 60 * 24 * 7,
 	httpOnly: true,
-	sameSite: 'lax'
-} as const;
+	sameSite: 'lax' as const,
+	secure: import.meta.env.PROD
+};

@@ -1,4 +1,5 @@
 import type { ProductDetailData, ProductSku } from '$lib/api/products';
+import { marketToSite } from '$lib/commerce';
 
 /** `sku_properties` JSON 객체에서 사용하는 키 (그 외 키는 무시) */
 const PROP_COLOR = '색상';
@@ -39,26 +40,13 @@ export type ItemDetail = {
 	priceHistory: PriceEntry[];
 };
 
-function marketToSite(market: string): string {
-	const map: Record<string, string> = {
-		ALIEXPRESS: 'AliExpress',
-		AMAZON: 'Amazon',
-		EBAY: 'eBay',
-		TAOBAO: 'Taobao'
-	};
-	return map[market] ?? market;
-}
-
 export function parsePriceAmount(s: string): number {
 	const n = Number(String(s).replace(/[^0-9.]/g, ''));
 	return Number.isFinite(n) ? n : 0;
 }
 
 function skuImageFromApi(s: ProductSku): string | null {
-	const u =
-		(s.image_url && s.image_url.trim()) ||
-		(s.imageUrl && s.imageUrl.trim()) ||
-		'';
+	const u = (s.image_url && s.image_url.trim()) || '';
 	return u.length > 0 ? u : null;
 }
 
@@ -98,13 +86,13 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 		const size = (s.size && s.size.trim()) || parts[1] || '';
 		const skuId = (s.id && String(s.id).trim()) || `__idx_${i}`;
 		const skuName =
-			(s.sku_name && s.sku_name.trim()) ||
-			`${colorCode}${size ? ' / ' + size : ''}` ||
-			skuId;
+			(s.sku_name && s.sku_name.trim()) || `${colorCode}${size ? ' / ' + size : ''}` || skuId;
 
 		const rawProps = s.sku_properties;
 		const hasRaw = typeof rawProps === 'string' && rawProps.trim().length > 0;
-		const parsed = hasRaw ? parseSkuPropertiesJson(rawProps) : { color: null, size: null, ok: false };
+		const parsed = hasRaw
+			? parseSkuPropertiesJson(rawProps)
+			: { color: null, size: null, ok: false };
 
 		let propColor: string | null;
 		let propSize: string | null;

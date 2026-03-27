@@ -17,15 +17,15 @@ description: Acts as a Svelte 5 + SvelteKit senior engineer for the Gugu Plus pr
 
 ## 실제 기술 스택
 
-| 영역 | 버전/선택 |
-|------|-----------|
-| 프레임워크 | SvelteKit 2 + Svelte 5 |
-| 언어 | TypeScript (strict) |
-| 스타일 | Tailwind CSS **v4** (CSS-first config, `@theme` in CSS) |
-| 상태 | Svelte 5 **Runes** (`$state`, `$derived`, `$effect`, `$props`) |
-| i18n | **Paraglide** (`$lib/paraglide/messages`) |
-| 패키지 매니저 | **pnpm** |
-| 라우팅 | SvelteKit file-based routing |
+| 영역          | 버전/선택                                                      |
+| ------------- | -------------------------------------------------------------- |
+| 프레임워크    | SvelteKit 2 + Svelte 5                                         |
+| 언어          | TypeScript (strict)                                            |
+| 스타일        | Tailwind CSS **v4** (CSS-first config, `@theme` in CSS)        |
+| 상태          | Svelte 5 **Runes** (`$state`, `$derived`, `$effect`, `$props`) |
+| i18n          | **Paraglide** (`$lib/paraglide/messages`)                      |
+| 패키지 매니저 | **pnpm**                                                       |
+| 라우팅        | SvelteKit file-based routing                                   |
 
 ---
 
@@ -33,23 +33,24 @@ description: Acts as a Svelte 5 + SvelteKit senior engineer for the Gugu Plus pr
 
 ```svelte
 <script lang="ts">
-  // props
-  let { items, onAdd }: { items: Item[]; onAdd: () => void } = $props();
+	// props
+	let { items, onAdd }: { items: Item[]; onAdd: () => void } = $props();
 
-  // 반응형 상태
-  let count = $state(0);
-  let doubled = $derived(count * 2);
+	// 반응형 상태
+	let count = $state(0);
+	let doubled = $derived(count * 2);
 
-  // 사이드이펙트
-  $effect(() => {
-    console.log('count changed:', count);
-  });
+	// 사이드이펙트
+	$effect(() => {
+		console.log('count changed:', count);
+	});
 </script>
 ```
 
 **절대 쓰지 않는 것**: `export let`, `$:`, `createEventDispatcher`, writable store (로컬 상태에). Svelte 4 문법은 이미 레거시다.
 
 이벤트 핸들러도 Svelte 5 방식:
+
 ```svelte
 <!-- ✅ -->
 <button onclick={() => count++}>+</button>
@@ -66,11 +67,11 @@ Tailwind v4는 `tailwind.config.js`가 없다. 커스텀 토큰은 CSS에서:
 
 ```css
 /* app.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-brand: oklch(60% 0.2 250);
-  --spacing-sidebar: 240px;
+	--color-brand: oklch(60% 0.2 250);
+	--spacing-sidebar: 240px;
 }
 ```
 
@@ -82,7 +83,7 @@ Tailwind v4는 `tailwind.config.js`가 없다. 커스텀 토큰은 CSS에서:
 
 ```svelte
 <script lang="ts">
-  import * as m from '$lib/paraglide/messages';
+	import * as m from '$lib/paraglide/messages';
 </script>
 
 <p>{m.empty_state_title()}</p>
@@ -135,33 +136,38 @@ src/routes/
 ## 이 프로젝트의 UX 패턴
 
 ### Free 플랜 제한 도달
+
 ```svelte
 {#if items.length >= 5 && !isPro}
-  <div class="upgrade-nudge">
-    <p>{m.limit_reached()}</p>
-    <a href="/plan">{m.upgrade_to_pro()}</a>
-  </div>
+	<div class="upgrade-nudge">
+		<p>{m.limit_reached()}</p>
+		<a href="/plan">{m.upgrade_to_pro()}</a>
+	</div>
 {/if}
 ```
+
 강압적 블락보다 컨텍스트에 맞는 업그레이드 유도.
 
 ### 로딩 상태
+
 스켈레톤 UI를 쓴다. `isLoading` boolean + `{#if}`보다 SvelteKit `load`의 streaming을 활용한다.
 
 ```svelte
 {#await data.items}
-  <ItemCardSkeleton />
+	<ItemCardSkeleton />
 {:then items}
-  {#each items as item}
-    <ItemCard {item} />
-  {/each}
+	{#each items as item}
+		<ItemCard {item} />
+	{/each}
 {/await}
 ```
 
 ### 빈 상태
+
 `EmptyState.svelte`를 항상 재사용. 직접 만들지 않는다.
 
 ### 가격 변동 표시
+
 - 상승 → `text-red-500` (한국 주식 관행)
 - 하락 → `text-blue-500`
 - 변동 없음 → `text-gray-400`

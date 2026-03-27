@@ -29,12 +29,14 @@
 
 <!-- Sticky header -->
 <div
-	class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 backdrop-blur-2xl px-6 py-5 sm:px-8 sm:py-6"
+	class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 px-6 py-5 backdrop-blur-2xl sm:px-8 sm:py-6"
 >
 	<div class="flex items-center gap-3">
 		<div>
-			<h1 class="text-2xl font-semibold sm:text-3xl text-zinc-900 tracking-tight">{t('settings_title')}</h1>
-			<p class="mt-0.5 hidden text-sm sm:block text-zinc-500">{t('settings_subtitle')}</p>
+			<h1 class="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+				{t('settings_title')}
+			</h1>
+			<p class="mt-0.5 hidden text-sm text-zinc-500 sm:block">{t('settings_subtitle')}</p>
 		</div>
 	</div>
 </div>
@@ -42,9 +44,8 @@
 <!-- Content -->
 <div class="p-6 sm:p-8 lg:p-10">
 	<div class="mx-auto max-w-2xl space-y-6">
-
 		<!-- Account Info -->
-		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+		<section class="rounded-3xl bg-white/60 p-7 backdrop-blur-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_account')}</h2>
 
 			<div class="space-y-5">
@@ -70,7 +71,10 @@
 				</div>
 
 				<!-- Plan -->
-				<div class="flex items-center justify-between rounded-2xl p-4" style="background-color: #f5f5f4;">
+				<div
+					class="flex items-center justify-between rounded-2xl p-4"
+					style="background-color: #f5f5f4;"
+				>
 					<div>
 						<p class="text-sm font-medium text-zinc-900">{t('settings_plan_current')}</p>
 						<p class="mt-0.5 text-xs text-zinc-500">
@@ -106,7 +110,7 @@
 		</section>
 
 		<!-- 언어 및 통화 -->
-		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+		<section class="rounded-3xl bg-white/60 p-7 backdrop-blur-sm sm:p-8">
 			<h2 class="mb-2 text-base font-semibold text-zinc-900">{t('settings_lang_currency')}</h2>
 			<p class="mb-6 text-sm text-zinc-500">
 				{t('settings_lang_currency_desc')}
@@ -159,7 +163,7 @@
 		</section>
 
 		<!-- Password Change -->
-		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+		<section class="rounded-3xl bg-white/60 p-7 backdrop-blur-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_password')}</h2>
 
 			<div class="space-y-4">
@@ -232,15 +236,33 @@
 					>
 						{#if settings.password.loading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+								></path>
 							</svg>
 						{/if}
 						{t('settings_password_submit')}
 					</button>
 					{#if settings.password.success}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								class="size-4"
+								aria-hidden="true"
+							>
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 							</svg>
 							{t('settings_password_success')}
@@ -251,7 +273,7 @@
 		</section>
 
 		<!-- Notifications -->
-		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+		<section class="rounded-3xl bg-white/60 p-7 backdrop-blur-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_notifications')}</h2>
 
 			<div class="space-y-4">
@@ -269,11 +291,15 @@
 						title={settings.notifications.email ? t('settings_notif_on') : t('settings_notif_off')}
 						onclick={() => (settings.notifications.email = !settings.notifications.email)}
 						class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none"
-						style="width: 44px; height: 24px; background-color: {settings.notifications.email ? '#2d2d2a' : 'rgba(45,45,42,0.2)'};"
+						style="width: 44px; height: 24px; background-color: {settings.notifications.email
+							? '#2d2d2a'
+							: 'rgba(45,45,42,0.2)'};"
 					>
 						<span
 							class="absolute rounded-full bg-white transition-all duration-200"
-							style="width: 18px; height: 18px; top: 3px; left: {settings.notifications.email ? '23px' : '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
+							style="width: 18px; height: 18px; top: 3px; left: {settings.notifications.email
+								? '23px'
+								: '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
 						></span>
 					</button>
 				</div>
@@ -288,15 +314,33 @@
 					>
 						{#if settings.notifications.saveLoading}
 							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+								></path>
 							</svg>
 						{/if}
 						{t('settings_save')}
 					</button>
 					{#if settings.notifications.saveSuccess}
 						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								class="size-4"
+								aria-hidden="true"
+							>
 								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 							</svg>
 							{t('settings_saved')}
@@ -307,7 +351,7 @@
 		</section>
 
 		<!-- 회원 탈퇴 -->
-		<section class="rounded-3xl bg-white/60 backdrop-blur-sm p-7 sm:p-8" >
+		<section class="rounded-3xl bg-white/60 p-7 backdrop-blur-sm sm:p-8">
 			<h2 class="mb-4 text-base font-semibold text-zinc-900">{t('settings_delete_account')}</h2>
 			<p class="mb-5 text-sm text-zinc-500">{t('settings_delete_account_desc')}</p>
 			<div class="flex justify-end">
@@ -321,7 +365,6 @@
 				</button>
 			</div>
 		</section>
-
 	</div>
 </div>
 
@@ -331,12 +374,28 @@
 		class="fixed inset-0 z-50 flex items-center justify-center p-4"
 		style="background-color: rgba(0,0,0,0.4);"
 		role="presentation"
-		onclick={(e) => { if (e.target === e.currentTarget) closeDeleteModal(); }}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeDeleteModal();
+		}}
 	>
-		<div class="w-full max-w-md rounded-3xl bg-white/60 backdrop-blur-sm p-7 shadow-xl">
-			<div class="mb-5 flex size-12 items-center justify-center rounded-xl" style="background-color: #fee8e8;">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-6 text-rose-600" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+		<div class="w-full max-w-md rounded-3xl bg-white/60 p-7 shadow-xl backdrop-blur-sm">
+			<div
+				class="mb-5 flex size-12 items-center justify-center rounded-xl"
+				style="background-color: #fee8e8;"
+			>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					class="size-6 text-rose-600"
+					aria-hidden="true"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+					/>
 				</svg>
 			</div>
 			<h3 class="mb-2 text-lg font-semibold text-zinc-900">{t('settings_delete_modal_title')}</h3>
@@ -374,14 +433,26 @@
 				<button
 					type="button"
 					onclick={handleDeleteAccount}
-					disabled={settings.accountDelete.confirmText !== t('settings_delete_confirm_word') || settings.accountDelete.loading}
+					disabled={settings.accountDelete.confirmText !== t('settings_delete_confirm_word') ||
+						settings.accountDelete.loading}
 					class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-40"
 					style="background-color: #d4183d;"
 				>
 					{#if settings.accountDelete.loading}
 						<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+							></path>
 						</svg>
 					{/if}
 					{t('settings_delete_submit')}

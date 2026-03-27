@@ -1,13 +1,9 @@
 <script lang="ts">
+	import { t } from '$lib/i18n/t';
 	import {
 		MONTHLY_PRICE,
 		YEARLY_PRICE,
-		comparisonRows,
 		createPlanPage,
-		faqItems,
-		freeFeatures,
-		proFeatures,
-		trustSignals,
 		yearlyPerMonth,
 		yearlySavings
 	} from './plan-page.svelte';
@@ -33,17 +29,14 @@
 					clip-rule="evenodd"
 				/>
 			</svg>
-			<span class="text-xs font-semibold text-stone-800">Price Eye 플랜</span>
+			<span class="text-xs font-semibold text-stone-800">{t('plan_badge')}</span>
 		</div>
 		<h1 class="text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
-			나에게 맞는 플랜을<br />
-			<span class="text-zinc-600">선택하세요</span>
+			{t('plan_title')}<br />
+			<span class="text-zinc-600">{t('plan_title_accent')}</span>
 		</h1>
 		<p class="mt-6 text-base leading-relaxed text-zinc-600">
-			매일 1회 가격을 수집해 장기 히스토리 데이터를 쌓아드립니다.<br
-				class="hidden sm:block"
-			/>
-			지금 시작할수록 더 풍부한 데이터가 쌓입니다.
+			{t('plan_desc')}
 		</p>
 	</div>
 
@@ -71,9 +64,9 @@
 				</svg>
 			</div>
 			<div>
-				<p class="text-sm font-semibold text-zinc-900">현재 Free 플랜 사용 중</p>
+				<p class="text-sm font-semibold text-zinc-900">{t('plan_current_free')}</p>
 				<p class="mt-0.5 text-xs text-zinc-500">
-					Pro로 업그레이드하면 50개 상품과 무제한 히스토리를 사용할 수 있어요.
+					{t('plan_upgrade_hint')}
 				</p>
 			</div>
 		</div>
@@ -94,15 +87,15 @@
 				</svg>
 			</div>
 			<div>
-				<p class="text-sm font-semibold text-zinc-900">현재 Pro 플랜 사용 중</p>
-				<p class="mt-0.5 text-xs text-zinc-500">모든 기능을 이용할 수 있어요.</p>
+				<p class="text-sm font-semibold text-zinc-900">{t('plan_current_pro')}</p>
+				<p class="mt-0.5 text-xs text-zinc-500">{t('plan_pro_all_features')}</p>
 			</div>
 		</div>
 	{/if}
 
 	<!-- ── Billing toggle ─────────────────────────────────────────── -->
 	<div class="flex justify-center">
-		<div class="flex gap-1.5 rounded-2xl bg-zinc-50/80 p-1.5 border border-zinc-200/60">
+		<div class="flex gap-1.5 rounded-2xl border border-zinc-200/60 bg-zinc-50/80 p-1.5">
 			<button
 				type="button"
 				onclick={() => page.setBillingCycle('monthly')}
@@ -111,7 +104,7 @@
 					? 'bg-white text-stone-800 shadow-sm ring-1 ring-zinc-200/80'
 					: 'text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-900'}"
 			>
-				월간 결제
+				{t('plan_monthly')}
 			</button>
 			<button
 				type="button"
@@ -121,11 +114,11 @@
 					? 'bg-white text-stone-800 shadow-sm ring-1 ring-zinc-200/80'
 					: 'text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-900'}"
 			>
-				연간 결제
+				{t('plan_yearly')}
 				<span
 					class="rounded-full border border-emerald-100/50 bg-linear-to-r from-emerald-50 to-teal-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-emerald-700"
 				>
-					29% 할인
+					{t('plan_yearly_discount')}
 				</span>
 			</button>
 		</div>
@@ -148,18 +141,18 @@
 						<span
 							class="rounded-lg border border-zinc-200/60 bg-zinc-50/80 px-3 py-1 text-xs font-medium text-zinc-500"
 						>
-							현재 플랜
+							{t('plan_current')}
 						</span>
 					{/if}
 				</div>
 				<div class="mb-1 flex items-baseline gap-1">
 					<span class="text-4xl font-semibold tracking-tight text-zinc-900">₩0</span>
 				</div>
-				<p class="text-sm text-zinc-500">영원히 무료</p>
+				<p class="text-sm text-zinc-500">{t('plan_free_forever')}</p>
 			</div>
 
 			<ul class="mb-7 flex flex-col gap-3.5">
-				{#each freeFeatures as feature (feature.text)}
+				{#each page.freeFeatures as feature (feature.text)}
 					<li class="flex items-start gap-3 text-sm">
 						{#if feature.included}
 							<div
@@ -203,16 +196,16 @@
 					<button
 						type="button"
 						disabled
-						class="w-full rounded-xl border border-zinc-200/60 bg-zinc-50/80 py-3 text-sm font-medium text-zinc-400 cursor-default"
+						class="w-full cursor-default rounded-xl border border-zinc-200/60 bg-zinc-50/80 py-3 text-sm font-medium text-zinc-400"
 					>
-						현재 플랜
+						{t('plan_current')}
 					</button>
 				{:else}
 					<button
 						type="button"
 						class="w-full rounded-xl border border-zinc-200/60 bg-white py-3 text-sm font-medium text-zinc-600 transition-all duration-200 hover:bg-zinc-50 hover:text-zinc-900"
 					>
-						다운그레이드
+						{t('plan_downgrade')}
 					</button>
 				{/if}
 			</div>
@@ -226,9 +219,9 @@
 			<!-- Popular badge -->
 			<div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
 				<span
-					class="rounded-full border border-zinc-700/40 bg-zinc-800 px-4 py-1 text-[11px] font-semibold tracking-wider text-white/90 shadow-sm whitespace-nowrap uppercase"
+					class="rounded-full border border-zinc-700/40 bg-zinc-800 px-4 py-1 text-[11px] font-semibold tracking-wider whitespace-nowrap text-white/90 uppercase shadow-sm"
 				>
-					가장 인기
+					{t('plan_popular')}
 				</span>
 			</div>
 
@@ -245,7 +238,7 @@
 							class="rounded-lg px-3 py-1 text-xs font-medium"
 							style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);"
 						>
-							현재 플랜
+							{t('plan_current')}
 						</span>
 					{/if}
 				</div>
@@ -255,25 +248,29 @@
 						<span class="text-4xl font-semibold tracking-tight text-white"
 							>₩{MONTHLY_PRICE.toLocaleString()}</span
 						>
-						<span class="text-sm" style="color: rgba(255,255,255,0.45);">/ 월</span>
+						<span class="text-sm" style="color: rgba(255,255,255,0.45);">{t('plan_per_month')}</span
+						>
 					</div>
-					<p class="text-sm" style="color: rgba(255,255,255,0.45);">매월 청구</p>
+					<p class="text-sm" style="color: rgba(255,255,255,0.45);">{t('plan_billed_monthly')}</p>
 				{:else}
 					<div class="mb-1 flex items-baseline gap-1">
 						<span class="text-4xl font-semibold tracking-tight text-white"
 							>₩{yearlyPerMonth.toLocaleString()}</span
 						>
-						<span class="text-sm" style="color: rgba(255,255,255,0.45);">/ 월</span>
+						<span class="text-sm" style="color: rgba(255,255,255,0.45);">{t('plan_per_month')}</span
+						>
 					</div>
 					<p class="text-sm" style="color: rgba(255,255,255,0.45);">
-						연 ₩{YEARLY_PRICE.toLocaleString()} 청구 ·
-						<span class="text-emerald-400">₩{yearlySavings.toLocaleString()} 절약</span>
+						{t('plan_billed_yearly_prefix', { price: YEARLY_PRICE.toLocaleString() })}
+						<span class="text-emerald-400"
+							>{t('plan_billed_yearly_savings', { amount: yearlySavings.toLocaleString() })}</span
+						>
 					</p>
 				{/if}
 			</div>
 
 			<ul class="mb-7 flex flex-col gap-3.5">
-				{#each proFeatures as feature (feature.text)}
+				{#each page.proFeatures as feature (feature.text)}
 					<li class="flex items-start gap-3 text-sm">
 						<div
 							class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
@@ -296,7 +293,7 @@
 			</ul>
 
 			<p class="mb-5 text-xs leading-relaxed" style="color: rgba(255,255,255,0.3);">
-				* 주기 변경 시 이후 수집 데이터부터 적용됩니다. 기존 데이터는 그대로 보존됩니다.
+				{t('plan_frequency_note')}
 			</p>
 
 			<div class="mt-auto">
@@ -304,10 +301,10 @@
 					<button
 						type="button"
 						disabled
-						class="w-full rounded-xl py-3 text-sm font-medium cursor-default"
+						class="w-full cursor-default rounded-xl py-3 text-sm font-medium"
 						style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);"
 					>
-						현재 플랜
+						{t('plan_current')}
 					</button>
 				{:else}
 					<button
@@ -345,10 +342,11 @@
 			</svg>
 		</div>
 		<div>
-			<p class="text-sm font-semibold text-zinc-900">Daily price tracking for long-term insights.</p>
+			<p class="text-sm font-semibold text-zinc-900">
+				{t('plan_data_policy_title')}
+			</p>
 			<p class="mt-1 text-xs leading-relaxed text-zinc-500">
-				Price Eye는 매일 1회 가격을 수집해 장기 히스토리 데이터를 쌓아드립니다. 빠른 알림 서비스가
-				아닌, 데이터 기반 구매 판단 도구입니다.
+				{t('plan_data_policy_desc')}
 			</p>
 		</div>
 	</div>
@@ -374,34 +372,42 @@
 					/>
 				</svg>
 			</div>
-			<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">플랜 비교</h2>
+			<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">
+				{t('plan_comparison_title')}
+			</h2>
 		</div>
 
-		<div class="overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/60 shadow-sm backdrop-blur-sm">
-			<table class="w-full text-sm">
+		<div
+			class="overflow-x-auto rounded-3xl border border-zinc-200/60 bg-white/60 shadow-sm backdrop-blur-sm"
+		>
+			<table class="w-full min-w-0 text-xs sm:text-sm">
 				<thead>
 					<tr class="border-b border-zinc-100">
 						<th
-							class="px-6 py-4 text-left text-[9px] font-semibold uppercase tracking-wider text-zinc-400"
-							style="width: 50%;">기능</th
+							class="px-3 py-3 text-left text-[9px] font-semibold tracking-wider text-zinc-400 uppercase sm:px-6 sm:py-4"
+							style="width: 40%;">{t('plan_feature_col')}</th
 						>
-						<th class="px-6 py-4 text-center text-[9px] font-semibold uppercase tracking-wider text-zinc-400"
+						<th
+							class="px-2 py-3 text-center text-[9px] font-semibold tracking-wider text-zinc-400 uppercase sm:px-6 sm:py-4"
 							>Free</th
 						>
-						<th class="px-6 py-4 text-center text-[9px] font-semibold uppercase tracking-wider text-zinc-600"
+						<th
+							class="px-2 py-3 text-center text-[9px] font-semibold tracking-wider text-zinc-600 uppercase sm:px-6 sm:py-4"
 							>Pro</th
 						>
 					</tr>
 				</thead>
 				<tbody>
-					{#each comparisonRows as row, i (row.label)}
+					{#each page.comparisonRows as row, i (row.label)}
 						<tr
-							class="{i < comparisonRows.length - 1 ? 'border-b border-zinc-100/80' : ''} transition-colors hover:bg-zinc-50/40"
+							class="{i < page.comparisonRows.length - 1
+								? 'border-b border-zinc-100/80'
+								: ''} transition-colors hover:bg-zinc-50/40"
 						>
-							<td class="px-6 py-3.5 font-medium text-zinc-700">{row.label}</td>
-							<td class="px-6 py-3.5 text-center text-zinc-400">{row.free}</td>
+							<td class="px-3 py-3 font-medium text-zinc-700 sm:px-6 sm:py-3.5">{row.label}</td>
+							<td class="px-2 py-3 text-center text-zinc-400 sm:px-6 sm:py-3.5">{row.free}</td>
 							<td
-								class="px-6 py-3.5 text-center font-semibold {row.pro === row.free
+								class="px-2 py-3 text-center font-semibold sm:px-6 sm:py-3.5 {row.pro === row.free
 									? 'text-zinc-400'
 									: 'text-zinc-900'}">{row.pro}</td
 							>
@@ -433,12 +439,14 @@
 					<line x1="12" y1="17" x2="12.01" y2="17" />
 				</svg>
 			</div>
-			<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">자주 묻는 질문</h2>
+			<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">{t('plan_faq_title')}</h2>
 		</div>
 
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-			{#each faqItems as faq (faq.q)}
-				<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 shadow-sm backdrop-blur-sm">
+			{#each page.faqItems as faq (faq.q)}
+				<div
+					class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 shadow-sm backdrop-blur-sm"
+				>
 					<h3 class="mb-2 text-sm font-semibold text-zinc-900">{faq.q}</h3>
 					<p class="text-sm leading-relaxed text-zinc-500">{faq.a}</p>
 				</div>
@@ -448,7 +456,7 @@
 
 	<!-- ── Trust signals ──────────────────────────────────────────── -->
 	<div class="flex flex-wrap items-center justify-center gap-6 pb-4">
-		{#each trustSignals as signal (signal.icon)}
+		{#each page.trustSignals as signal (signal.icon)}
 			<div class="flex items-center gap-2 text-sm text-zinc-500">
 				{#if signal.icon === 'shield'}
 					<svg

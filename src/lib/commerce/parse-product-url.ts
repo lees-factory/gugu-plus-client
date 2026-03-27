@@ -38,9 +38,7 @@ export function parseCommerceProductUrl(raw: string): ParsedCommerceUrl {
 	const host = u.hostname.toLowerCase();
 
 	const isAliExpressHost =
-		host === 'aliexpress.com' ||
-		host.endsWith('.aliexpress.com') ||
-		host.endsWith('aliexpress.us');
+		host === 'aliexpress.com' || host.endsWith('.aliexpress.com') || host.endsWith('aliexpress.us');
 
 	if (isAliExpressHost) {
 		const m = u.pathname.match(/\/item\/(\d+)\.html/i);

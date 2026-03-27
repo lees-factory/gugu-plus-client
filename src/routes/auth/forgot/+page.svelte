@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { t } from '$lib/i18n/t';
 	let email = $state('');
 	let loading = $state(false);
 	let sent = $state(false);
@@ -17,9 +18,13 @@
 
 <div class="rounded-2xl bg-white p-7 shadow-sm" style="border: 1px solid rgba(45, 45, 42, 0.08);">
 	<div class="mb-6">
-		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">Reset your password</h1>
+		<h1 class="text-xl font-semibold" style="color: #1a1a17; letter-spacing: -0.01em;">
+			{t('forgot_title')}
+		</h1>
 		{#if !sent}
-			<p class="mt-1 text-sm" style="color: #6b6b65;">Enter your email and we'll send you a reset link.</p>
+			<p class="mt-1 text-sm" style="color: #6b6b65;">
+				{t('forgot_subtitle')}
+			</p>
 		{/if}
 	</div>
 
@@ -38,32 +43,38 @@
 					style="color: #5aad9c;"
 					aria-hidden="true"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+					/>
 				</svg>
 			</div>
 			<p class="text-center text-sm leading-relaxed" style="color: #6b6b65;">
-				Check your email for reset instructions.
+				{t('forgot_sent')}
 			</p>
 			<a
 				href={resolve('/auth/login')}
 				class="flex h-11 w-full items-center justify-center rounded-xl px-4 text-sm font-medium transition-all hover:shadow-sm focus-visible:outline-none"
 				style="border: 1px solid rgba(45, 45, 42, 0.1); background-color: #ffffff; color: #1a1a17;"
 			>
-				Back to login
+				{t('auth_back_to_login')}
 			</a>
 		</div>
 	{:else}
 		<form onsubmit={handleSubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
-				<label for="email" class="text-sm font-medium" style="color: #1a1a17;">Email</label>
+				<label for="email" class="text-sm font-medium" style="color: #1a1a17;"
+					>{t('auth_email_label')}</label
+				>
 				<input
 					id="email"
 					type="email"
 					bind:value={email}
-					placeholder="you@example.com"
+					placeholder={t('auth_email_placeholder')}
 					autocomplete="email"
 					required
-					class="h-11 w-full rounded-xl px-4 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50"
+					class="h-11 w-full rounded-xl px-4 text-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50"
 					style="
 						border: 1px solid rgba(45, 45, 42, 0.1);
 						background-color: #f7f6f3;
@@ -78,7 +89,7 @@
 				class="h-11 w-full rounded-xl px-4 text-sm font-medium transition-all hover:shadow-md focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				style="background-color: #2d2d2a; color: #ffffff;"
 			>
-				{loading ? 'Sending...' : 'Send reset link'}
+				{loading ? t('forgot_loading') : t('forgot_submit')}
 			</button>
 
 			<a
@@ -86,7 +97,7 @@
 				class="text-center text-sm transition hover:opacity-70"
 				style="color: #6b6b65;"
 			>
-				Back to login
+				{t('auth_back_to_login')}
 			</a>
 		</form>
 	{/if}

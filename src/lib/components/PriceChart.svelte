@@ -21,14 +21,29 @@
 			class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition"
 			style="
 				background-color: {chart.selectedPeriod === p.value ? '#2d2d2a' : '#f7f6f3'};
-				color: {chart.selectedPeriod === p.value ? '#ffffff' : locked ? 'rgba(107,107,101,0.4)' : '#6b6b65'};
+				color: {chart.selectedPeriod === p.value
+				? '#ffffff'
+				: locked
+					? 'rgba(107,107,101,0.4)'
+					: '#6b6b65'};
 				cursor: {locked ? 'default' : 'pointer'};
 			"
 		>
 			{p.label}
 			{#if locked}
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;opacity:0.4;" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					style="width:10px;height:10px;opacity:0.4;"
+					aria-hidden="true"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+					/>
 				</svg>
 			{/if}
 		</button>
@@ -36,7 +51,10 @@
 </div>
 
 <!-- SVG 차트 -->
-<div class="rounded-xl overflow-hidden" style="background-color: #fafaf8; border: 1px solid rgba(45,45,42,0.06);">
+<div
+	class="overflow-hidden rounded-xl"
+	style="background-color: #fafaf8; border: 1px solid rgba(45,45,42,0.06);"
+>
 	<svg
 		viewBox="0 0 {chart.VW} {chart.VH}"
 		class="w-full"
@@ -56,9 +74,12 @@
 		<!-- Y축 그리드 -->
 		{#each chart.yGrid as g (g.y)}
 			<line
-				x1={chart.PL} y1={g.y}
-				x2={chart.VW - chart.PR} y2={g.y}
-				stroke="rgba(45,45,42,0.06)" stroke-width="1"
+				x1={chart.PL}
+				y1={g.y}
+				x2={chart.VW - chart.PR}
+				y2={g.y}
+				stroke="rgba(45,45,42,0.06)"
+				stroke-width="1"
 			/>
 			<text x={chart.PL - 6} y={g.y + 4} text-anchor="end" font-size="9.5" fill="#9b9b95">
 				{chart.fmtShort(g.price)}
@@ -92,50 +113,101 @@
 		<!-- 최저·최고 마커 (Pro) -->
 		{#if chart.isPro && chart.svgPoints.length > 0}
 			{#if chart.minIdx >= 0}
-				<circle cx={chart.svgPoints[chart.minIdx].x} cy={chart.svgPoints[chart.minIdx].y} r="3.5" fill="#5aad9c" />
-				<circle cx={chart.svgPoints[chart.minIdx].x} cy={chart.svgPoints[chart.minIdx].y} r="6" fill="#5aad9c" fill-opacity="0.15" />
+				<circle
+					cx={chart.svgPoints[chart.minIdx].x}
+					cy={chart.svgPoints[chart.minIdx].y}
+					r="3.5"
+					fill="#5aad9c"
+				/>
+				<circle
+					cx={chart.svgPoints[chart.minIdx].x}
+					cy={chart.svgPoints[chart.minIdx].y}
+					r="6"
+					fill="#5aad9c"
+					fill-opacity="0.15"
+				/>
 			{/if}
 			{#if chart.maxIdx >= 0 && chart.maxIdx !== chart.minIdx}
-				<circle cx={chart.svgPoints[chart.maxIdx].x} cy={chart.svgPoints[chart.maxIdx].y} r="3.5" fill="#d4183d" />
-				<circle cx={chart.svgPoints[chart.maxIdx].x} cy={chart.svgPoints[chart.maxIdx].y} r="6" fill="#d4183d" fill-opacity="0.15" />
+				<circle
+					cx={chart.svgPoints[chart.maxIdx].x}
+					cy={chart.svgPoints[chart.maxIdx].y}
+					r="3.5"
+					fill="#d4183d"
+				/>
+				<circle
+					cx={chart.svgPoints[chart.maxIdx].x}
+					cy={chart.svgPoints[chart.maxIdx].y}
+					r="6"
+					fill="#d4183d"
+					fill-opacity="0.15"
+				/>
 			{/if}
 		{/if}
 
 		<!-- 호버 요소 -->
 		{#if chart.hoverPt && chart.hoverIdx !== null}
 			<line
-				x1={chart.hoverPt.x} y1={chart.PT}
-				x2={chart.hoverPt.x} y2={chart.PT + chart.cH}
-				stroke="rgba(45,45,42,0.18)" stroke-width="1" stroke-dasharray="3,3"
+				x1={chart.hoverPt.x}
+				y1={chart.PT}
+				x2={chart.hoverPt.x}
+				y2={chart.PT + chart.cH}
+				stroke="rgba(45,45,42,0.18)"
+				stroke-width="1"
+				stroke-dasharray="3,3"
 			/>
-			<circle cx={chart.hoverPt.x} cy={chart.hoverPt.y} r="4.5" fill="#5aad9c" stroke="white" stroke-width="2" />
+			<circle
+				cx={chart.hoverPt.x}
+				cy={chart.hoverPt.y}
+				r="4.5"
+				fill="#5aad9c"
+				stroke="white"
+				stroke-width="2"
+			/>
 
 			<!-- 툴팁 -->
 			<rect
-				x={chart.tooltipX} y={chart.tooltipY}
-				width="110" height="42" rx="7"
+				x={chart.tooltipX}
+				y={chart.tooltipY}
+				width="110"
+				height="42"
+				rx="7"
 				fill="white"
 				style="filter: drop-shadow(0 2px 10px rgba(0,0,0,0.1));"
 			/>
 			<rect
-				x={chart.tooltipX} y={chart.tooltipY}
-				width="110" height="42" rx="7"
-				fill="none" stroke="rgba(45,45,42,0.07)" stroke-width="1"
+				x={chart.tooltipX}
+				y={chart.tooltipY}
+				width="110"
+				height="42"
+				rx="7"
+				fill="none"
+				stroke="rgba(45,45,42,0.07)"
+				stroke-width="1"
 			/>
 			<text x={chart.tooltipX + 10} y={chart.tooltipY + 14} font-size="9.5" fill="#9b9b95">
 				{chart.chartData[chart.hoverIdx].date}
 			</text>
-			<text x={chart.tooltipX + 10} y={chart.tooltipY + 30} font-size="12" font-weight="600" fill="#1a1a17">
+			<text
+				x={chart.tooltipX + 10}
+				y={chart.tooltipY + 30}
+				font-size="12"
+				font-weight="600"
+				fill="#1a1a17"
+			>
 				{chart.fmt(chart.hoverPt.price)}
 			</text>
 			{#if chart.chartData[chart.hoverIdx].change !== 0}
 				<text
-					x={chart.tooltipX + 100} y={chart.tooltipY + 30}
-					font-size="9" font-weight="500"
+					x={chart.tooltipX + 100}
+					y={chart.tooltipY + 30}
+					font-size="9"
+					font-weight="500"
 					text-anchor="end"
 					fill={chart.changeColor(chart.chartData[chart.hoverIdx].change)}
 				>
-					{chart.chartData[chart.hoverIdx].change > 0 ? '+' : ''}{chart.fmtShort(chart.chartData[chart.hoverIdx].change)}
+					{chart.chartData[chart.hoverIdx].change > 0 ? '+' : ''}{chart.fmtShort(
+						chart.chartData[chart.hoverIdx].change
+					)}
 				</text>
 			{/if}
 		{/if}
@@ -147,15 +219,21 @@
 	<div class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_min')}</p>
-			<p class="text-sm font-semibold tabular-nums" style="color: #5aad9c;">{chart.fmt(chart.stats.min)}</p>
+			<p class="text-sm font-semibold tabular-nums" style="color: #5aad9c;">
+				{chart.fmt(chart.stats.min)}
+			</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_max')}</p>
-			<p class="text-sm font-semibold tabular-nums" style="color: #d4183d;">{chart.fmt(chart.stats.max)}</p>
+			<p class="text-sm font-semibold tabular-nums" style="color: #d4183d;">
+				{chart.fmt(chart.stats.max)}
+			</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_avg')}</p>
-			<p class="text-sm font-semibold tabular-nums" style="color: #1a1a17;">{chart.fmt(chart.stats.avg)}</p>
+			<p class="text-sm font-semibold tabular-nums" style="color: #1a1a17;">
+				{chart.fmt(chart.stats.avg)}
+			</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_change')}</p>
@@ -186,11 +264,28 @@
 				class="flex items-center gap-2 rounded-xl px-4 py-2.5"
 				style="background: white; border: 1px solid rgba(45,45,42,0.1); box-shadow: 0 2px 12px rgba(0,0,0,0.08);"
 			>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5 shrink-0" style="color: #6b6b65;" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					class="size-3.5 shrink-0"
+					style="color: #6b6b65;"
+					aria-hidden="true"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+					/>
 				</svg>
 				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_lock')} </span>
-				<a href={resolve('/plan')} class="text-xs font-semibold" style="color: #1a1a17; text-decoration: underline; text-underline-offset: 2px;">{t('chart_pro_link')}</a>
+				<a
+					href={resolve('/plan')}
+					class="text-xs font-semibold"
+					style="color: #1a1a17; text-decoration: underline; text-underline-offset: 2px;"
+					>{t('chart_pro_link')}</a
+				>
 				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_suffix')}</span>
 			</div>
 		</div>

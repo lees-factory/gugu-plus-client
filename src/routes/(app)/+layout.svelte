@@ -5,6 +5,7 @@
 	import AppFooter from '$lib/components/AppFooter.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
 	import { hydratePreferencesFromStorage } from '$lib/stores/preferences.svelte';
+	import { t } from '$lib/i18n/t';
 	import { onMount, setContext } from 'svelte';
 	import { createLayoutModel } from './app-layout.svelte';
 
@@ -93,7 +94,7 @@
 					<input
 						type="text"
 						bind:value={layout.model.searchValue}
-						placeholder="상품 URL 붙여넣기, 브랜드 또는 카테고리 검색..."
+						placeholder={t('search_placeholder')}
 						onpaste={layout.handleSearchPaste}
 						onkeydown={layout.handleSearchKeydown}
 						class="h-12 w-full rounded-2xl border border-zinc-200/60 bg-white/50 pr-4 pl-11 text-sm font-normal transition-all duration-200 outline-none placeholder:text-zinc-400 focus:border-stone-300 focus:bg-white focus:ring-4 focus:ring-stone-100/50"
@@ -114,7 +115,7 @@
 							href={resolve('/auth/login')}
 							class="rounded-2xl border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-50"
 						>
-							로그인
+							{t('header_login')}
 						</a>
 					{/if}
 				</div>

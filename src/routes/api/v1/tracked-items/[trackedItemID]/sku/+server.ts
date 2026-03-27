@@ -9,7 +9,15 @@ export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
 	}
 
 	const id = params.trackedItemID;
-	const body = await request.text();
+
+	let body: string;
+	try {
+		const parsed = JSON.parse(await request.text());
+		body = JSON.stringify(parsed);
+	} catch {
+		throw error(400, 'Invalid JSON');
+	}
+
 	const res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}/sku`, {
 		method: 'PATCH',
 		headers: {

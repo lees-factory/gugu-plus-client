@@ -16,13 +16,10 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	const id = params.trackedItemID;
 	/** OpenAPI: `user_id` 쿼리 필수. 쿠키 값으로 넣어 클라이언트 위조 방지 */
 	const qs = new URLSearchParams({ user_id: userId }).toString();
-	const res = await fetch(
-		`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`,
-		{
-			method: 'DELETE',
-			headers: { Authorization: `Bearer ${accessToken}` }
-		}
-	);
+	const res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`, {
+		method: 'DELETE',
+		headers: { Authorization: `Bearer ${accessToken}` }
+	});
 
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });

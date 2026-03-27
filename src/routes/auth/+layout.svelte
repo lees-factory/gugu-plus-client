@@ -2,11 +2,11 @@
 	let { children } = $props();
 </script>
 
-<div class="flex min-h-svh items-center justify-center p-4 bg-[#F5F4F1]">
+<div class="flex min-h-svh items-center justify-center bg-[#F5F4F1] p-4">
 	<div class="w-full max-w-sm">
 		<div class="mb-10 flex items-center justify-center gap-3">
 			<div
-				class="flex size-11 items-center justify-center rounded-2xl shadow-lg shadow-zinc-900/10 text-white"
+				class="flex size-11 items-center justify-center rounded-2xl text-white shadow-lg shadow-zinc-900/10"
 				style="background: linear-gradient(135deg, #3f3f46 0%, #1c1917 100%);"
 			>
 				<svg
@@ -19,7 +19,9 @@
 					class="size-5"
 					aria-hidden="true"
 				>
-					<path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14" />
+					<path
+						d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"
+					/>
 					<path d="m7.5 4.27 9 5.15" />
 					<polyline points="3.29 7 12 12 20.71 7" />
 					<line x1="12" x2="12" y1="22" y2="12" />
@@ -28,8 +30,10 @@
 				</svg>
 			</div>
 			<div>
-				<div class="text-xl font-semibold tracking-tight text-zinc-900 leading-none">Price Eye</div>
-				<div class="mt-1 text-[9px] font-medium tracking-wider text-zinc-400">Smart Price Companion</div>
+				<div class="text-xl leading-none font-semibold tracking-tight text-zinc-900">Price Eye</div>
+				<div class="mt-1 text-[9px] font-medium tracking-wider text-zinc-400">
+					Smart Price Companion
+				</div>
 			</div>
 		</div>
 		{@render children()}

@@ -19,8 +19,7 @@ export const ENDPOINTS = {
 	trackedItems: {
 		list: '/api/v1/tracked-items',
 		create: '/api/v1/tracked-items',
-		delete: (trackedItemId: string) =>
-			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
+		delete: (trackedItemId: string) => `/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		selectSku: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`
 	},

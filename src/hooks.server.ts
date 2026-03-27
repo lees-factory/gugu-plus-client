@@ -2,8 +2,9 @@ import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { deLocalizeHref } from '$lib/paraglide/runtime.js';
 import { paraglideMiddleware } from '$lib/paraglide/server.js';
-import { authApi } from '$lib/api/auth';
+import { ENDPOINTS } from '$lib/api/endpoints';
 import { COOKIE_OPTS } from '$lib/api/config';
+import type { AuthTokens } from '$lib/api/auth';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -28,9 +29,13 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 
 	// access_token이 없고 refresh_token이 있으면 자동 갱신 시도
 	if (!accessToken && refreshToken) {
-		const result = await authApi.refresh(refreshToken);
+		const res = await fetch(ENDPOINTS.auth.refresh, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ refresh_token: refreshToken })
+		}).catch(() => null);
 
-		if (result.error) {
+		if (!res || !res.ok) {
 			// refresh 실패 → 쿠키 전체 삭제 (게스트 상태로 계속)
 			event.cookies.delete('session', { path: '/' });
 			event.cookies.delete('access_token', { path: '/' });
@@ -39,7 +44,8 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 			return resolve(event);
 		}
 
-		const tokens = result.data?.data;
+		const body = await res.json().catch(() => null);
+		const tokens: AuthTokens | undefined = body?.data;
 		if (tokens?.access_token) {
 			event.cookies.set('access_token', tokens.access_token, COOKIE_OPTS);
 		}

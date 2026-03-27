@@ -7,14 +7,14 @@
 
 ## 1. 현재 프로젝트 현황
 
-| 항목 | 수치 |
-|------|------|
-| 전체 코드량 | ~5,173 lines (38 files) |
-| 프레임워크 | SvelteKit 2 + Svelte 5 (Runes) |
-| 가장 큰 파일 | product-dummy.ts (1,061줄), items/[id]/+page.svelte (539줄) |
-| domain/ 폴더 | 없음 |
-| service/reader/writer 패턴 | 없음 |
-| API 레이어 | 있음 (client.ts, endpoints.ts, auth.ts) |
+| 항목                       | 수치                                                        |
+| -------------------------- | ----------------------------------------------------------- |
+| 전체 코드량                | ~5,173 lines (38 files)                                     |
+| 프레임워크                 | SvelteKit 2 + Svelte 5 (Runes)                              |
+| 가장 큰 파일               | product-dummy.ts (1,061줄), items/[id]/+page.svelte (539줄) |
+| domain/ 폴더               | 없음                                                        |
+| service/reader/writer 패턴 | 없음                                                        |
+| API 레이어                 | 있음 (client.ts, endpoints.ts, auth.ts)                     |
 
 ---
 
@@ -37,23 +37,23 @@ Presentation → Business(-service) → Implement(-reader, -writer) → Data Acc
 
 ### SKILL.md에서 좋은 부분
 
-| 원칙 | 평가 |
-|------|------|
-| 개념(Concept) 단위 분리 | 올바른 방향. 단, 지금은 개념이 2-3개뿐 |
-| 격벽(index.ts로 공개 인터페이스 제한) | 프로젝트가 커지면 유용. 지금은 과잉 |
-| 레이어를 네이밍으로 구분 | 좋은 아이디어. 폴더 중첩보다 낫다 |
-| storage/ 기술 격리 | API 클라이언트 격리는 이미 하고 있다 (lib/api/) |
-| components vs 횡단기능 구분 | 명확한 기준이라 유용 |
+| 원칙                                  | 평가                                            |
+| ------------------------------------- | ----------------------------------------------- |
+| 개념(Concept) 단위 분리               | 올바른 방향. 단, 지금은 개념이 2-3개뿐          |
+| 격벽(index.ts로 공개 인터페이스 제한) | 프로젝트가 커지면 유용. 지금은 과잉             |
+| 레이어를 네이밍으로 구분              | 좋은 아이디어. 폴더 중첩보다 낫다               |
+| storage/ 기술 격리                    | API 클라이언트 격리는 이미 하고 있다 (lib/api/) |
+| components vs 횡단기능 구분           | 명확한 기준이라 유용                            |
 
 ### SKILL.md에서 과한 부분
 
-| 원칙 | 문제 |
-|------|------|
-| 4단계 레이어 강제 | 프론트엔드에서 Business → Implement → Data Access 3단 위임은 대부분 pass-through |
-| "건너뛰기 금지" | `service`에서 `storage`를 직접 호출 못하면, 1줄짜리 reader를 만들어야 한다 |
-| 동일 레이어 참조 금지 | service 간 조합이 필요한 경우가 실제로 존재한다 |
-| 모든 개념에 index.ts 격벽 | 2-3개 파일로 구성된 개념에 index.ts는 보일러플레이트만 늘린다 |
-| 백엔드 용어 대응 (Controller ≈ Page) | 비유로는 좋지만, 프론트엔드의 특성(반응형 상태, 컴포넌트 트리)을 무시하게 된다 |
+| 원칙                                 | 문제                                                                             |
+| ------------------------------------ | -------------------------------------------------------------------------------- |
+| 4단계 레이어 강제                    | 프론트엔드에서 Business → Implement → Data Access 3단 위임은 대부분 pass-through |
+| "건너뛰기 금지"                      | `service`에서 `storage`를 직접 호출 못하면, 1줄짜리 reader를 만들어야 한다       |
+| 동일 레이어 참조 금지                | service 간 조합이 필요한 경우가 실제로 존재한다                                  |
+| 모든 개념에 index.ts 격벽            | 2-3개 파일로 구성된 개념에 index.ts는 보일러플레이트만 늘린다                    |
+| 백엔드 용어 대응 (Controller ≈ Page) | 비유로는 좋지만, 프론트엔드의 특성(반응형 상태, 컴포넌트 트리)을 무시하게 된다   |
 
 ### 제안: 단계적 적용
 
@@ -65,11 +65,11 @@ Page(Presentation) → Domain Logic + API(Business)
 
 프로젝트가 성장하면서 단계적으로 적용:
 
-| 프로젝트 규모 | 적용 수준 |
-|--------------|----------|
+| 프로젝트 규모    | 적용 수준                                            |
+| ---------------- | ---------------------------------------------------- |
 | ~5K lines (현재) | Page → lib/domain/{concept}.ts (service 하나로 충분) |
-| ~15K lines | Page → service → API client, 개념별 폴더 분리 |
-| ~50K+ lines | SKILL.md의 풀 아키텍처 적용 고려 |
+| ~15K lines       | Page → service → API client, 개념별 폴더 분리        |
+| ~50K+ lines      | SKILL.md의 풀 아키텍처 적용 고려                     |
 
 ---
 
@@ -79,25 +79,25 @@ Page(Presentation) → Domain Logic + API(Business)
 
 **script 블록 (1-242줄, 약 242줄):**
 
-| 구간 | 줄 수 | 내용 | 분리 가능 여부 |
-|------|-------|------|--------------|
-| 타입 정의 | 1-32 | ParsedSku, ColorOption, PriceEntry, ItemDetail | 별도 types.ts로 분리 가능 |
-| 더미 히스토리 생성 | 34-67 | genHistory() | API 연동 시 제거될 코드 |
-| 헬퍼 함수 | 69-99 | parseKRW, sourceToSite, formatKRW, parseSkus | 도메인 로직. 분리 대상 |
-| 아이템 맵 구성 | 101-138 | 더미 데이터 → ItemDetail 변환 | API 연동 시 제거될 코드 |
-| 반응형 상태 + 파생 | 140-224 | selectedColor, sizeOptions, currentSku 등 | 일부 로직 분리 가능 |
-| 이벤트 핸들러 | 226-241 | selectColor, handleDelete | 페이지에 남아도 됨 |
+| 구간               | 줄 수   | 내용                                           | 분리 가능 여부            |
+| ------------------ | ------- | ---------------------------------------------- | ------------------------- |
+| 타입 정의          | 1-32    | ParsedSku, ColorOption, PriceEntry, ItemDetail | 별도 types.ts로 분리 가능 |
+| 더미 히스토리 생성 | 34-67   | genHistory()                                   | API 연동 시 제거될 코드   |
+| 헬퍼 함수          | 69-99   | parseKRW, sourceToSite, formatKRW, parseSkus   | 도메인 로직. 분리 대상    |
+| 아이템 맵 구성     | 101-138 | 더미 데이터 → ItemDetail 변환                  | API 연동 시 제거될 코드   |
+| 반응형 상태 + 파생 | 140-224 | selectedColor, sizeOptions, currentSku 등      | 일부 로직 분리 가능       |
+| 이벤트 핸들러      | 226-241 | selectColor, handleDelete                      | 페이지에 남아도 됨        |
 
 **template 블록 (244-539줄, 약 295줄):**
 
-| 구간 | 줄 수 | 컴포넌트화 가능 |
-|------|-------|----------------|
-| Sticky header | 252-302 | ItemDetailHeader.svelte |
-| Image 영역 | 311-329 | 작아서 분리 불필요 |
-| Price card | 334-365 | PriceCard.svelte |
-| Tracking settings | 368-408 | TrackingSettings.svelte |
-| SKU selector | 413-500 | SkuSelector.svelte |
-| Price history | 503-535 | 이미 PriceChart 사용 중, 테이블만 분리 가능 |
+| 구간              | 줄 수   | 컴포넌트화 가능                             |
+| ----------------- | ------- | ------------------------------------------- |
+| Sticky header     | 252-302 | ItemDetailHeader.svelte                     |
+| Image 영역        | 311-329 | 작아서 분리 불필요                          |
+| Price card        | 334-365 | PriceCard.svelte                            |
+| Tracking settings | 368-408 | TrackingSettings.svelte                     |
+| SKU selector      | 413-500 | SkuSelector.svelte                          |
+| Price history     | 503-535 | 이미 PriceChart 사용 중, 테이블만 분리 가능 |
 
 ### 핵심 문제
 
@@ -130,25 +130,25 @@ src/lib/components/
 
 ```typescript
 // Profile (1개)
-let emailValue = $state('')
+let emailValue = $state('');
 
 // Password change (5개)
-let currentPassword = $state('')
-let newPassword = $state('')
-let confirmPassword = $state('')
-let passwordLoading = $state(false)
-let passwordSuccess = $state(false)
-let passwordError = $state('')
+let currentPassword = $state('');
+let newPassword = $state('');
+let confirmPassword = $state('');
+let passwordLoading = $state(false);
+let passwordSuccess = $state(false);
+let passwordError = $state('');
 
 // Notifications (3개)
-let emailNotif = $state(true)
-let notifSaveLoading = $state(false)
-let notifSaveSuccess = $state(false)
+let emailNotif = $state(true);
+let notifSaveLoading = $state(false);
+let notifSaveSuccess = $state(false);
 
 // Delete account (3개)
-let deleteConfirmText = $state('')
-let deleteLoading = $state(false)
-let showDeleteModal = $state(false)
+let deleteConfirmText = $state('');
+let deleteLoading = $state(false);
+let showDeleteModal = $state(false);
 ```
 
 **총 12개의 $state** - 4개의 서로 다른 관심사가 하나의 파일에 섞여 있다.
@@ -187,12 +187,12 @@ src/routes/(app)/settings/
 
 **프론트엔드는 상황이 다르다:**
 
-| 백엔드 | 프론트엔드 |
-|--------|----------|
-| Controller는 재사용 안 됨 | Page도 재사용 안 됨 |
+| 백엔드                             | 프론트엔드                                   |
+| ---------------------------------- | -------------------------------------------- |
+| Controller는 재사용 안 됨          | Page도 재사용 안 됨                          |
 | Service는 여러 Controller에서 사용 | 비즈니스 로직은 대부분 1개 페이지에서만 사용 |
-| HTTP ↔ 비즈니스 경계가 명확 | UI 상태 ↔ 비즈니스 상태 경계가 모호 |
-| Service가 수십 개 도구를 조합 | 프론트 서비스는 API 1-2개 호출이 전부 |
+| HTTP ↔ 비즈니스 경계가 명확        | UI 상태 ↔ 비즈니스 상태 경계가 모호          |
+| Service가 수십 개 도구를 조합      | 프론트 서비스는 API 1-2개 호출이 전부        |
 
 ### 분리 기준
 
@@ -233,6 +233,7 @@ Page.svelte
 ### 지금 당장 할 수 있는 것 (과하지 않은 수준)
 
 1. **공통 포맷터 분리**
+
    ```
    src/lib/domain/price/
    ├── price-formatter.ts   # formatKRW, parseKRW
@@ -290,6 +291,7 @@ shared/lib/formatKRW      ← item에서만 쓰는데 shared?
 ```
 
 **개념(도메인 객체) 기준**이 명확하다:
+
 - `item` → 상품 추적과 관련된 모든 것
 - `auth` → 인증과 관련된 모든 것
 - `account` → 계정 설정과 관련된 모든 것
@@ -330,6 +332,7 @@ src/routes/(app)/
 ```
 
 **문제점:**
+
 - 모든 비즈니스 로직이 +page.svelte에 인라인
 - 포맷터(formatKRW)가 재사용 불가 (items에만 존재)
 - types.ts에 2개 타입만 있고, 나머지 타입은 페이지 내부에 정의
@@ -411,12 +414,12 @@ src/routes/(app)/
 "이 로직이 이 페이지에서만 쓰이는가?" → 라우트 폴더에 둔다
 ```
 
-| 모듈 | 분리 근거 |
-|------|----------|
-| `domain/price/` | formatKRW는 home, items, plan에서 모두 필요 |
-| `domain/item/` | ItemDetail 타입은 items/[id], home, ItemCard에서 사용 |
-| `domain/auth/` | auth-api + store + types가 이미 3개 파일 → 개념으로 묶을 가치 |
-| `domain/account/` | settings의 validation, API가 인라인 → 분리하면 테스트 가능 |
+| 모듈              | 분리 근거                                                     |
+| ----------------- | ------------------------------------------------------------- |
+| `domain/price/`   | formatKRW는 home, items, plan에서 모두 필요                   |
+| `domain/item/`    | ItemDetail 타입은 items/[id], home, ItemCard에서 사용         |
+| `domain/auth/`    | auth-api + store + types가 이미 3개 파일 → 개념으로 묶을 가치 |
+| `domain/account/` | settings의 validation, API가 인라인 → 분리하면 테스트 가능    |
 
 #### 라우트 전용 컴포넌트 배치
 
@@ -475,15 +478,15 @@ export { formatKRW, parseKRW } from './price-formatter';
 
 ### SKILL.md 구조 vs 제안 구조 비교
 
-| 항목 | SKILL.md | 제안 |
-|------|----------|------|
-| 개념 단위 분리 | domain/{concept}/ | **동일** |
-| 격벽 (index.ts) | 모든 개념에 강제 | 3파일 이상일 때만 |
-| 네이밍 컨벤션 | -service, -reader, -writer, -formatter | -api, -formatter, -parser, -validator (필요한 것만) |
-| 레이어 깊이 | 4단계 (Presentation→Business→Implement→DataAccess) | 2단계 (Page→Domain+API) |
-| service 레이어 | 모든 개념에 필수 | 복잡한 조합 로직 있을 때만 |
-| storage/ 분리 | 별도 Data Access 레이어 | api/client.ts에 통합 (현재 규모에 충분) |
-| 라우트 전용 컴포넌트 | views/ 폴더에 | 라우트 폴더에 co-locate |
+| 항목                 | SKILL.md                                           | 제안                                                |
+| -------------------- | -------------------------------------------------- | --------------------------------------------------- |
+| 개념 단위 분리       | domain/{concept}/                                  | **동일**                                            |
+| 격벽 (index.ts)      | 모든 개념에 강제                                   | 3파일 이상일 때만                                   |
+| 네이밍 컨벤션        | -service, -reader, -writer, -formatter             | -api, -formatter, -parser, -validator (필요한 것만) |
+| 레이어 깊이          | 4단계 (Presentation→Business→Implement→DataAccess) | 2단계 (Page→Domain+API)                             |
+| service 레이어       | 모든 개념에 필수                                   | 복잡한 조합 로직 있을 때만                          |
+| storage/ 분리        | 별도 Data Access 레이어                            | api/client.ts에 통합 (현재 규모에 충분)             |
+| 라우트 전용 컴포넌트 | views/ 폴더에                                      | 라우트 폴더에 co-locate                             |
 
 **결론: SKILL.md의 개념 분리 원칙은 올바르다.** 과한 것은 4단계 레이어 강제와 모든 곳의 격벽이다.
 "백엔드처럼 모듈 네이밍을 명확하게"라는 방향은 맞다. `-api`, `-formatter`, `-validator`로
@@ -518,6 +521,7 @@ domain/{concept}/{concept}-api.ts → API Server
 ```
 
 단방향이 깨지는 패턴을 피한다:
+
 ```
 ❌ 자식 컴포넌트가 직접 API 호출하고 부모 상태를 변경
 ❌ store를 통해 형제 컴포넌트끼리 암묵적 통신
@@ -528,13 +532,13 @@ domain/{concept}/{concept}-api.ts → API Server
 
 ## 8. 요약
 
-| 항목 | 평가 |
-|------|------|
-| SKILL.md 아키텍처 | 개념 분리 원칙은 올바름. 4단계 레이어 강제가 과함 |
-| FSD vs 개념 기반 | 개념(도메인 객체) 기준이 FSD보다 명확. 올바른 판단 |
-| items/[id] 539줄 | domain/item/ + 라우트 전용 컴포넌트로 ~200줄 가능 |
-| settings 408줄 | 섹션 컴포넌트 4개 분리 → +page.svelte ~60줄 |
-| 비즈니스 로직 + UI | "재사용/테스트 필요한 것만 분리", 나머지는 co-locate |
-| 네이밍 컨벤션 (-api, -formatter) | 파일 역할이 이름에서 보임. 유지 |
-| 데이터 흐름 | Page → Section → Shared 단방향 유지 |
-| 전체 방향 | 2단계(Page→Domain)로 시작, 필요 시 service 레이어 추가 |
+| 항목                             | 평가                                                   |
+| -------------------------------- | ------------------------------------------------------ |
+| SKILL.md 아키텍처                | 개념 분리 원칙은 올바름. 4단계 레이어 강제가 과함      |
+| FSD vs 개념 기반                 | 개념(도메인 객체) 기준이 FSD보다 명확. 올바른 판단     |
+| items/[id] 539줄                 | domain/item/ + 라우트 전용 컴포넌트로 ~200줄 가능      |
+| settings 408줄                   | 섹션 컴포넌트 4개 분리 → +page.svelte ~60줄            |
+| 비즈니스 로직 + UI               | "재사용/테스트 필요한 것만 분리", 나머지는 co-locate   |
+| 네이밍 컨벤션 (-api, -formatter) | 파일 역할이 이름에서 보임. 유지                        |
+| 데이터 흐름                      | Page → Section → Shared 단방향 유지                    |
+| 전체 방향                        | 2단계(Page→Domain)로 시작, 필요 시 service 레이어 추가 |

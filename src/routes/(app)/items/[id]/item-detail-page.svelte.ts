@@ -34,9 +34,7 @@ export function createItemDetailPage(
 	getSkus: () => ProductSku[] | null | undefined
 ) {
 	const item = $derived(
-		getProduct()
-			? mapProductDetail(getProduct() as ProductDetailData, getSkus() ?? null)
-			: null
+		getProduct() ? mapProductDetail(getProduct() as ProductDetailData, getSkus() ?? null) : null
 	);
 
 	const ui = $state({
@@ -65,25 +63,18 @@ export function createItemDetailPage(
 			const v = s.propColor;
 			if (!v || seen.has(v)) continue;
 			seen.add(v);
-			const img =
-				s.image ??
-				item.skus.find((x) => x.propColor === v && x.image)?.image ??
-				null;
+			const img = s.image ?? item.skus.find((x) => x.propColor === v && x.image)?.image ?? null;
 			opts.push({ value: v, image: img });
 		}
 		return opts;
 	});
 
 	/** $effect 전 첫 프레임에 ui.propColor가 ''이면 필터가 비어 크기 줄이 통째로 사라짐 → 첫 SKU 색상으로 폴백 */
-	const effectivePropColor = $derived(
-		ui.propColor || item?.skus[0]?.propColor || ''
-	);
+	const effectivePropColor = $derived(ui.propColor || item?.skus[0]?.propColor || '');
 
 	const matrixSizeOptions = $derived.by(() => {
 		if (!item?.variantMatrix || !needSize) return [] as string[];
-		const sizes = item.skus
-			.map((s) => s.propSize)
-			.filter((x): x is string => !!x && x !== '');
+		const sizes = item.skus.map((s) => s.propSize).filter((x): x is string => !!x && x !== '');
 		const uniq = [...new SvelteSet(sizes)];
 		uniq.sort((a, b) => {
 			const ra = getSizeRank(a);
@@ -116,17 +107,13 @@ export function createItemDetailPage(
 	const showColorRow = $derived(
 		!!item?.variantMatrix && needColor && matrixColorOptions.length > 1
 	);
-	const showSizeRow = $derived(
-		!!item?.variantMatrix && needSize && matrixSizeOptions.length > 1
-	);
+	const showSizeRow = $derived(!!item?.variantMatrix && needSize && matrixSizeOptions.length > 1);
 
 	const showMatrixPanel = $derived(
 		!!item?.variantMatrix && item.skus.length > 1 && (showColorRow || showSizeRow)
 	);
 
-	const showFlatPanel = $derived(
-		!!item && !item.variantMatrix && item.skus.length > 1
-	);
+	const showFlatPanel = $derived(!!item && !item.variantMatrix && item.skus.length > 1);
 
 	const showFlatMatrixFallback = $derived(
 		!!item?.variantMatrix && item.skus.length > 1 && !showColorRow && !showSizeRow
@@ -251,27 +238,67 @@ export function createItemDetailPage(
 	}
 
 	return {
-		item,
+		get item() {
+			return item;
+		},
 		ui,
-		effectivePropColor,
-		effectivePropSize,
-		needColor,
-		needSize,
-		matrixColorOptions,
-		matrixSizeOptions,
-		availableSizesForColor,
-		showColorRow,
-		showSizeRow,
-		showMatrixPanel,
-		showFlatPanel,
-		showFlatMatrixFallback,
-		hasSkuList,
-		currentSku,
-		displayImage,
-		displayPrice,
-		originalPrice,
-		discountPct,
-		siteBadgeStyle,
+		get effectivePropColor() {
+			return effectivePropColor;
+		},
+		get effectivePropSize() {
+			return effectivePropSize;
+		},
+		get needColor() {
+			return needColor;
+		},
+		get needSize() {
+			return needSize;
+		},
+		get matrixColorOptions() {
+			return matrixColorOptions;
+		},
+		get matrixSizeOptions() {
+			return matrixSizeOptions;
+		},
+		get availableSizesForColor() {
+			return availableSizesForColor;
+		},
+		get showColorRow() {
+			return showColorRow;
+		},
+		get showSizeRow() {
+			return showSizeRow;
+		},
+		get showMatrixPanel() {
+			return showMatrixPanel;
+		},
+		get showFlatPanel() {
+			return showFlatPanel;
+		},
+		get showFlatMatrixFallback() {
+			return showFlatMatrixFallback;
+		},
+		get hasSkuList() {
+			return hasSkuList;
+		},
+		get currentSku() {
+			return currentSku;
+		},
+		get displayImage() {
+			return displayImage;
+		},
+		get displayPrice() {
+			return displayPrice;
+		},
+		get originalPrice() {
+			return originalPrice;
+		},
+		get discountPct() {
+			return discountPct;
+		},
+		get siteBadgeStyle() {
+			return siteBadgeStyle;
+		},
 		selectSku,
 		selectMatrixColor,
 		selectMatrixSize,

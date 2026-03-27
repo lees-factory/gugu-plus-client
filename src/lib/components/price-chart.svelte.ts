@@ -67,7 +67,10 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 	const isPro = $derived(auth.plan.type === 'pro');
 
 	$effect(() => {
-		if (!isPro && (selectedPeriod === '30' || selectedPeriod === '90' || selectedPeriod === 'all')) {
+		if (
+			!isPro &&
+			(selectedPeriod === '30' || selectedPeriod === '90' || selectedPeriod === 'all')
+		) {
 			selectedPeriod = '14';
 		}
 	});
@@ -205,21 +208,57 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		cW,
 		cH,
 		periods: getPriceChartPeriods(),
-		selectedPeriod,
-		isPro,
-		chartData,
-		stats,
-		svgPoints,
-		yGrid,
-		xLabels,
-		minIdx,
-		maxIdx,
-		linePath,
-		fillPath,
-		hoverIdx,
-		hoverPt,
-		tooltipX,
-		tooltipY,
+		get selectedPeriod() {
+			return selectedPeriod;
+		},
+		set selectedPeriod(v: ChartPeriod) {
+			selectedPeriod = v;
+		},
+		get isPro() {
+			return isPro;
+		},
+		get chartData() {
+			return chartData;
+		},
+		get stats() {
+			return stats;
+		},
+		get svgPoints() {
+			return svgPoints;
+		},
+		get yGrid() {
+			return yGrid;
+		},
+		get xLabels() {
+			return xLabels;
+		},
+		get minIdx() {
+			return minIdx;
+		},
+		get maxIdx() {
+			return maxIdx;
+		},
+		get linePath() {
+			return linePath;
+		},
+		get fillPath() {
+			return fillPath;
+		},
+		get hoverIdx() {
+			return hoverIdx;
+		},
+		set hoverIdx(v: number | null) {
+			hoverIdx = v;
+		},
+		get hoverPt() {
+			return hoverPt;
+		},
+		get tooltipX() {
+			return tooltipX;
+		},
+		get tooltipY() {
+			return tooltipY;
+		},
 		onMouseMove,
 		clearHover,
 		fmt: fmtPriceChart,

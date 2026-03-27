@@ -307,7 +307,9 @@
 							</div>
 							<div class="shrink-0 text-right">
 								<div class="text-sm font-semibold text-emerald-600">-{item.discountPct}%</div>
-								<div class="text-xs text-zinc-400">{page.fmt(item.currentPrice, item.currency)}</div>
+								<div class="text-xs text-zinc-400">
+									{page.fmt(item.currentPrice, item.currency)}
+								</div>
 							</div>
 						</a>
 					{/each}
