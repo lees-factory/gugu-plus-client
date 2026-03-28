@@ -13,6 +13,8 @@
 
 	const layout = createLayoutModel(() => data);
 
+	let userMenuOpen = $state(false);
+
 	let mainEl: HTMLElement | undefined = $state();
 
 	onMount(() => {
@@ -101,19 +103,61 @@
 					/>
 				</div>
 
+				<div class="flex-1"></div>
+
 				<!-- Right actions -->
-				<div class="hidden items-center gap-3 md:flex">
+				<div class="flex shrink-0 items-center gap-3">
 					{#if layout.userInitial !== '?'}
-						<a
-							href={resolve('/settings')}
-							class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-700 to-stone-800 text-sm font-semibold text-white shadow-md shadow-zinc-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-						>
-							{layout.userInitial}
-						</a>
+						<div class="relative">
+							<button
+								type="button"
+								onclick={() => (userMenuOpen = !userMenuOpen)}
+								class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-700 to-stone-800 text-sm font-semibold text-white shadow-md shadow-zinc-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+							>
+								{layout.userInitial}
+							</button>
+
+							{#if userMenuOpen}
+								<!-- backdrop -->
+								<div
+									class="fixed inset-0 z-40"
+									role="presentation"
+									onclick={() => (userMenuOpen = false)}
+								></div>
+								<!-- dropdown -->
+								<div
+									class="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-zinc-200/60 bg-white shadow-xl"
+								>
+									<a
+										href={resolve('/settings')}
+										onclick={() => (userMenuOpen = false)}
+										class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+									>
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4 text-zinc-400" aria-hidden="true">
+											<circle cx="12" cy="12" r="3" />
+											<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+										</svg>
+										{t('nav_settings')}
+									</a>
+									<div style="border-top: 1px solid rgba(45,45,42,0.06);"></div>
+									<a
+										href={resolve('/auth/logout')}
+										onclick={() => (userMenuOpen = false)}
+										class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+									>
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4" aria-hidden="true">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3-3h-12m12 0-3-3m3 3-3 3" />
+										</svg>
+										{t('sidebar_log_out')}
+									</a>
+								</div>
+							{/if}
+						</div>
 					{:else}
 						<a
 							href={resolve('/auth/login')}
-							class="rounded-2xl border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-50"
+							class="flex h-10 shrink-0 items-center rounded-2xl px-5 text-sm font-semibold text-white shadow-md shadow-zinc-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+							style="background: linear-gradient(to right, #292524, #3f3f46);"
 						>
 							{t('header_login')}
 						</a>
