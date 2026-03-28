@@ -3,11 +3,12 @@ import { resolve } from '$app/paths';
 import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
-	mapProductDetail,
+	mapTrackedItemDetail,
 	formatDisplayPrice,
 	type ParsedSku
 } from '$lib/product-detail/map-product';
-import type { ProductDetailData, ProductSku } from '$lib/api/products';
+import type { TrackedItemDetailData } from '$lib/api/tracked-items';
+import type { ProductSku } from '$lib/api/products';
 import { trackedItemsApi } from '$lib/api/tracked-items';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
@@ -30,11 +31,13 @@ const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 export type MatrixColorOption = { value: string; image: string | null };
 
 export function createItemDetailPage(
-	getProduct: () => ProductDetailData | null | undefined,
+	getTrackedItem: () => TrackedItemDetailData | null | undefined,
 	getSkus: () => ProductSku[] | null | undefined
 ) {
 	const item = $derived(
-		getProduct() ? mapProductDetail(getProduct() as ProductDetailData, getSkus() ?? null) : null
+		getTrackedItem()
+			? mapTrackedItemDetail(getTrackedItem() as TrackedItemDetailData, getSkus() ?? undefined)
+			: null
 	);
 
 	const ui = $state({

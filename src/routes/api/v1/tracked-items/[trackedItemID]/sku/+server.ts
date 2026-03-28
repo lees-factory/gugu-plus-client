@@ -18,14 +18,19 @@ export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
 		throw error(400, 'Invalid JSON');
 	}
 
-	const res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}/sku`, {
-		method: 'PATCH',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${accessToken}`
-		},
-		body
-	});
+	let res: Response;
+	try {
+		res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}/sku`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			},
+			body
+		});
+	} catch {
+		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+	}
 
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });

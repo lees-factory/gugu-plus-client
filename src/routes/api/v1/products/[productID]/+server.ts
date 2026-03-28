@@ -19,9 +19,14 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 	const qs = searchParams.toString();
 	const target = `${API_BASE}/v1/products/${encodeURIComponent(productID)}${qs ? `?${qs}` : ''}`;
 
-	const res = await fetch(target, {
-		headers: { Authorization: `Bearer ${accessToken}` }
-	});
+	let res: Response;
+	try {
+		res = await fetch(target, {
+			headers: { Authorization: `Bearer ${accessToken}` }
+		});
+	} catch {
+		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+	}
 
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });

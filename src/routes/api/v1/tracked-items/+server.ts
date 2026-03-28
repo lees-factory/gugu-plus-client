@@ -19,9 +19,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	const qs = params.toString();
 	const target = `${API_BASE}/v1/tracked-items/${qs ? `?${qs}` : ''}`;
 
-	const res = await fetch(target, {
-		headers: { Authorization: `Bearer ${accessToken}` }
-	});
+	let res: Response;
+	try {
+		res = await fetch(target, {
+			headers: { Authorization: `Bearer ${accessToken}` }
+		});
+	} catch {
+		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+	}
 
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });
@@ -48,14 +53,19 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	/** OpenAPI: 본문에 `user_id` 포함. 클라이언트가 보내더라도 서버 쿠키 값으로 덮어써 위조 방지 */
 	const body = JSON.stringify({ ...parsed, user_id: userId });
 
-	const res = await fetch(`${API_BASE}/v1/tracked-items/`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${accessToken}`
-		},
-		body
-	});
+	let res: Response;
+	try {
+		res = await fetch(`${API_BASE}/v1/tracked-items/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			},
+			body
+		});
+	} catch {
+		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+	}
 
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });

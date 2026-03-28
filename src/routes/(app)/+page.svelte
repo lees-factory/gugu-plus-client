@@ -6,7 +6,7 @@
 	const page = createDiscoverPage();
 </script>
 
-<div class="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+<div class="space-y-10 p-8 sm:p-10 lg:p-14">
 	<!-- ── Hero ─────────────────────────────────────────────────── -->
 	<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 		<div class="max-w-2xl">

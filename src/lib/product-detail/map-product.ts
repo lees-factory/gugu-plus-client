@@ -1,4 +1,5 @@
 import type { ProductDetailData, ProductSku } from '$lib/api/products';
+import type { TrackedItemDetailData, ProductSKUData } from '$lib/api/tracked-items';
 import { marketToSite } from '$lib/commerce';
 
 /** `sku_properties` JSON 객체에서 사용하는 키 (그 외 키는 무시) */
@@ -168,6 +169,17 @@ export function formatDisplayPrice(n: number, currency: string): string {
 }
 
 /**
+ * SKU가 색상 또는 크기 옵션을 가지고 있으면 옵션 조합 UI를 사용한다.
+ * sku_properties JSON 뿐 아니라 API의 color/size 필드도 인식한다.
+ */
+function hasVariantOptions(skus: ParsedSku[]): boolean {
+	if (skus.length <= 1) return false;
+	const hasColor = skus.some((s) => s.propColor != null && s.propColor !== '');
+	const hasSize = skus.some((s) => s.propSize != null && s.propSize !== '');
+	return hasColor || hasSize;
+}
+
+/**
  * `skusFromDedicatedApi` — GET /v1/products/{id}/skus 결과가 있으면 우선 사용,
  * 없으면 상세 응답의 `d.skus`, 그것도 없으면 현재가 기준 단일 옵션.
  */
@@ -199,7 +211,7 @@ export function mapProductDetail(
 				}
 			];
 
-	const variantMatrix = skusParsed.some((s) => s.propertiesFromJson);
+	const variantMatrix = hasVariantOptions(skusParsed);
 
 	return {
 		trackedItemId: d.tracked_item_id,
@@ -216,5 +228,74 @@ export function mapProductDetail(
 		skus: skusParsed,
 		variantMatrix,
 		priceHistory: mapPriceHistories(d.price_histories ?? [], d.current_price)
+	};
+}
+
+/** TrackedItemDetailData의 ProductSKUData → ProductSku 변환 */
+function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
+	return {
+		id: s.id,
+		external_sku_id: s.external_sku_id,
+		sku_name: s.sku_name,
+		color: s.color,
+		size: s.size,
+		price: s.price,
+		original_price: s.original_price,
+		currency: s.currency,
+		image_url: s.image_url,
+		sku_properties: s.sku_properties,
+		origin_sku_id: s.origin_sku_id
+	};
+}
+
+/**
+ * GET /v1/tracked-items/{id} 응답을 ItemDetail로 변환.
+ * TrackedItemDetailData에는 price_histories가 없으므로 current_price 기반 단일 엔트리를 만든다.
+ */
+export function mapTrackedItemDetail(
+	d: TrackedItemDetailData,
+	skusFromApi?: ProductSku[]
+): ItemDetail {
+	const rawSkus =
+		skusFromApi && skusFromApi.length > 0
+			? skusFromApi
+			: d.skus && d.skus.length > 0
+				? d.skus.map(trackedSkuToProductSku)
+				: null;
+
+	const skusParsed = rawSkus
+		? parseSkusFromApi(rawSkus)
+		: [
+				{
+					skuId: 'default',
+					skuName: d.title?.trim() || 'Default',
+					colorCode: 'Default',
+					size: '',
+					price: parsePriceAmount(d.current_price),
+					originalPrice: null,
+					image: d.main_image_url || null,
+					propColor: null,
+					propSize: null,
+					propertiesFromJson: false
+				}
+			];
+
+	const variantMatrix = hasVariantOptions(skusParsed);
+
+	return {
+		trackedItemId: d.tracked_item_id,
+		productId: d.tracked_item_id,
+		title: d.title,
+		site: marketToSite(d.market),
+		imageUrl: d.main_image_url,
+		url: d.product_url || d.original_url,
+		currency: d.currency,
+		lastChecked: '—',
+		trackingFrequency: '24h',
+		alertEnabled: true,
+		alertThreshold: parsePriceAmount(d.current_price),
+		skus: skusParsed,
+		variantMatrix,
+		priceHistory: [{ date: '—', price: parsePriceAmount(d.current_price), change: 0 }]
 	};
 }

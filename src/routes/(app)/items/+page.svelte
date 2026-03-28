@@ -10,7 +10,7 @@
 	const page = createItemsPage();
 </script>
 
-<div class="space-y-10 p-6 sm:p-8 lg:p-10">
+<div class="space-y-10 p-8 sm:p-10 lg:p-14">
 	<!-- Page header (aligned with web-ref Watchlist) -->
 	<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 		<div class="max-w-2xl">
@@ -300,7 +300,7 @@
 			</div>
 
 			<!-- Items list -->
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col gap-4">
 				{#each page.displayedItems as item (item.id)}
 					<ItemCard
 						{item}

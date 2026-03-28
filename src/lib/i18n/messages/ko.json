@@ -19,6 +19,7 @@
 	"sidebar_plan_prefix": "플랜:",
 	"sidebar_upgrade_pro_price": "Pro 업그레이드 (월 ₩6,900)",
 	"sidebar_log_out": "로그아웃",
+	"settings_logout_desc": "현재 계정에서 로그아웃합니다.",
 	"footer_copyright": "© {year} Price Eye. All rights reserved.",
 	"footer_terms": "이용약관",
 	"footer_privacy": "개인정보처리방침",

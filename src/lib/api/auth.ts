@@ -1,5 +1,6 @@
 import { apiPost } from './client';
 import { ENDPOINTS } from './endpoints';
+export type { ApiResult } from './client';
 
 export interface AuthUser {
 	id: string;
@@ -35,12 +36,16 @@ export interface OAuthLoginResponse {
 
 export interface RegisterResponse {
 	result: string;
-	data: { user: { email: string } };
+	data: {
+		user: AuthUser;
+		verification_dispatched: boolean;
+		verification_code?: string;
+	};
 }
 
 export interface VerifyResponse {
 	result: string;
-	data: { user: { email: string } };
+	data: { user: AuthUser };
 }
 
 export type OAuthProvider = 'google' | 'kakao' | 'naver' | 'apple';
@@ -53,7 +58,7 @@ export const authApi = {
 		provider: OAuthProvider;
 		subject: string;
 		email: string;
-		display_name?: string;
+		display_name: string;
 	}) => apiPost<OAuthLoginResponse>(ENDPOINTS.auth.oauthLogin, payload),
 
 	register: (email: string, password: string, display_name: string) =>
@@ -76,4 +81,34 @@ export const authApi = {
 
 	logout: (refresh_token: string) =>
 		apiPost<{ result: string }>(ENDPOINTS.auth.logout, { refresh_token })
+};
+
+/**
+ * 브라우저(클라이언트) 전용 — 동일 출처 BFF 프록시 경유.
+ * BFF 라우트가 쿠키 설정까지 처리하므로, 응답만 받으면 된다.
+ */
+export const authBffApi = {
+	login: (email: string, password: string) =>
+		apiPost<LoginResponse>(ENDPOINTS.authBff.loginEmail, { email, password }),
+
+	oauthLogin: (payload: {
+		provider: OAuthProvider;
+		subject: string;
+		email: string;
+		display_name: string;
+	}) => apiPost<OAuthLoginResponse>(ENDPOINTS.authBff.oauthLogin, payload),
+
+	register: (email: string, password: string, display_name: string) =>
+		apiPost<RegisterResponse>(ENDPOINTS.authBff.registerEmail, { email, password, display_name }),
+
+	verify: (code: string) => apiPost<VerifyResponse>(ENDPOINTS.authBff.verifyEmail, { code }),
+
+	refresh: (refresh_token: string, device_name?: string) =>
+		apiPost<{ result: string; data: AuthTokens }>(ENDPOINTS.authBff.refresh, {
+			refresh_token,
+			device_name
+		}),
+
+	logout: (refresh_token: string) =>
+		apiPost<{ result: string }>(ENDPOINTS.authBff.logout, { refresh_token })
 };

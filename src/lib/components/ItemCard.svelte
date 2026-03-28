@@ -37,7 +37,7 @@
 	class="group flex flex-col rounded-3xl border border-zinc-200/60 bg-white/60 backdrop-blur-sm transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 md:flex-row md:items-stretch md:rounded-2xl"
 >
 	<a
-		href={resolve(`/items/${item.productId}`)}
+		href={resolve(`/items/${item.id}`)}
 		class="flex min-w-0 flex-1 flex-col gap-4 p-5 md:flex-row md:items-center md:gap-0 md:p-4"
 	>
 		<div class="flex min-w-0 flex-1 items-start gap-4 md:items-center md:gap-4 md:pr-4">

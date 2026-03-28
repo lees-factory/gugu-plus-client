@@ -34,15 +34,15 @@ export async function handlePasswordChange() {
 	const p = settings.password;
 	p.error = '';
 	if (!p.current || !p.next || !p.confirm) {
-		p.error = '모든 항목을 입력해 주세요.';
+		p.error = t('settings_password_err_fill');
 		return;
 	}
 	if (p.next !== p.confirm) {
-		p.error = '새 비밀번호가 일치하지 않습니다.';
+		p.error = t('settings_password_err_match');
 		return;
 	}
 	if (p.next.length < 8) {
-		p.error = '비밀번호는 8자 이상이어야 합니다.';
+		p.error = t('settings_password_err_length');
 		return;
 	}
 	p.loading = true;
