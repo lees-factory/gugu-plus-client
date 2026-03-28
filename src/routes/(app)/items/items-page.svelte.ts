@@ -11,6 +11,9 @@ export type SortKey = 'recent' | 'title' | 'site' | 'price';
 export const CHROME_EXTENSION_STORE_URL =
 	'https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb';
 
+/** 모듈 레벨 캐시 — 추가/삭제/새로고침 시에만 갱신 */
+let cachedItems: TrackedItem[] | null = null;
+
 export function createItemsPage() {
 	/**
 	 * `$state` 객체를 그대로 노출해야 `{#each ... model.items}` 등이 갱신된다.
@@ -86,13 +89,18 @@ export function createItemsPage() {
 		window.open(CHROME_EXTENSION_STORE_URL, '_blank');
 	}
 
-	async function loadItems() {
+	async function loadItems(force = false) {
+		if (!force && cachedItems) {
+			model.items = cachedItems;
+			model.loading = false;
+			return;
+		}
+
 		model.loading = true;
 		model.listError = null;
 		try {
 			const listRes = await trackedItemsApi.list();
 
-			// 인증 만료 → 로그인 페이지로
 			if (listRes.status === 401) {
 				await goto(resolve('/auth/login'));
 				return;
@@ -105,8 +113,8 @@ export function createItemsPage() {
 
 			const body = listRes.data;
 			const list = normalizeTrackedItemsList(body.data);
-			console.log('🚀 ~ loadItems ~ list:', list);
 			model.items = list.map(summaryToCard);
+			cachedItems = model.items;
 		} finally {
 			model.loading = false;
 		}
@@ -131,8 +139,8 @@ export function createItemsPage() {
 			throw new Error('서버 응답이 올바르지 않습니다.');
 		}
 
-		// 추가 성공 후 목록 재조회
-		await loadItems();
+		// 추가 성공 후 캐시 무효화 + 목록 재조회
+		await loadItems(true);
 	}
 
 	async function deleteItem(trackedItemId: string) {
@@ -145,6 +153,7 @@ export function createItemsPage() {
 				return;
 			}
 			model.items = model.items.filter((i) => i.id !== trackedItemId);
+			cachedItems = model.items;
 		} finally {
 			model.deletingId = null;
 		}

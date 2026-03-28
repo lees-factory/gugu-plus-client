@@ -157,6 +157,10 @@
 	"discover_hero_desc_line1": "Spot products with steep real-time price drops and the hottest most-watched deals at a glance.",
 	"discover_hero_desc_line2": "Get data-driven insights to catch the best time to buy.",
 
+	"discover_trending_title": "Trending Now",
+	"discover_trending_subtitle": "The most viewed products right now",
+	"discover_loading": "Loading…",
+	"discover_no_more": "You've seen all products",
 	"search_placeholder": "Paste a product URL, search brands or categories…",
 	"header_login": "Log in",
 

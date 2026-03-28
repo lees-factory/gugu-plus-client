@@ -129,8 +129,8 @@
 						</svg>
 					</div>
 					<div>
-						<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">Trending Now</h2>
-						<p class="mt-1 text-sm text-zinc-500">실시간으로 가장 많이 조회되는 상품</p>
+						<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">{t('discover_trending_title')}</h2>
+						<p class="mt-1 text-sm text-zinc-500">{t('discover_trending_subtitle')}</p>
 					</div>
 				</div>
 			</div>
@@ -257,10 +257,10 @@
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
 								></path>
 							</svg>
-							불러오는 중…
+							{t('discover_loading')}
 						</span>
 					{:else if !page.model.hasMore && page.model.displayed.length > 0}
-						<span>모든 상품을 확인했습니다</span>
+						<span>{t('discover_no_more')}</span>
 					{/if}
 				</div>
 			</div>
