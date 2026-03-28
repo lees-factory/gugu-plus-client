@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
+import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const accessToken = cookies.get('access_token');
@@ -13,7 +14,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		throw error(401, 'Unauthorized');
 	}
 
-	/** OpenAPI: `user_id` 쿼리 필수. 쿠키 값으로 넣어 클라이언트 위조 방지 */
 	const params = new URLSearchParams(url.searchParams);
 	params.set('user_id', userId);
 	const qs = params.toString();
@@ -21,11 +21,15 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	let res: Response;
 	try {
-		res = await fetch(target, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+		res = await bffFetch(
+			target,
+			{ headers: { Authorization: `Bearer ${accessToken}` } },
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));
@@ -50,21 +54,26 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		throw error(400, 'Invalid JSON');
 	}
 
-	/** OpenAPI: 본문에 `user_id` 포함. 클라이언트가 보내더라도 서버 쿠키 값으로 덮어써 위조 방지 */
 	const body = JSON.stringify({ ...parsed, user_id: userId });
 
 	let res: Response;
 	try {
-		res = await fetch(`${API_BASE}/v1/tracked-items/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+		res = await bffFetch(
+			`${API_BASE}/v1/tracked-items/`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${accessToken}`
+				},
+				body
 			},
-			body
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));

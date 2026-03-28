@@ -103,7 +103,7 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 	});
 
 	const svgPoints = $derived.by(() => {
-		if (chartData.length < 2) return [];
+		if (chartData.length === 0) return [];
 		const prices = chartData.map((d) => d.price);
 		const lo = Math.min(...prices);
 		const hi = Math.max(...prices);
@@ -113,7 +113,7 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		const yRange = yMax - yMin;
 		const n = chartData.length;
 		return chartData.map((d, i) => ({
-			x: PL + (i / (n - 1)) * cW,
+			x: n === 1 ? PL + cW / 2 : PL + (i / (n - 1)) * cW,
 			y: PT + (1 - (d.price - yMin) / yRange) * cH,
 			price: d.price,
 			date: d.date
@@ -138,6 +138,9 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 	const xLabels = $derived.by(() => {
 		const pts = svgPoints;
 		if (pts.length === 0) return [];
+		if (pts.length === 1) {
+			return [{ x: pts[0].x, label: chartData[0].date.replace('월 ', '/').replace('일', '') }];
+		}
 		const maxL = Math.min(6, pts.length);
 		const step = (pts.length - 1) / (maxL - 1);
 		const seen: number[] = [];

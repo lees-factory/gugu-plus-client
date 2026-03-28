@@ -110,6 +110,38 @@
 			/>
 		{/if}
 
+		<!-- 1건일 때 단일 점 표시 (pulse 애니메이션) -->
+		{#if chart.svgPoints.length === 1}
+			<circle
+				cx={chart.svgPoints[0].x}
+				cy={chart.svgPoints[0].y}
+				r="10"
+				fill="#5aad9c"
+				fill-opacity="0.08"
+			>
+				<animate attributeName="r" values="8;14;8" dur="2.4s" repeatCount="indefinite" />
+				<animate attributeName="fill-opacity" values="0.12;0.04;0.12" dur="2.4s" repeatCount="indefinite" />
+			</circle>
+			<circle
+				cx={chart.svgPoints[0].x}
+				cy={chart.svgPoints[0].y}
+				r="5"
+				fill="#5aad9c"
+			>
+				<animate attributeName="r" values="4.5;6;4.5" dur="2.4s" repeatCount="indefinite" />
+			</circle>
+			<text
+				x={chart.svgPoints[0].x}
+				y={chart.svgPoints[0].y - 16}
+				text-anchor="middle"
+				font-size="11"
+				font-weight="600"
+				fill="#1a1a17"
+			>
+				{chart.fmt(chart.svgPoints[0].price)}
+			</text>
+		{/if}
+
 		<!-- 최저·최고 마커 (Pro) -->
 		{#if chart.isPro && chart.svgPoints.length > 0}
 			{#if chart.minIdx >= 0}

@@ -2,8 +2,7 @@ import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { deLocalizeHref } from '$lib/paraglide/runtime.js';
 import { paraglideMiddleware } from '$lib/paraglide/server.js';
-import { ENDPOINTS } from '$lib/api/endpoints';
-import { COOKIE_OPTS } from '$lib/api/config';
+import { API_BASE, COOKIE_OPTS } from '$lib/api/config';
 import type { AuthTokens } from '$lib/api/auth';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
@@ -14,6 +13,22 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
 		});
 	});
+
+/**
+ * JWT의 exp 클레임을 디코딩하여 만료까지 남은 초를 반환한다.
+ * 파싱 실패 시 0 (만료된 것으로 간주).
+ */
+function getTokenRemainingSeconds(token: string): number {
+	try {
+		const payload = token.split('.')[1];
+		const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+		const exp = decoded.exp as number;
+		if (!exp) return 0;
+		return exp - Math.floor(Date.now() / 1000);
+	} catch {
+		return 0;
+	}
+}
 
 const handleAuth: Handle = async ({ event, resolve }) => {
 	const accessToken = event.cookies.get('access_token');
@@ -27,9 +42,12 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	// access_token이 없고 refresh_token이 있으면 자동 갱신 시도
-	if (!accessToken && refreshToken) {
-		const res = await fetch(ENDPOINTS.auth.refresh, {
+	// access_token이 없거나 만료 임박(60초 이내)이면 갱신 시도
+	const needsRefresh =
+		refreshToken && (!accessToken || getTokenRemainingSeconds(accessToken) < 60);
+
+	if (needsRefresh) {
+		const res = await fetch(`${API_BASE}/v1/auth/refresh`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ refresh_token: refreshToken })

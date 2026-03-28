@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
+import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 export const GET: RequestHandler = async ({ params, cookies }) => {
 	const accessToken = cookies.get('access_token');
@@ -18,11 +19,15 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 
 	let res: Response;
 	try {
-		res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+		res = await bffFetch(
+			`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`,
+			{ headers: { Authorization: `Bearer ${accessToken}` } },
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));
@@ -41,17 +46,22 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	}
 
 	const id = params.trackedItemID;
-	/** OpenAPI: `user_id` 쿼리 필수. 쿠키 값으로 넣어 클라이언트 위조 방지 */
 	const qs = new URLSearchParams({ user_id: userId }).toString();
 
 	let res: Response;
 	try {
-		res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`, {
-			method: 'DELETE',
-			headers: { Authorization: `Bearer ${accessToken}` }
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+		res = await bffFetch(
+			`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`,
+			{
+				method: 'DELETE',
+				headers: { Authorization: `Bearer ${accessToken}` }
+			},
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));

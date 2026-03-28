@@ -8,7 +8,6 @@ import {
 	type ParsedSku
 } from '$lib/product-detail/map-product';
 import type { TrackedItemDetailData } from '$lib/api/tracked-items';
-import type { ProductSku } from '$lib/api/products';
 import { trackedItemsApi } from '$lib/api/tracked-items';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
@@ -21,22 +20,17 @@ function getSizeRank(size: string): number {
 }
 
 const SITE_COLORS: Record<string, { bg: string; text: string }> = {
-	Amazon: { bg: '#fef3e8', text: '#c97d32' },
-	Taobao: { bg: '#fef0e8', text: '#c96332' },
-	eBay: { bg: '#fef9e8', text: '#c9a832' },
-	AliExpress: { bg: '#fee8e8', text: '#c93232' },
-	'1688': { bg: '#fef5e8', text: '#c99532' }
+	AliExpress: { bg: '#fee8e8', text: '#c93232' }
 };
 
 export type MatrixColorOption = { value: string; image: string | null };
 
 export function createItemDetailPage(
-	getTrackedItem: () => TrackedItemDetailData | null | undefined,
-	getSkus: () => ProductSku[] | null | undefined
+	getTrackedItem: () => TrackedItemDetailData | null | undefined
 ) {
 	const item = $derived(
 		getTrackedItem()
-			? mapTrackedItemDetail(getTrackedItem() as TrackedItemDetailData, getSkus() ?? undefined)
+			? mapTrackedItemDetail(getTrackedItem() as TrackedItemDetailData)
 			: null
 	);
 

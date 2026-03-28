@@ -252,16 +252,9 @@ function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
  * GET /v1/tracked-items/{id} 응답을 ItemDetail로 변환.
  * TrackedItemDetailData에는 price_histories가 없으므로 current_price 기반 단일 엔트리를 만든다.
  */
-export function mapTrackedItemDetail(
-	d: TrackedItemDetailData,
-	skusFromApi?: ProductSku[]
-): ItemDetail {
+export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 	const rawSkus =
-		skusFromApi && skusFromApi.length > 0
-			? skusFromApi
-			: d.skus && d.skus.length > 0
-				? d.skus.map(trackedSkuToProductSku)
-				: null;
+		d.skus && d.skus.length > 0 ? d.skus.map(trackedSkuToProductSku) : null;
 
 	const skusParsed = rawSkus
 		? parseSkusFromApi(rawSkus)
@@ -296,6 +289,10 @@ export function mapTrackedItemDetail(
 		alertThreshold: parsePriceAmount(d.current_price),
 		skus: skusParsed,
 		variantMatrix,
-		priceHistory: [{ date: '—', price: parsePriceAmount(d.current_price), change: 0 }]
+		priceHistory: [{
+			date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+			price: parsePriceAmount(d.current_price),
+			change: 0
+		}]
 	};
 }

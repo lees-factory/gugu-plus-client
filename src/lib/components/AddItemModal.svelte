@@ -31,7 +31,7 @@
 		}
 	});
 
-	const supportedSites = ['Amazon', 'eBay', 'AliExpress', 'Taobao', '1688', 'Coupang'];
+	const supportedSites = ['AliExpress'];
 
 	const parsed = $derived(parseCommerceProductUrl(url));
 

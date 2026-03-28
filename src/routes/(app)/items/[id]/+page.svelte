@@ -6,12 +6,9 @@
 	import PriceChart from '$lib/components/PriceChart.svelte';
 
 	const { data }: PageProps = $props();
-	console.log('🚀 ~ data:', data.skus);
+	console.log('🚀 ~ data:', data);
 
-	const page = createItemDetailPage(
-		() => data.trackedItem,
-		() => data.skus
-	);
+	const page = createItemDetailPage(() => data.trackedItem);
 
 	const item = $derived(page.item);
 </script>
@@ -62,7 +59,7 @@
 			</a>
 
 			<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-				<div class="max-w-2xl">
+				<div class="min-w-0 flex-1">
 					<div
 						class="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
 					>
@@ -72,7 +69,7 @@
 							{item.site}
 						</span>
 					</div>
-					<h1 class="line-clamp-2 text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
+					<h1 class="line-clamp-4 text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
 						{item.title}
 					</h1>
 					<a
@@ -164,133 +161,49 @@
 					{/if}
 				</div>
 
-				<!-- Price + Tracking -->
-				<div class="flex flex-col gap-5">
-					<!-- Price card -->
-					<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm">
-						<p class="mb-1.5 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
-							{t('detail_current_price')}
+				<!-- Price -->
+				<div class="flex flex-col justify-center rounded-3xl border border-zinc-200/60 bg-white/60 p-8 backdrop-blur-sm">
+					<p class="mb-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
+						{t('detail_current_price')}
+					</p>
+					<div class="flex items-end gap-3">
+						<p
+							class="text-4xl font-semibold tracking-tight text-zinc-900 tabular-nums sm:text-5xl"
+						>
+							{page.fmt(page.displayPrice)}
 						</p>
-						<div class="flex items-end gap-2.5">
-							<p
-								class="text-3xl font-semibold tracking-tight text-zinc-900 tabular-nums sm:text-4xl"
+						{#if page.discountPct}
+							<span
+								class="mb-1.5 rounded-xl border border-rose-100/50 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-600"
 							>
-								{page.fmt(page.displayPrice)}
-							</p>
-							{#if page.discountPct}
-								<span
-									class="mb-1 rounded-xl border border-rose-100/50 bg-rose-50 px-2.5 py-0.5 text-sm font-semibold text-rose-600"
-								>
-									-{page.discountPct}%
-								</span>
-							{/if}
-						</div>
-						{#if page.originalPrice && page.originalPrice > page.displayPrice}
-							<p class="mt-1 text-sm text-zinc-400 tabular-nums line-through">
-								{page.fmt(page.originalPrice)}
-							</p>
-						{/if}
-						{#if page.originalPrice && page.originalPrice > page.displayPrice}
-							<div
-								class="mt-4 inline-flex items-center gap-1.5 rounded-2xl border border-emerald-100/50 bg-linear-to-r from-emerald-50 to-teal-50 px-3.5 py-2 text-sm font-semibold text-emerald-700"
-							>
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									class="size-4"
-									aria-hidden="true"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M2.25 18 9 11.25l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181"
-									/>
-								</svg>
-								{t('detail_savings', { amount: page.fmt(page.originalPrice - page.displayPrice) })}
-							</div>
+								-{page.discountPct}%
+							</span>
 						{/if}
 					</div>
-
-					<!-- Tracking settings -->
-					<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-5 backdrop-blur-sm">
-						<div>
-							<div class="flex items-center justify-between border-b border-zinc-100 py-3">
-								<div class="flex items-center gap-2 text-sm text-zinc-500">
-									<svg
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.5"
-										class="size-4 shrink-0"
-										aria-hidden="true"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-										/>
-									</svg>
-									{t('detail_last_checked')}
-								</div>
-								<span class="text-sm font-medium text-zinc-900">{item.lastChecked}</span>
-							</div>
-							<div class="flex items-center justify-between border-b border-zinc-100 py-3">
-								<div class="flex items-center gap-2 text-sm text-zinc-500">
-									<svg
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.5"
-										class="size-4 shrink-0"
-										aria-hidden="true"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-										/>
-									</svg>
-									{t('detail_check_interval')}
-								</div>
-								<span class="text-sm font-medium text-zinc-900"
-									>{t('detail_every_frequency', { frequency: item.trackingFrequency })}</span
-								>
-							</div>
-							<div class="flex items-center justify-between py-3">
-								<div class="flex items-center gap-2 text-sm text-zinc-500">
-									<svg
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.5"
-										class="size-4 shrink-0"
-										aria-hidden="true"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-										/>
-									</svg>
-									{t('detail_price_alert')}
-								</div>
-								<button
-									type="button"
-									onclick={page.toggleAlert}
-									class="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm font-medium transition-all duration-200 {page
-										.ui.alertEnabled
-										? 'border border-emerald-100/50 bg-emerald-50 text-emerald-700'
-										: 'text-zinc-500 hover:text-zinc-900'}"
-								>
-									{page.ui.alertEnabled
-										? t('detail_alert_below', { price: page.fmt(item.alertThreshold) })
-										: t('detail_alert_off')}
-								</button>
-							</div>
+					{#if page.originalPrice && page.originalPrice > page.displayPrice}
+						<p class="mt-2 text-base text-zinc-400 tabular-nums line-through">
+							{page.fmt(page.originalPrice)}
+						</p>
+						<div
+							class="mt-6 inline-flex items-center gap-1.5 rounded-2xl border border-emerald-100/50 bg-linear-to-r from-emerald-50 to-teal-50 px-4 py-2.5 text-sm font-semibold text-emerald-700"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								class="size-4"
+								aria-hidden="true"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M2.25 18 9 11.25l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181"
+								/>
+							</svg>
+							{t('detail_savings', { amount: page.fmt(page.originalPrice - page.displayPrice) })}
 						</div>
-					</div>
+					{/if}
 				</div>
 			</div>
 
@@ -444,35 +357,37 @@
 
 				<PriceChart data={item.priceHistory} />
 
-				<div class="mt-6">
-					<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">
-						{t('detail_recent_changes')}
-					</p>
-					{#each item.priceHistory.slice(0, 10) as entry, i (i)}
-						<div
-							class="flex items-center justify-between py-2.5"
-							style={i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}
-						>
-							<span class="text-sm text-zinc-500">{entry.date}</span>
-							<div class="flex items-center gap-4">
-								<span class="text-sm font-medium text-zinc-900 tabular-nums"
-									>{page.fmt(entry.price)}</span
-								>
-								{#if entry.change < 0}
-									<span class="w-20 text-right text-xs font-medium text-emerald-600 tabular-nums">
-										▼ {page.fmt(Math.abs(entry.change))}
-									</span>
-								{:else if entry.change > 0}
-									<span class="w-20 text-right text-xs font-medium text-rose-600 tabular-nums">
-										▲ {page.fmt(entry.change)}
-									</span>
-								{:else}
-									<span class="w-20 text-right text-xs" style="color: #9b9b95;">—</span>
-								{/if}
+				{#if item.priceHistory.length > 1}
+					<div class="mt-6">
+						<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">
+							{t('detail_recent_changes')}
+						</p>
+						{#each item.priceHistory.slice(0, 10) as entry, i (i)}
+							<div
+								class="flex items-center justify-between py-2.5"
+								style={i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}
+							>
+								<span class="text-sm text-zinc-500">{entry.date}</span>
+								<div class="flex items-center gap-4">
+									<span class="text-sm font-medium text-zinc-900 tabular-nums"
+										>{page.fmt(entry.price)}</span
+									>
+									{#if entry.change < 0}
+										<span class="w-20 text-right text-xs font-medium text-emerald-600 tabular-nums">
+											▼ {page.fmt(Math.abs(entry.change))}
+										</span>
+									{:else if entry.change > 0}
+										<span class="w-20 text-right text-xs font-medium text-rose-600 tabular-nums">
+											▲ {page.fmt(entry.change)}
+										</span>
+									{:else}
+										<span class="w-20 text-right text-xs" style="color: #9b9b95;">—</span>
+									{/if}
+								</div>
 							</div>
-						</div>
-					{/each}
-				</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

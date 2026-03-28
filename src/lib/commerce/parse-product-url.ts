@@ -58,51 +58,9 @@ export function parseCommerceProductUrl(raw: string): ParsedCommerceUrl {
 		};
 	}
 
-	if (host.includes('amazon.')) {
-		const asin =
-			u.pathname.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i)?.[1] ??
-			u.pathname.match(/\/d\/([A-Z0-9]{10})/i)?.[1];
-		if (asin) {
-			return {
-				ok: false,
-				displayName: 'Amazon',
-				message: 'Amazon 상품은 아직 추가할 수 없습니다.'
-			};
-		}
-		return {
-			ok: false,
-			displayName: 'Amazon',
-			message: 'Amazon 상품 URL에서 ASIN을 찾지 못했습니다.'
-		};
-	}
-
-	if (host.includes('ebay.')) {
-		const id = u.pathname.match(/\/itm\/(\d+)/)?.[1];
-		if (id) {
-			return {
-				ok: false,
-				displayName: 'eBay',
-				message: 'eBay 상품은 아직 추가할 수 없습니다.'
-			};
-		}
-		return {
-			ok: false,
-			displayName: 'eBay',
-			message: 'eBay 상품 ID를 찾지 못했습니다.'
-		};
-	}
-
-	if (host.includes('taobao.com') || host.includes('tmall.com')) {
-		return {
-			ok: false,
-			displayName: host.includes('tmall') ? 'Tmall' : 'Taobao',
-			message: '타오바오·티몰 상품은 아직 추가할 수 없습니다.'
-		};
-	}
-
 	return {
 		ok: false,
 		displayName: null,
-		message: '지원하는 쇼핑몰 URL이 아닙니다.'
+		message: '현재 AliExpress 상품만 지원합니다.'
 	};
 }

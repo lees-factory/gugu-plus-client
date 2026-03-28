@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
+import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 export const GET: RequestHandler = async ({ params, url, cookies }) => {
 	const accessToken = cookies.get('access_token');
@@ -21,11 +22,15 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 
 	let res: Response;
 	try {
-		res = await fetch(target, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+		res = await bffFetch(
+			target,
+			{ headers: { Authorization: `Bearer ${accessToken}` } },
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));

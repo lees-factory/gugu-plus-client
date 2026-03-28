@@ -1,5 +1,7 @@
 import type { Pathname } from '$app/types';
 import { page } from '$app/state';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
 import { trackedItemsApi } from '$lib/api/tracked-items';
 import { t } from '$lib/i18n/t';
@@ -79,6 +81,8 @@ export function createLayoutModel(getData: () => LayoutData) {
 			external_product_id: itemData.commerce.external_product_id
 		});
 		if (res.error) throw new Error(res.error);
+		// 추가 후 items 페이지로 이동 (이미 있으면 reload)
+		await goto(resolve('/items'), { invalidateAll: true });
 	}
 
 	return {

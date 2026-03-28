@@ -1,4 +1,3 @@
-import { onMount } from 'svelte';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
@@ -92,14 +91,21 @@ export function createItemsPage() {
 		model.listError = null;
 		try {
 			const listRes = await trackedItemsApi.list();
+
+			// 인증 만료 → 로그인 페이지로
+			if (listRes.status === 401) {
+				await goto(resolve('/auth/login'));
+				return;
+			}
+
 			if (listRes.error || !listRes.data) {
 				model.listError = listRes.error ?? '목록을 불러오지 못했습니다.';
-				model.items = [];
 				return;
 			}
 
 			const body = listRes.data;
 			const list = normalizeTrackedItemsList(body.data);
+			console.log('🚀 ~ loadItems ~ list:', list);
 			model.items = list.map(summaryToCard);
 		} finally {
 			model.loading = false;
@@ -125,6 +131,7 @@ export function createItemsPage() {
 			throw new Error('서버 응답이 올바르지 않습니다.');
 		}
 
+		// 추가 성공 후 목록 재조회
 		await loadItems();
 	}
 
@@ -143,10 +150,13 @@ export function createItemsPage() {
 		}
 	}
 
-	onMount(() => {
-		if (auth.user) {
+	let loaded = false;
+
+	$effect(() => {
+		if (auth.user && !loaded) {
+			loaded = true;
 			void loadItems();
-		} else {
+		} else if (!auth.user) {
 			model.loading = false;
 		}
 	});

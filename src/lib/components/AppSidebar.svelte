@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { getContext } from 'svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { t } from '$lib/i18n/t';
 
@@ -9,6 +10,8 @@
 		mobileOpen,
 		onClose
 	}: { collapsed: boolean; mobileOpen: boolean; onClose: () => void } = $props();
+
+	const openQuickAdd = getContext<() => void>('openQuickAdd');
 
 	const navItems = $derived([
 		{ path: '/' as const, label: t('nav_home') },
@@ -184,6 +187,7 @@
 				type="button"
 				onclick={() => {
 					onClose();
+					openQuickAdd();
 				}}
 				class="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-zinc-900/15"
 				style="background: linear-gradient(to right, #292524, #3f3f46);"

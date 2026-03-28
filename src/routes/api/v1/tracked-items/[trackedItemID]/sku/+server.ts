@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
+import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
 	const accessToken = cookies.get('access_token');
@@ -20,16 +21,22 @@ export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
 
 	let res: Response;
 	try {
-		res = await fetch(`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}/sku`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+		res = await bffFetch(
+			`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}/sku`,
+			{
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${accessToken}`
+				},
+				body
 			},
-			body
-		});
-	} catch {
-		return json({ error: { message: 'Cannot reach backend' } }, { status: 503 });
+			cookies
+		);
+	} catch (e) {
+		if (e instanceof BffNetworkError)
+			return json({ error: { message: e.message } }, { status: 503 });
+		throw e;
 	}
 
 	const data = await res.json().catch(() => ({}));

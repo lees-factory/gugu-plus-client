@@ -134,182 +134,58 @@
 				{t('home_retry')}
 			</button>
 		</div>
+	{:else if page.model.items.length === 0}
+		<EmptyState onAdd={() => (page.model.modalOpen = true)} />
+	{:else if page.displayedItems.length === 0}
+		<p class="py-16 text-center text-sm text-zinc-500">{t('items_no_results')}</p>
 	{:else}
-		<!-- Search + Filters (web-ref Watchlist toolbar; no All/Active/Paused tabs) -->
+		<!-- Chrome extension banner -->
 		<div
-			class="flex flex-col gap-4 rounded-3xl border border-zinc-200/60 bg-white/60 p-4 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between"
+			class="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
 		>
-			<div class="relative max-w-md flex-1">
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					class="pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-zinc-400"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-					/>
-				</svg>
-				<input
-					type="search"
-					bind:value={page.searchQuery}
-					placeholder={t('items_search_placeholder')}
-					class="h-12 w-full rounded-2xl border border-zinc-200/60 bg-white/50 pr-4 pl-11 text-sm font-normal transition-all outline-none placeholder:text-zinc-400 focus:border-stone-300 focus:bg-white focus:ring-4 focus:ring-stone-100/50"
-				/>
-			</div>
-			<div class="flex items-center gap-3">
-				<button
-					type="button"
-					onclick={page.toggleFilterOpen}
-					aria-expanded={page.filterOpen}
-					class="inline-flex h-12 items-center justify-center rounded-2xl border px-5 text-sm font-medium transition-all duration-200
-						{page.filterOpen
-						? 'border-stone-200/80 bg-zinc-100/80 text-stone-800'
-						: 'border-zinc-200/60 bg-white text-zinc-700 hover:bg-zinc-50'}"
+			<div class="flex items-center gap-4">
+				<div
+					class="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 bg-white shadow-sm"
 				>
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
 						stroke-width="2"
-						class="mr-2 size-4"
+						class="size-5 text-zinc-500"
 						aria-hidden="true"
 					>
-						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke-linejoin="round" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+						/>
 					</svg>
-					{t('items_filters_button')}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						class="ml-2 size-4 transition-transform duration-300 {page.filterOpen
-							? 'rotate-180'
-							: ''}"
-						aria-hidden="true"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
-					</svg>
-				</button>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-zinc-900">{t('home_chrome_banner_title')}</p>
+					<p class="text-xs text-zinc-500">{t('home_chrome_banner_desc')}</p>
+				</div>
 			</div>
+			<button
+				type="button"
+				onclick={page.openChromeExtensionStore}
+				class="hidden shrink-0 rounded-2xl border border-zinc-200/60 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-all duration-200 hover:shadow-sm sm:block"
+			>
+				{t('home_install')}
+			</button>
 		</div>
 
-		{#if page.filterOpen}
-			<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 shadow-sm backdrop-blur-sm">
-				<div class="grid gap-6 md:grid-cols-2">
-					<div>
-						<label
-							for="items-marketplace"
-							class="text-[9px] font-semibold tracking-wider text-zinc-400 uppercase"
-						>
-							{t('items_filter_marketplace')}
-						</label>
-						<select
-							id="items-marketplace"
-							bind:value={page.marketplace}
-							class="mt-2 w-full rounded-xl border border-zinc-200/60 bg-zinc-50/80 p-3 text-sm font-medium transition-colors outline-none focus:border-stone-300"
-						>
-							<option value="all">{t('items_market_all')}</option>
-							{#each page.marketplaceSites as site (site)}
-								<option value={site}>{site}</option>
-							{/each}
-						</select>
-					</div>
-					<div>
-						<label
-							for="items-sort"
-							class="text-[9px] font-semibold tracking-wider text-zinc-400 uppercase"
-						>
-							{t('items_filter_sort')}
-						</label>
-						<select
-							id="items-sort"
-							value={page.sortBy}
-							onchange={page.setSortFromSelect}
-							class="mt-2 w-full rounded-xl border border-zinc-200/60 bg-zinc-50/80 p-3 text-sm font-medium transition-colors outline-none focus:border-stone-300"
-						>
-							<option value="recent">{t('items_sort_recent')}</option>
-							<option value="title">{t('items_sort_title')}</option>
-							<option value="site">{t('items_sort_site')}</option>
-							<option value="price">{t('items_sort_price')}</option>
-						</select>
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		{#if page.model.items.length === 0}
-			<EmptyState onAdd={() => (page.model.modalOpen = true)} />
-		{:else if page.displayedItems.length === 0}
-			<p class="py-16 text-center text-sm text-zinc-500">{t('items_no_results')}</p>
-		{:else}
-			<!-- Chrome extension banner -->
-			<div
-				class="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
-			>
-				<div class="flex items-center gap-4">
-					<div
-						class="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 bg-white shadow-sm"
-					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							class="size-5 text-zinc-500"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
-							/>
-						</svg>
-					</div>
-					<div>
-						<p class="text-sm font-semibold text-zinc-900">{t('home_chrome_banner_title')}</p>
-						<p class="text-xs text-zinc-500">{t('home_chrome_banner_desc')}</p>
-					</div>
-				</div>
-				<button
-					type="button"
-					onclick={page.openChromeExtensionStore}
-					class="hidden shrink-0 rounded-2xl border border-zinc-200/60 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-all duration-200 hover:shadow-sm sm:block"
-				>
-					{t('home_install')}
-				</button>
-			</div>
-
-			<!-- Column headers (desktop) — aligned with ItemCard -->
-			<div
-				class="mb-2 hidden items-center border-b border-zinc-200/60 px-4 py-2 text-[9px] font-semibold tracking-wider text-zinc-400 uppercase md:flex"
-			>
-				<div class="w-[72px] shrink-0"></div>
-				<div class="min-w-0 flex-1 pr-4">{t('items_column_product')}</div>
-				<div class="flex w-[380px] shrink-0 items-center justify-between gap-3 pr-4">
-					<div class="w-20">{t('items_col_current')}</div>
-					<div class="w-20">{t('items_col_target')}</div>
-					<div class="w-24 text-center">{t('items_col_progress')}</div>
-					<div class="w-20 text-right">{t('items_col_trend')}</div>
-				</div>
-				<div class="w-24 shrink-0 text-right">{t('item_delete')}</div>
-			</div>
-
-			<!-- Items list -->
-			<div class="flex flex-col gap-4">
-				{#each page.displayedItems as item (item.id)}
-					<ItemCard
-						{item}
-						deleting={page.model.deletingId === item.id}
-						onDelete={() => page.deleteItem(item.id)}
-					/>
-				{/each}
-			</div>
-		{/if}
+		<!-- Items list -->
+		<div class="flex flex-col gap-4">
+			{#each page.displayedItems as item (item.id)}
+				<ItemCard
+					{item}
+					deleting={page.model.deletingId === item.id}
+					onDelete={() => page.deleteItem(item.id)}
+				/>
+			{/each}
+		</div>
 	{/if}
 </div>
 
