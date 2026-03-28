@@ -6,7 +6,6 @@
 	import PriceChart from '$lib/components/PriceChart.svelte';
 
 	const { data }: PageProps = $props();
-	console.log('🚀 ~ data:', data);
 
 	const page = createItemDetailPage(() => data.trackedItem);
 
@@ -162,14 +161,14 @@
 				</div>
 
 				<!-- Price -->
-				<div class="flex flex-col justify-center rounded-3xl border border-zinc-200/60 bg-white/60 p-8 backdrop-blur-sm">
+				<div
+					class="flex flex-col justify-center rounded-3xl border border-zinc-200/60 bg-white/60 p-8 backdrop-blur-sm"
+				>
 					<p class="mb-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
 						{t('detail_current_price')}
 					</p>
 					<div class="flex items-end gap-3">
-						<p
-							class="text-4xl font-semibold tracking-tight text-zinc-900 tabular-nums sm:text-5xl"
-						>
+						<p class="text-4xl font-semibold tracking-tight text-zinc-900 tabular-nums sm:text-5xl">
 							{page.fmt(page.displayPrice)}
 						</p>
 						{#if page.discountPct}

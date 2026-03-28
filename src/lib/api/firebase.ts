@@ -4,14 +4,14 @@
  */
 
 const FIREBASE_CONFIG = {
-	apiKey: 'AIzaSyCp5aEfy39Wz9Y8eM3drvAUpL1AsNEcVrU',
-	authDomain: 'price-eye.firebaseapp.com',
-	projectId: 'price-eye',
-	storageBucket: 'price-eye.firebasestorage.app',
-	messagingSenderId: '561355623656',
-	appId: '1:561355623656:web:6a4616ce08f932404d0d5d',
-	measurementId: 'G-6Q630R0BP8'
-} as const;
+	apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
+	authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? '',
+	projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ?? '',
+	storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ?? '',
+	messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '',
+	appId: import.meta.env.VITE_FIREBASE_APP_ID ?? '',
+	measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? ''
+};
 
 const CDN = 'https://www.gstatic.com/firebasejs/12.11.0';
 
