@@ -45,6 +45,11 @@ export const ENDPOINTS = {
 		list: '/api/v1/alerts'
 	},
 
+	/** 브라우저 → BFF → GET /v1/discover/… */
+	discover: {
+		hotProducts: '/api/v1/discover/hot-products'
+	},
+
 	/** 브라우저 → BFF → GET /v1/products/… (Bearer) */
 	products: {
 		detail: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}`,

@@ -6,7 +6,6 @@
 	import PriceChart from '$lib/components/PriceChart.svelte';
 
 	const { data }: PageProps = $props();
-	console.log('🚀 ~ data:', data);
 
 	const page = createItemDetailPage(() => data.trackedItem);
 

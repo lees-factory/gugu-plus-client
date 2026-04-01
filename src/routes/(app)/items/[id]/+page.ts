@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 	if (!id) {
 		return {
 			trackedItem: null as TrackedItemDetailData | null,
-			error: '상품 ID가 없습니다.'
+			error: 'item_id_missing'
 		};
 	}
 
@@ -26,13 +26,13 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 				? String(err.message)
 				: typeof err === 'string'
 					? err
-					: '상품을 불러오지 못했습니다.';
+					: 'item_load_fail';
 		return { trackedItem: null, error: msg };
 	}
 
 	const payload = json?.data;
 	if (!payload || typeof payload !== 'object') {
-		return { trackedItem: null, error: '응답 형식이 올바르지 않습니다.' };
+		return { trackedItem: null, error: 'response_format_error' };
 	}
 
 	return {

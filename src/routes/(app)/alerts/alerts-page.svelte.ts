@@ -1,52 +1,42 @@
-import { alertsApi, productsApi, type PriceAlertData } from '$lib/api/products';
+import { invalidate } from '$app/navigation';
+import { SvelteMap } from 'svelte/reactivity';
+import { productsApi, type PriceAlertData } from '$lib/api/products';
 import type { TrackedItemData } from '$lib/api/tracked-items';
-import { getCachedTrackedItems } from '$lib/api/tracked-items-cache';
+import { t } from '$lib/i18n/t';
 
-export function createAlertsPage() {
-	let alerts = $state<PriceAlertData[]>([]);
-	let loading = $state(true);
-	let error = $state('');
+type AlertsPageData = {
+	alerts: PriceAlertData[];
+	trackedItems: TrackedItemData[];
+	error: string | null;
+};
+
+export function createAlertsPage(getData: () => AlertsPageData) {
 	let removingId = $state('');
-	let productMap = $state<Map<string, TrackedItemData>>(new Map());
+	let actionError = $state('');
 
-	async function load() {
-		try {
-			const [alertsRes, items] = await Promise.all([
-				alertsApi.list(),
-				getCachedTrackedItems()
-			]);
+	const alerts = $derived(getData().alerts);
+	const error = $derived(getData().error ?? actionError);
+	const loading = $derived(false); // load 함수가 SSR/CSR에서 처리하므로 항상 false
 
-			if (alertsRes.error) {
-				error = alertsRes.error;
-				alerts = [];
-			} else {
-				alerts = alertsRes.data?.data ?? [];
-			}
-
-			const map = new Map<string, TrackedItemData>();
-			for (const item of items) {
-				map.set(item.product_id, item);
-			}
-			productMap = map;
-		} catch {
-			error = '알림 목록을 불러오지 못했습니다.';
-			alerts = [];
-		} finally {
-			loading = false;
+	const productMap = $derived.by(() => {
+		const map = new SvelteMap<string, TrackedItemData>();
+		for (const item of getData().trackedItems) {
+			map.set(item.product_id, item);
 		}
-	}
+		return map;
+	});
 
 	async function removeAlert(alert: PriceAlertData) {
 		removingId = alert.id;
 		try {
 			const res = await productsApi.unregisterAlert(alert.product_id);
 			if (!res.error) {
-				alerts = alerts.filter((a) => a.id !== alert.id);
+				await invalidate('/api/v1/alerts');
 			} else {
-				error = res.error;
+				actionError = res.error;
 			}
 		} catch {
-			error = '알림 해제에 실패했습니다.';
+			actionError = t('alert_dismiss_fail');
 		} finally {
 			removingId = '';
 		}
@@ -68,7 +58,6 @@ export function createAlertsPage() {
 		get productMap() {
 			return productMap;
 		},
-		load,
 		removeAlert
 	};
 }

@@ -2,20 +2,33 @@ import { apiDelete, apiGet, apiPatch, apiPost } from './client';
 import { ENDPOINTS } from './endpoints';
 import type { ProductMarket } from './market';
 
-/**
- * POST `/api/v1/tracked-items` 로 보내는 본문 (브라우저 → BFF).
- * 백엔드 OpenAPI는 `user_id`까지 요구하며, BFF가 `user_id` 쿠키로 채워 전달한다.
- */
-export type CreateTrackedItemBody = {
+/** POST 요청의 items 배열 요소 (브라우저 → BFF) */
+export type CreateTrackedItemEntry = {
 	original_url: string;
 	provider_commerce: ProductMarket;
 	external_product_id: string;
+	currency?: string;
 };
 
-/** 201 응답 `data` — AddTrackedItemData */
-export type AddTrackedItemData = {
+/**
+ * POST `/api/v1/tracked-items` 로 보내는 본문.
+ * 한 번에 최대 5개까지 추가 가능. BFF가 `user_id` 쿠키로 채워 전달한다.
+ */
+export type CreateTrackedItemBody = {
+	items: CreateTrackedItemEntry[];
+};
+
+/** 201 응답 개별 결과 */
+export type AddTrackedItemResult = {
 	tracked_item_id: string;
 	already_tracked: boolean;
+};
+
+/** 201 응답 `data` */
+export type AddTrackedItemData = {
+	results: AddTrackedItemResult[];
+	total: number;
+	added: number;
 };
 
 export type CreateTrackedItemSuccessResponse = {
@@ -93,17 +106,32 @@ export type SelectTrackedItemSkuBody = {
 	sku_id: string;
 };
 
+/** 커서 기반 페이지네이션 목록 데이터 */
+export type ListTrackedItemsPageData = {
+	items: TrackedItemData[];
+	next_cursor?: string;
+	has_more: boolean;
+};
+
 export type ListTrackedItemsSuccessResponse = {
 	result: string;
-	data: TrackedItemData[];
+	data: ListTrackedItemsPageData;
 };
 
 export const trackedItemsApi = {
-	create: (body: CreateTrackedItemBody) =>
-		apiPost<CreateTrackedItemSuccessResponse>(ENDPOINTS.trackedItems.create, body),
+	/** 1~5개 상품을 한 번에 추가 */
+	create: (items: CreateTrackedItemEntry[]) =>
+		apiPost<CreateTrackedItemSuccessResponse>(ENDPOINTS.trackedItems.create, { items }),
 
-	/** GET — BFF가 `user_id` 쿼리를 쿠키로 채움 */
-	list: () => apiGet<ListTrackedItemsSuccessResponse>(ENDPOINTS.trackedItems.list),
+	/** GET — 커서 기반 페이지네이션. BFF가 `user_id` 쿼리를 쿠키로 채움 */
+	list: (params?: { cursor?: string; size?: number }) => {
+		const base = ENDPOINTS.trackedItems.list;
+		const qs = new URLSearchParams();
+		if (params?.cursor) qs.set('cursor', params.cursor);
+		if (params?.size) qs.set('size', String(params.size));
+		const query = qs.toString();
+		return apiGet<ListTrackedItemsSuccessResponse>(query ? `${base}?${query}` : base);
+	},
 
 	/** GET /{trackedItemID} — BFF가 `user_id` 쿼리를 쿠키로 채움 */
 	getDetail: (trackedItemId: string) =>

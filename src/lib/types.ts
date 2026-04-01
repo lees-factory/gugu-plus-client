@@ -13,8 +13,7 @@ export type TrackedItem = {
 	currency: string;
 };
 
-export type AddItemData = {
+export type AddItemEntry = {
 	url: string;
-	frequency: string;
 	commerce: ParsedCommerceUrl;
 };

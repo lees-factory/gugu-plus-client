@@ -1,13 +1,10 @@
-import { goto } from '$app/navigation';
+import { goto, invalidate } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { SvelteSet } from 'svelte/reactivity';
 import { auth } from '$lib/stores/auth.svelte';
-import { trackedItemsApi } from '$lib/api/tracked-items';
-import {
-	getCachedTrackedItems,
-	invalidateTrackedItemsCache
-} from '$lib/api/tracked-items-cache';
+import { trackedItemsApi, type TrackedItemData } from '$lib/api/tracked-items';
 import { t } from '$lib/i18n/t';
-import type { AddItemData, TrackedItem } from '$lib/types';
+import type { AddItemEntry, TrackedItem } from '$lib/types';
 import { summaryToCard } from '$lib/tracked-items/map-summary';
 
 export type SortKey = 'recent' | 'title' | 'site' | 'price';
@@ -15,16 +12,21 @@ export type SortKey = 'recent' | 'title' | 'site' | 'price';
 export const CHROME_EXTENSION_STORE_URL =
 	'https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb';
 
-export function createItemsPage() {
-	/**
-	 * `$state` 객체를 그대로 노출해야 `{#each ... model.items}` 등이 갱신된다.
-	 */
+export function createItemsPage(getData: () => {
+	items: TrackedItemData[];
+	hasMore: boolean;
+	nextCursor?: string;
+	error: string | null;
+}) {
 	const model = $state({
 		modalOpen: false,
 		items: [] as TrackedItem[],
 		loading: true,
 		listError: null as string | null,
-		deletingId: null as string | null
+		deletingId: null as string | null,
+		isLoadingMore: false,
+		hasMore: false,
+		nextCursor: undefined as string | undefined
 	});
 
 	let searchQuery = $state('');
@@ -32,8 +34,18 @@ export function createItemsPage() {
 	let sortBy = $state<SortKey>('recent');
 	let filterOpen = $state(false);
 
+	// load 데이터가 바뀔 때마다 model 갱신
+	$effect(() => {
+		const data = getData();
+		model.items = data.items.map(summaryToCard);
+		model.listError = data.error;
+		model.loading = false;
+		model.hasMore = data.hasMore;
+		model.nextCursor = data.nextCursor;
+	});
+
 	const marketplaceSites = $derived.by(() => {
-		return [...new Set(model.items.map((i) => i.site))].sort((a, b) => a.localeCompare(b));
+		return [...new SvelteSet(model.items.map((i) => i.site))].sort((a, b) => a.localeCompare(b));
 	});
 
 	const displayedItems = $derived.by(() => {
@@ -86,40 +98,28 @@ export function createItemsPage() {
 		window.open(CHROME_EXTENSION_STORE_URL, '_blank');
 	}
 
-	async function loadItems(force = false) {
-		model.loading = true;
-		model.listError = null;
-		try {
-			const list = await getCachedTrackedItems(force);
-			model.items = list.map(summaryToCard);
-		} catch {
-			model.listError = '목록을 불러오지 못했습니다.';
-		} finally {
-			model.loading = false;
-		}
-	}
+	async function handleAddItem(entries: AddItemEntry[]) {
+		const items = entries
+			.map((e) => e.commerce)
+			.filter((c): c is Extract<typeof c, { ok: true }> => c.ok)
+			.map((c) => ({
+				original_url: c.original_url,
+				provider_commerce: c.provider_commerce,
+				external_product_id: c.external_product_id
+			}));
 
-	async function handleAddItem(data: AddItemData) {
-		if (!data.commerce.ok) {
-			throw new Error('유효한 상품 URL이 아닙니다.');
+		if (items.length === 0) {
+			throw new Error(t('no_valid_url'));
 		}
 
-		const createRes = await trackedItemsApi.create({
-			original_url: data.commerce.original_url,
-			provider_commerce: data.commerce.provider_commerce,
-			external_product_id: data.commerce.external_product_id
-		});
+		const createRes = await trackedItemsApi.create(items);
 
 		if (createRes.error || !createRes.data) {
-			throw new Error(createRes.error ?? '상품을 추가하지 못했습니다.');
+			throw new Error(createRes.error ?? t('item_add_fail'));
 		}
 
-		if (!createRes.data.data) {
-			throw new Error('서버 응답이 올바르지 않습니다.');
-		}
-
-		// 추가 성공 후 캐시 무효화 + 목록 재조회
-		await loadItems(true);
+		// load 함수 재실행 → model 자동 갱신
+		await invalidate('/api/v1/tracked-items');
 	}
 
 	async function deleteItem(trackedItemId: string) {
@@ -131,23 +131,31 @@ export function createItemsPage() {
 				alert(res.error);
 				return;
 			}
+			// optimistic UI + load 재실행
 			model.items = model.items.filter((i) => i.id !== trackedItemId);
-			invalidateTrackedItemsCache();
+			await invalidate('/api/v1/tracked-items');
 		} finally {
 			model.deletingId = null;
 		}
 	}
 
-	let loaded = false;
-
-	$effect(() => {
-		if (auth.user && !loaded) {
-			loaded = true;
-			void loadItems();
-		} else if (!auth.user) {
-			model.loading = false;
+	async function loadMore() {
+		if (model.isLoadingMore || !model.hasMore || !model.nextCursor) return;
+		model.isLoadingMore = true;
+		try {
+			const res = await trackedItemsApi.list({ cursor: model.nextCursor, size: 20 });
+			if (res.error || !res.data) {
+				model.hasMore = false;
+				return;
+			}
+			const page = res.data.data;
+			model.items = [...model.items, ...page.items.map(summaryToCard)];
+			model.hasMore = page.has_more;
+			model.nextCursor = page.next_cursor;
+		} finally {
+			model.isLoadingMore = false;
 		}
-	});
+	}
 
 	return {
 		model,
@@ -185,8 +193,8 @@ export function createItemsPage() {
 		toggleFilterOpen,
 		handleAddClick,
 		openChromeExtensionStore,
-		loadItems,
 		handleAddItem,
-		deleteItem
+		deleteItem,
+		loadMore
 	};
 }

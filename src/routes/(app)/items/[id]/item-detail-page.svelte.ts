@@ -1,5 +1,6 @@
-import { goto } from '$app/navigation';
+import { goto, invalidate } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
@@ -8,7 +9,6 @@ import {
 } from '$lib/product-detail/map-product';
 import type { TrackedItemDetailData } from '$lib/api/tracked-items';
 import { trackedItemsApi } from '$lib/api/tracked-items';
-import { invalidateTrackedItemsCache } from '$lib/api/tracked-items-cache';
 import { productsApi } from '$lib/api/products';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
@@ -56,9 +56,9 @@ export function createItemDetailPage(
 	/** 컬러가 1종인데 이미지가 여러 종 → 이미지(디자인)로 그룹핑 */
 	const groupByImage = $derived.by(() => {
 		if (!item?.variantMatrix) return false;
-		const uniqueColors = new Set(item.skus.map((s) => s.propColor).filter(Boolean));
+		const uniqueColors = new SvelteSet(item.skus.map((s) => s.propColor).filter(Boolean));
 		if (uniqueColors.size > 1) return false;
-		const uniqueImages = new Set(item.skus.map((s) => s.image).filter(Boolean));
+		const uniqueImages = new SvelteSet(item.skus.map((s) => s.image).filter(Boolean));
 		return uniqueImages.size > 1;
 	});
 
@@ -66,7 +66,7 @@ export function createItemDetailPage(
 		if (!item?.variantMatrix) return [];
 
 		if (groupByImage) {
-			const seen = new Set<string>();
+			const seen = new SvelteSet<string>();
 			const opts: MatrixColorOption[] = [];
 			for (const s of item.skus) {
 				const img = s.image;
@@ -77,7 +77,7 @@ export function createItemDetailPage(
 			return opts;
 		}
 
-		const seen = new Set<string>();
+		const seen = new SvelteSet<string>();
 		const opts: MatrixColorOption[] = [];
 		for (const s of item.skus) {
 			const v = s.propColor;
@@ -97,7 +97,7 @@ export function createItemDetailPage(
 	const matrixSizeOptions = $derived.by(() => {
 		if (!item?.variantMatrix || !needSize) return [] as string[];
 		const sizes = item.skus.map((s) => s.propSize).filter((x): x is string => !!x && x !== '');
-		const uniq = [...new Set(sizes)];
+		const uniq = [...new SvelteSet(sizes)];
 		uniq.sort((a, b) => {
 			const ra = getSizeRank(a);
 			const rb = getSizeRank(b);
@@ -108,14 +108,14 @@ export function createItemDetailPage(
 	});
 
 	const availableSizesForColor = $derived.by(() => {
-		if (!item?.variantMatrix || !needSize) return new Set<string>();
-		if (!needColor && !groupByImage) return new Set(matrixSizeOptions);
+		if (!item?.variantMatrix || !needSize) return new SvelteSet<string>();
+		if (!needColor && !groupByImage) return new SvelteSet(matrixSizeOptions);
 
 		const filtered = groupByImage
 			? item.skus.filter((s) => s.image === effectivePropColor)
 			: item.skus.filter((s) => s.propColor === effectivePropColor);
 
-		return new Set(
+		return new SvelteSet(
 			filtered.map((s) => s.propSize).filter((x): x is string => !!x && x !== '')
 		);
 	});
@@ -310,7 +310,7 @@ export function createItemDetailPage(
 				alert(res.error);
 				return;
 			}
-			invalidateTrackedItemsCache();
+			await invalidate('/api/v1/tracked-items');
 			await goto(resolve('/items'));
 		} finally {
 			ui.deleting = false;

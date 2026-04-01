@@ -1,0 +1,2345 @@
+openapi: 3.0.3
+info:
+  title: gugu-api
+  version: 1.0.0
+  description: gugu API의 상태 확인 및 인증 관련 엔드포인트 명세
+servers:
+  - url: https://price-eye.duckdns.org
+    description: Production
+  - url: http://localhost:8080
+    description: Local
+tags:
+  - name: 상태 확인
+    description: 서버 상태 확인 API
+  - name: 인증
+    description: 회원가입, 이메일 인증, 로그인 API
+  - name: 외부 연동
+    description: 외부 서비스 연결 및 상태 조회 API
+  - name: 상품
+    description: 상품 상세 조회 API
+  - name: 유저 저장 상품
+    description: Tracked Items 조회, 추가, 삭제 API
+  - name: 가격 알림
+    description: 상품 가격 변동 알림 등록/해제/조회 API
+  - name: 디스커버
+    description: 상품 탐색 및 추천 API
+paths:
+  /health:
+    get:
+      tags:
+        - 상태 확인
+      summary: 서버 상태 확인
+      description: 서버가 정상적으로 요청을 처리할 수 있는지 확인한다.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: 서버가 정상 상태다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                success:
+                  value:
+                    result: SUCCESS
+                    data:
+                      status: ok
+  /v1/auth/register/email:
+    post:
+      tags:
+        - 인증
+      summary: 이메일 회원가입
+      description: 이메일과 비밀번호로 계정을 만들고 6자리 인증 코드를 발송한다.
+      operationId: registerEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEmailRequest'
+            examples:
+              default:
+                value:
+                  email: user@example.com
+                  password: secret123!
+                  display_name: Gugu User
+      responses:
+        '201':
+          description: 회원가입이 완료되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterEmailResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 비즈니스 규칙을 위반했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                duplicateEmail:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G1000
+                      message: email already exists
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/auth/login/email:
+    post:
+      tags:
+        - 인증
+      summary: 이메일 로그인
+      description: 이메일과 비밀번호가 맞으면 JWT access token과 refresh token을 발급한다.
+      operationId: loginEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginEmailRequest'
+      responses:
+        '200':
+          description: 로그인에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 이메일 인증이 완료되지 않았다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                emailNotVerified:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2001
+                      message: email is not verified
+        '401':
+          description: 로그인 정보가 유효하지 않다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2000
+                      message: invalid credentials
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/auth/verify-email:
+    post:
+      tags:
+        - 인증
+      summary: 이메일 인증 코드 검증
+      description: 회원가입 시 받은 6자리 인증 코드를 검증한다.
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+            examples:
+              default:
+                value:
+                  code: '123456'
+      responses:
+        '200':
+          description: 이메일 인증이 완료되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 인증 코드를 찾을 수 없다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                codeNotFound:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2002
+                      message: verification code not found
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/auth/oauth/login:
+    post:
+      tags:
+        - 인증
+      summary: OAuth 로그인
+      description: OAuth 공급자 정보로 로그인하거나 신규 사용자를 생성한 뒤 JWT 토큰을 발급한다.
+      operationId: loginOAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginOAuthRequest'
+      responses:
+        '200':
+          description: OAuth 로그인에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 지원하지 않는 공급자다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                invalidProvider:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2003
+                      message: oauth provider is invalid
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/auth/refresh:
+    post:
+      tags:
+        - 인증
+      summary: Refresh token 재발급
+      description: 유효한 refresh token으로 access token과 refresh token을 재발급한다.
+      operationId: refreshAuthTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+            examples:
+              default:
+                value:
+                  refresh_token: refresh-token-value
+                  device_name: Chrome on Mac
+      responses:
+        '200':
+          description: 토큰 재발급에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 refresh token이 유효하지 않다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                invalidRefreshToken:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2004
+                      message: refresh token is invalid
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/auth/logout:
+    post:
+      tags:
+        - 인증
+      summary: 로그아웃
+      description: 현재 refresh token 세션을 폐기한다. 클라이언트는 응답과 별개로 로컬 토큰도 즉시 삭제해야 한다.
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+            examples:
+              default:
+                value:
+                  refresh_token: refresh-token-value
+      responses:
+        '200':
+          description: 로그아웃에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    result: SUCCESS
+        '400':
+          description: 요청 형식이 잘못되었거나 refresh token이 유효하지 않다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    result: ERROR
+                    error:
+                      code: E400
+                      message: invalid request body
+                invalidRefreshToken:
+                  value:
+                    result: ERROR
+                    error:
+                      code: G2004
+                      message: refresh token is invalid
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/authorize-url:
+    post:
+      tags:
+        - 외부 연동
+      summary: AliExpress 인가 URL 생성
+      description: |
+        AliExpress seller authorization 화면으로 보내기 위한 URL을 생성한다. 운영자/개발자 전용.
+        발급받은 access_token은 내부 TokenStore에 저장되어 상품 조회 API에서 자동으로 사용된다.
+      operationId: buildAliExpressAuthorizationURL
+      responses:
+        '200':
+          description: 인가 URL 생성에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressAuthorizationURLResponse'
+        '400':
+          description: 요청 형식이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/exchange-code:
+    post:
+      tags:
+        - 외부 연동
+      summary: AliExpress 인가 code 교환
+      description: |
+        callback으로 받은 code를 AliExpress access_token으로 교환하고 내부 TokenStore에 저장한다. 운영자/개발자 전용.
+        저장된 토큰은 상품 조회(product-detail, product-sku-detail) 및 tracked-items 추가 시 자동으로 사용된다.
+      operationId: exchangeAliExpressCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AliExpressExchangeCodeRequest'
+      responses:
+        '200':
+          description: code 교환 및 연결 저장에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressConnectionStatusResponse'
+        '400':
+          description: code가 유효하지 않거나 요청 형식이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/refresh-token:
+    post:
+      tags:
+        - 외부 연동
+      summary: AliExpress access_token 갱신
+      description: |
+        저장된 refresh_token으로 access_token을 갱신한다. 운영자/개발자 전용.
+        access_token은 24시간 만료이며, refresh_token(6개월)이 유효한 동안 갱신 가능하다.
+        refresh_token 만료 시 authorize-url → exchange-code 재인증이 필요하다.
+      operationId: refreshAliExpressToken
+      responses:
+        '200':
+          description: 토큰 갱신에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressConnectionStatusResponse'
+        '400':
+          description: AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 저장된 토큰이 없거나 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/connection-status:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress 연결 상태 조회
+      description: 내부에 저장된 AliExpress seller 연결 상태를 조회한다. token 원문은 반환하지 않는다.
+      operationId: getAliExpressConnectionStatus
+      responses:
+        '200':
+          description: 연결 상태 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressConnectionStatusResponse'
+        '400':
+          description: 요청 형식이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/categories:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress Affiliate 카테고리 목록 조회
+      description: |
+        AliExpress Affiliate API를 호출하여 전체 카테고리 목록을 조회한다. 개발자 확인용.
+        카테고리 ID는 상품 목록 조회(`/products`)의 `category_ids` 파라미터에 사용할 수 있다.
+      operationId: getAliExpressCategories
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressCategoryResponse'
+        '400':
+          description: AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/products:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress Affiliate 상품 목록 조회
+      description: |
+        AliExpress Affiliate API를 호출하여 조건에 맞는 상품 목록을 조회한다. 개발자 확인용.
+        내부 TokenStore에 저장된 access_token을 자동으로 사용한다.
+        토큰이 없으면 access_token 없이 호출되어 빈 결과가 반환될 수 있다.
+      operationId: getAliExpressProducts
+      parameters:
+        - in: query
+          name: keywords
+          schema:
+            type: string
+          description: 검색 키워드
+          example: 'mp3'
+        - in: query
+          name: category_ids
+          schema:
+            type: string
+          description: 카테고리 ID 목록 (쉼표 구분)
+        - in: query
+          name: min_sale_price
+          schema:
+            type: string
+          description: 최소 판매가 (cent 단위)
+        - in: query
+          name: max_sale_price
+          schema:
+            type: string
+          description: 최대 판매가 (cent 단위)
+        - in: query
+          name: page_no
+          schema:
+            type: string
+          description: 페이지 번호
+        - in: query
+          name: page_size
+          schema:
+            type: string
+          description: 페이지당 레코드 수 (1-50)
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum:
+              - SALE_PRICE_ASC
+              - SALE_PRICE_DESC
+              - LAST_VOLUME_ASC
+              - LAST_VOLUME_DESC
+          description: 정렬 방식
+        - in: query
+          name: ship_to_country
+          schema:
+            type: string
+          description: 배송 국가 코드
+          example: 'KR'
+        - in: query
+          name: tracking_id
+          schema:
+            type: string
+          description: 사용자 trackingID
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressProductQueryResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/product-detail:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress Affiliate 상품 상세 조회
+      description: |
+        AliExpress Affiliate API를 호출하여 상품 상세 정보를 조회한다. 개발자 확인용.
+        내부 TokenStore에 저장된 access_token을 자동으로 사용한다.
+        토큰이 없으면 access_token 없이 호출되어 빈 결과가 반환될 수 있다.
+      operationId: getAliExpressProductDetail
+      parameters:
+        - in: query
+          name: product_id
+          required: true
+          schema:
+            type: string
+          description: AliExpress 외부 상품 ID
+          example: '1005010555086223'
+      responses:
+        '200':
+          description: 조회에 성공했다. 상품이 없으면 빈 products 배열을 반환한다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressProductDetailResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/product-sku-detail:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress Affiliate 상품 SKU 상세 조회
+      description: |
+        AliExpress Affiliate API를 호출하여 상품 SKU 정보를 조회한다. 개발자 확인용.
+        내부 TokenStore에 저장된 access_token을 자동으로 사용한다.
+        토큰이 없으면 access_token 없이 호출되어 빈 결과가 반환될 수 있다.
+      operationId: getAliExpressProductSKUDetail
+      parameters:
+        - in: query
+          name: product_id
+          required: true
+          schema:
+            type: string
+          description: AliExpress 외부 상품 ID
+          example: '1005010555086223'
+        - in: query
+          name: sku_ids
+          schema:
+            type: string
+          description: 조회할 SKU ID 목록 (쉼표 구분, 최대 20개). 미입력 시 전체 SKU 반환 (최대 20개 제한)
+          example: '12000045375202022'
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressProductSKUDetailResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/integrations/aliexpress/ds-product:
+    get:
+      tags:
+        - 외부 연동
+      summary: AliExpress Dropshipping 상품 조회
+      description: |
+        AliExpress Dropshipping API를 호출하여 상품 정보와 전체 SKU를 조회한다. 개발자 확인용.
+        Affiliate API에 없는 상품도 조회 가능하다.
+        내부 TokenStore에 저장된 DROPSHIPPING access_token을 자동으로 사용한다.
+      operationId: getAliExpressDSProduct
+      parameters:
+        - in: query
+          name: product_id
+          required: true
+          schema:
+            type: string
+          description: AliExpress 외부 상품 ID
+          example: '1005008965454164'
+        - in: query
+          name: ship_to_country
+          schema:
+            type: string
+            default: KR
+          description: 배송 대상 국가 (2자리 코드)
+          example: KR
+        - in: query
+          name: target_currency
+          schema:
+            type: string
+            default: KRW
+          description: 표시 통화
+          example: KRW
+        - in: query
+          name: target_language
+          schema:
+            type: string
+            default: ko
+          description: 표시 언어
+          example: ko
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliExpressDSProductResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 AliExpress API 에러가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/tracked-items/:
+    get:
+      tags:
+        - 유저 저장 상품
+      summary: Tracked Items 목록 조회
+      description: 특정 유저가 대시보드에 저장한 활성 상품 목록을 조회한다.
+      operationId: listTrackedItems
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: 조회 대상 내부 사용자 ID
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+          description: 다음 페이지 커서. 첫 요청 시 생략하고, 이후 응답의 next_cursor 값을 전달한다.
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: 한 번에 조회할 항목 수 (기본값 20, 최대 100)
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTrackedItemsResponse'
+        '400':
+          description: 요청 파라미터가 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - 유저 저장 상품
+      summary: Tracked Item 추가 (1~5개)
+      description: 유저가 전달한 마켓과 외부 상품 식별자로 내부 상품을 조회하거나 수집한 뒤 대시보드에 저장한다. 한 번에 최대 5개까지 추가할 수 있다.
+      operationId: addTrackedItems
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTrackedItemRequest'
+      responses:
+        '201':
+          description: 저장에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTrackedItemResponse'
+        '400':
+          description: 요청 형식이 잘못되었거나 지원하지 않는 마켓, 상품을 찾을 수 없는 경우다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/tracked-items/{trackedItemID}:
+    get:
+      tags:
+        - 유저 저장 상품
+      summary: Tracked Item 상세 조회
+      description: 유저 저장 상품의 상세 정보(상품 정보, SKU 목록 포함)를 조회한다.
+      operationId: getTrackedItemDetail
+      parameters:
+        - in: path
+          name: trackedItemID
+          required: true
+          schema:
+            type: string
+          description: 유저 저장 상품 ID
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: 조회 요청 사용자 ID
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackedItemDetailResponse'
+        '400':
+          description: 요청 값이 잘못되었거나 조회 대상이 없다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - 유저 저장 상품
+      summary: Tracked Item 삭제
+      description: 유저 저장 상품을 soft delete 한다.
+      operationId: deleteTrackedItem
+      parameters:
+        - in: path
+          name: trackedItemID
+          required: true
+          schema:
+            type: string
+          description: 삭제 대상 유저 저장 상품 ID
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: 삭제 요청 사용자 ID
+      responses:
+        '200':
+          description: 삭제에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: 요청 값이 잘못되었거나 삭제 대상이 없다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/tracked-items/{trackedItemID}/sku:
+    patch:
+      tags:
+        - 유저 저장 상품
+      summary: Tracked Item SKU 선택
+      description: 유저 저장 상품에 특정 SKU를 선택한다.
+      operationId: selectTrackedItemSKU
+      parameters:
+        - in: path
+          name: trackedItemID
+          required: true
+          schema:
+            type: string
+          description: SKU를 선택할 유저 저장 상품 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectSKURequest'
+      responses:
+        '200':
+          description: SKU 선택에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: 요청 값이 잘못되었거나 대상을 찾을 수 없다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/products/{productID}/alert:
+    post:
+      tags:
+        - 가격 알림
+      summary: 가격 알림 등록
+      description: 특정 상품에 대한 가격 변동 알림을 등록한다. 이미 등록된 알림이 있으면 재활성화한다.
+      operationId: registerPriceAlert
+      parameters:
+        - in: path
+          name: productID
+          required: true
+          schema:
+            type: string
+          description: 알림을 등록할 상품 ID
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Bearer {access_token}'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPriceAlertRequest'
+            examples:
+              default:
+                value:
+                  channel: EMAIL
+      responses:
+        '201':
+          description: 알림 등록에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceAlertResponse'
+        '400':
+          description: 요청 형식이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 인증이 필요하다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - 가격 알림
+      summary: 가격 알림 해제
+      description: 특정 상품에 대한 가격 변동 알림을 해제(삭제)한다.
+      operationId: unregisterPriceAlert
+      parameters:
+        - in: path
+          name: productID
+          required: true
+          schema:
+            type: string
+          description: 알림을 해제할 상품 ID
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Bearer {access_token}'
+      responses:
+        '200':
+          description: 알림 해제에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: 인증이 필요하다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/alerts:
+    get:
+      tags:
+        - 가격 알림
+      summary: 내 알림 목록 조회
+      description: 인증된 유저가 등록한 모든 가격 알림 목록을 조회한다.
+      operationId: listMyPriceAlerts
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Bearer {access_token}'
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPriceAlertsResponse'
+        '401':
+          description: 인증이 필요하다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/discover/hot-products:
+    get:
+      tags:
+        - 디스커버
+      summary: 인기 상품 목록 조회
+      description: 수집된 인기 상품(HOT_PRODUCT_QUERY) 목록을 페이지네이션으로 조회한다.
+      operationId: listHotProducts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 페이지 번호 (1부터 시작)
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 페이지당 상품 수 (최대 100)
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListHotProductsResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/products/{productID}:
+    get:
+      tags:
+        - 상품
+      summary: 상품 상세 조회
+      description: 내부 상품, 가격 이력, 유저 저장 상태를 조합해 상품 상세를 조회한다.
+      operationId: getProductDetail
+      parameters:
+        - in: path
+          name: productID
+          required: true
+          schema:
+            type: string
+          description: 내부 상품 ID
+        - in: query
+          name: user_id
+          required: false
+          schema:
+            type: string
+          description: 유저 저장 상태 판단에 사용할 내부 사용자 ID
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailResponse'
+        '400':
+          description: 상품을 찾을 수 없거나 요청 값이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/products/{productID}/skus:
+    get:
+      tags:
+        - 상품
+      summary: 상품 SKU 목록 조회
+      description: 내부 상품의 SKU(옵션) 목록을 조회한다.
+      operationId: listProductSKUs
+      parameters:
+        - in: path
+          name: productID
+          required: true
+          schema:
+            type: string
+          description: 내부 상품 ID
+      responses:
+        '200':
+          description: 조회에 성공했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProductSKUsResponse'
+        '400':
+          description: 상품을 찾을 수 없거나 요청 값이 잘못되었다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 서버 내부 오류가 발생했다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ResultType:
+      type: string
+      description: API 처리 결과 구분값
+      enum:
+        - SUCCESS
+        - ERROR
+    ErrorMessage:
+      type: object
+      description: 에러 응답 본문
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: 애플리케이션 에러 코드
+          example: E400
+        message:
+          type: string
+          description: 사용자 또는 클라이언트가 확인할 에러 메시지
+          example: invalid request body
+        data:
+          nullable: true
+          description: 추가 에러 데이터
+    ErrorResponse:
+      type: object
+      description: 공통 에러 응답 래퍼
+      required:
+        - result
+        - error
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        error:
+          $ref: '#/components/schemas/ErrorMessage'
+    User:
+      type: object
+      description: 사용자 정보
+      required:
+        - id
+        - email
+        - display_name
+        - email_verified
+        - created_at
+      properties:
+        id:
+          type: string
+          description: 사용자 고유 ID
+          example: user_01
+        email:
+          type: string
+          format: email
+          description: 사용자 이메일
+          example: user@example.com
+        display_name:
+          type: string
+          description: 화면 표시 이름
+          example: Gugu User
+        email_verified:
+          type: boolean
+          description: 이메일 인증 완료 여부
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: 계정 생성 시각
+          example: '2026-03-14T12:00:00Z'
+    Tokens:
+      type: object
+      description: 로그인 성공 시 발급되는 JWT 토큰 묶음
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - access_expires_at
+        - refresh_expires_at
+      properties:
+        access_token:
+          type: string
+          description: API 인증에 사용하는 JWT access token
+        refresh_token:
+          type: string
+          description: access token 재발급에 사용할 JWT refresh token
+        token_type:
+          type: string
+          description: Authorization 헤더에 사용할 토큰 타입
+          example: Bearer
+        access_expires_at:
+          type: string
+          format: date-time
+          description: access token 만료 시각
+          example: '2026-03-14T12:15:00Z'
+        refresh_expires_at:
+          type: string
+          format: date-time
+          description: refresh token 만료 시각
+          example: '2026-03-28T12:00:00Z'
+    RegisterEmailRequest:
+      type: object
+      description: 이메일 회원가입 요청
+      required:
+        - email
+        - password
+        - display_name
+      properties:
+        email:
+          type: string
+          format: email
+          description: 회원가입 이메일
+        password:
+          type: string
+          format: password
+          description: 로그인 비밀번호
+        display_name:
+          type: string
+          description: 사용자 표시 이름
+    LoginEmailRequest:
+      type: object
+      description: 이메일 로그인 요청
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 로그인 이메일
+        password:
+          type: string
+          format: password
+          description: 로그인 비밀번호
+    VerifyEmailRequest:
+      type: object
+      description: 이메일 인증 코드 검증 요청
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: 이메일로 전달된 6자리 인증 코드
+          example: '123456'
+    LoginOAuthRequest:
+      type: object
+      description: OAuth 로그인 요청
+      required:
+        - provider
+        - subject
+        - email
+        - display_name
+      properties:
+        provider:
+          type: string
+          description: OAuth 공급자 이름
+          example: google
+        subject:
+          type: string
+          description: 공급자가 내려준 사용자 식별자
+          example: oauth-subject-123
+        email:
+          type: string
+          format: email
+          description: 공급자 기준 이메일
+        display_name:
+          type: string
+          description: 공급자 기준 표시 이름
+    RefreshTokenRequest:
+      type: object
+      description: refresh token 재발급 요청
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: 재발급에 사용할 refresh token
+        device_name:
+          type: string
+          description: 클라이언트 기기 이름
+          example: Chrome on Mac
+    LogoutRequest:
+      type: object
+      description: 로그아웃 요청
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: 폐기할 현재 refresh token
+    AliExpressExchangeCodeRequest:
+      type: object
+      description: AliExpress callback code 교환 요청
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: AliExpress callback 으로 받은 authorization code
+          example: ali-code-123
+    AddTrackedItemRequest:
+      type: object
+      description: 유저 저장 상품 추가 요청 (1~5개)
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: 추가할 상품 목록 (최소 1개, 최대 5개)
+          minItems: 1
+          maxItems: 5
+          items:
+            type: object
+            required:
+              - original_url
+              - provider_commerce
+              - external_product_id
+            properties:
+              original_url:
+                type: string
+                description: 사용자가 붙여넣은 원본 URL
+                example: https://www.aliexpress.com/item/1005000000000000.html
+              provider_commerce:
+                type: string
+                description: 프론트가 판별한 마켓 식별자
+                example: ALIEXPRESS
+              external_product_id:
+                type: string
+                description: 프론트가 추출한 외부 상품 식별자
+                example: '1005000000000000'
+              currency:
+                type: string
+                description: 유저가 원하는 통화 (KRW, USD). 미지정 시 상품 대표 통화 사용.
+                example: KRW
+    HealthData:
+      type: object
+      description: 상태 확인 응답 데이터
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: 서버 상태값
+          example: ok
+    HealthResponse:
+      type: object
+      description: 상태 확인 성공 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/HealthData'
+    RegisterEmailData:
+      type: object
+      description: 이메일 회원가입 성공 데이터
+      required:
+        - user
+        - verification_dispatched
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        verification_code:
+          type: string
+          nullable: true
+          description: 현재 구현에서 개발 및 확인 용도로 함께 반환하는 6자리 인증 코드
+          example: '123456'
+        verification_dispatched:
+          type: boolean
+          description: 인증 코드 발송 처리 여부
+          example: true
+    RegisterEmailResponse:
+      type: object
+      description: 이메일 회원가입 성공 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/RegisterEmailData'
+    LoginData:
+      type: object
+      description: 로그인 성공 데이터
+      required:
+        - user
+        - tokens
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/Tokens'
+    LoginResponse:
+      type: object
+      description: 로그인 성공 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/LoginData'
+    VerifyEmailData:
+      type: object
+      description: 이메일 인증 성공 데이터
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    VerifyEmailResponse:
+      type: object
+      description: 이메일 인증 성공 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/VerifyEmailData'
+    TokensResponse:
+      type: object
+      description: 토큰 재발급 성공 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/Tokens'
+    SuccessResponse:
+      type: object
+      description: 데이터 없이 성공만 반환하는 응답
+      required:
+        - result
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+    AliExpressAuthorizationURLData:
+      type: object
+      description: AliExpress 인가 URL 응답 데이터
+      required:
+        - authorization_url
+      properties:
+        authorization_url:
+          type: string
+          description: AliExpress seller authorization 페이지 URL
+          example: https://api-sg.aliexpress.com/oauth/authorize?response_type=code
+    AliExpressAuthorizationURLResponse:
+      type: object
+      description: AliExpress 인가 URL 생성 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/AliExpressAuthorizationURLData'
+    AliExpressConnectionStatusData:
+      type: object
+      description: AliExpress 연결 상태 응답 데이터
+      required:
+        - connected
+        - reauthorization_required
+      properties:
+        seller_id:
+          type: string
+          nullable: true
+          description: 연결된 AliExpress seller 식별자
+          example: '200042362'
+        account:
+          type: string
+          nullable: true
+          description: 연결된 AliExpress 계정명
+          example: seller@example.com
+        user_nick:
+          type: string
+          nullable: true
+          description: 연결된 AliExpress seller 닉네임
+          example: seller nick
+        connected:
+          type: boolean
+          description: 현재 연결 정보가 존재하는지 여부
+          example: true
+        reauthorization_required:
+          type: boolean
+          description: refresh token 만료 등으로 재인가가 필요한지 여부
+          example: false
+        authorized_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 최초 인가 완료 시각
+        access_token_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 내부 access token 만료 시각
+        refresh_token_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 내부 refresh token 만료 시각
+        last_refreshed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 토큰을 마지막으로 저장 또는 갱신한 시각
+    AliExpressConnectionStatusResponse:
+      type: object
+      description: AliExpress 연결 상태 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/AliExpressConnectionStatusData'
+    AliExpressCategoryResponse:
+      type: object
+      description: AliExpress Affiliate 카테고리 목록 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: object
+          properties:
+            TotalResultCount:
+              type: integer
+              description: 전체 카테고리 수
+            Categories:
+              type: array
+              description: 카테고리 목록
+              items:
+                type: object
+                properties:
+                  category_id:
+                    type: integer
+                    description: 카테고리 ID
+                  category_name:
+                    type: string
+                    description: 카테고리명
+                  parent_category_id:
+                    type: integer
+                    description: 부모 카테고리 ID (0이면 최상위)
+    AliExpressProductQueryResponse:
+      type: object
+      description: AliExpress Affiliate 상품 목록 조회 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: object
+          properties:
+            CurrentPageNo:
+              type: integer
+              description: 현재 페이지 번호
+            CurrentRecordCount:
+              type: integer
+              description: 현재 페이지 레코드 수
+            TotalPageNo:
+              type: integer
+              description: 전체 페이지 수
+            TotalRecordCount:
+              type: integer
+              description: 전체 레코드 수
+            Products:
+              type: array
+              description: 상품 목록
+              items:
+                type: object
+                properties:
+                  product_id:
+                    type: integer
+                  sku_id:
+                    type: integer
+                  product_title:
+                    type: string
+                  product_main_image_url:
+                    type: string
+                  product_detail_url:
+                    type: string
+                  promotion_link:
+                    type: string
+                  target_sale_price:
+                    type: string
+                  target_sale_price_currency:
+                    type: string
+                  target_original_price:
+                    type: string
+                  sale_price:
+                    type: string
+                  sale_price_currency:
+                    type: string
+                  commission_rate:
+                    type: string
+                  shop_name:
+                    type: string
+                  lastest_volume:
+                    type: integer
+                  discount:
+                    type: string
+    AliExpressProductDetailResponse:
+      type: object
+      description: AliExpress Affiliate 상품 상세 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: object
+          properties:
+            CurrentRecordCount:
+              type: integer
+              description: 조회된 상품 수
+            Products:
+              type: array
+              description: 상품 목록 (없으면 빈 배열)
+              items:
+                type: object
+                properties:
+                  product_id:
+                    type: integer
+                  product_title:
+                    type: string
+                  product_main_image_url:
+                    type: string
+                  product_detail_url:
+                    type: string
+                  promotion_link:
+                    type: string
+                  target_sale_price:
+                    type: string
+                  target_sale_price_currency:
+                    type: string
+                  target_original_price:
+                    type: string
+                  sale_price:
+                    type: string
+                  sale_price_currency:
+                    type: string
+                  commission_rate:
+                    type: string
+                  shop_name:
+                    type: string
+    AliExpressProductSKUDetailResponse:
+      type: object
+      description: AliExpress Affiliate 상품 SKU 상세 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: object
+          properties:
+            Code:
+              type: integer
+            Success:
+              type: boolean
+            ItemInfo:
+              type: object
+              properties:
+                product_id:
+                  type: string
+                title:
+                  type: string
+                en_title:
+                  type: string
+                image_link:
+                  type: string
+                original_link:
+                  type: string
+                store_name:
+                  type: string
+            SKUInfos:
+              type: array
+              items:
+                type: object
+                properties:
+                  sku_id:
+                    type: integer
+                  color:
+                    type: string
+                  size:
+                    type: string
+                  price_with_tax:
+                    type: string
+                  sale_price_with_tax:
+                    type: string
+                  currency:
+                    type: string
+                  sku_image_link:
+                    type: string
+                  sku_properties:
+                    type: string
+                  link:
+                    type: string
+                  discount_rate:
+                    type: string
+    AliExpressDSProductResponse:
+      type: object
+      description: AliExpress Dropshipping 상품 조회 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: object
+          properties:
+            ae_item_base_info_dto:
+              type: object
+              description: 기본 상품 정보
+              properties:
+                product_id:
+                  type: integer
+                subject:
+                  type: string
+                  description: 상품 제목
+                product_status_type:
+                  type: string
+                category_id:
+                  type: integer
+                currency_code:
+                  type: string
+                avg_evaluation_rating:
+                  type: string
+                evaluation_count:
+                  type: string
+                sales_count:
+                  type: string
+            ae_item_sku_info_dtos:
+              type: array
+              description: 전체 SKU 목록
+              items:
+                type: object
+                properties:
+                  sku_id:
+                    type: string
+                  id:
+                    type: string
+                    description: SKU 속성 고유 키
+                  sku_attr:
+                    type: string
+                  sku_price:
+                    type: string
+                    description: 원가
+                  offer_sale_price:
+                    type: string
+                    description: 할인가
+                  channel_discount_price:
+                    type: string
+                    description: DS 채널 전용 가격
+                  sku_available_stock:
+                    type: integer
+                    description: 재고 수량
+                  currency_code:
+                    type: string
+                  barcode:
+                    type: string
+                  ean_code:
+                    type: string
+                  ae_sku_property_dtos:
+                    type: array
+                    description: SKU 속성 (색상, 사이즈 등)
+                    items:
+                      type: object
+                      properties:
+                        sku_property_id:
+                          type: integer
+                          description: 속성 ID (14=Color, 5=Size)
+                        sku_property_name:
+                          type: string
+                        property_value_id:
+                          type: integer
+                        sku_property_value:
+                          type: string
+                        property_value_definition_name:
+                          type: string
+                        sku_image:
+                          type: string
+            ae_multimedia_info_dto:
+              type: object
+              properties:
+                image_urls:
+                  type: string
+                  description: 대표 이미지 URL 목록 (세미콜론 구분)
+            ae_store_info:
+              type: object
+              properties:
+                store_id:
+                  type: integer
+                store_name:
+                  type: string
+                store_country_code:
+                  type: string
+            logistics_info_dto:
+              type: object
+              properties:
+                ship_to_country:
+                  type: string
+                delivery_time:
+                  type: integer
+            has_whole_sale:
+              type: boolean
+            rsp_code:
+              type: integer
+            rsp_msg:
+              type: string
+    TrackedItemData:
+      type: object
+      description: 유저 저장 상품 카드 데이터
+      required:
+        - tracked_item_id
+        - product_id
+        - market
+        - external_product_id
+        - original_url
+        - title
+        - main_image_url
+        - current_price
+        - currency
+        - product_url
+      properties:
+        tracked_item_id:
+          type: string
+          description: 유저 저장 상품 ID
+        product_id:
+          type: string
+          description: 내부 상품 ID
+        market:
+          type: string
+          description: 마켓 식별자
+          example: ALIEXPRESS
+        external_product_id:
+          type: string
+          description: 외부 상품 식별자
+        original_url:
+          type: string
+          description: 사용자가 추가할 때 입력한 원본 URL
+        title:
+          type: string
+          description: 상품명
+        main_image_url:
+          type: string
+          description: 대표 이미지 URL
+        current_price:
+          type: string
+          description: 현재 가격
+          example: '8335'
+        currency:
+          type: string
+          description: 가격 통화
+          example: KRW
+        product_url:
+          type: string
+          description: 외부 상품 상세 URL
+        promotion_link:
+          type: string
+          nullable: true
+          description: Affiliate 프로모션 링크. 빈 값이면 product_url 사용.
+    TrackedItemDetailData:
+      type: object
+      description: 유저 저장 상품 상세 데이터
+      required:
+        - tracked_item_id
+        - product_id
+        - market
+        - external_product_id
+        - original_url
+        - title
+        - main_image_url
+        - current_price
+        - currency
+        - product_url
+        - skus
+      properties:
+        tracked_item_id:
+          type: string
+          description: 유저 저장 상품 ID
+        product_id:
+          type: string
+          description: 내부 상품 ID
+        sku_id:
+          type: string
+          description: 선택된 SKU ID
+        market:
+          type: string
+          description: 마켓 식별자
+          example: ALIEXPRESS
+        external_product_id:
+          type: string
+          description: 외부 상품 식별자
+        original_url:
+          type: string
+          description: 사용자가 추가할 때 입력한 원본 URL
+        title:
+          type: string
+          description: 상품명
+        main_image_url:
+          type: string
+          description: 대표 이미지 URL
+        current_price:
+          type: string
+          description: 현재 가격
+          example: '8335'
+        currency:
+          type: string
+          description: 가격 통화
+          example: KRW
+        product_url:
+          type: string
+          description: 외부 상품 상세 URL
+        promotion_link:
+          type: string
+          nullable: true
+          description: Affiliate 프로모션 링크. 빈 값이면 product_url 사용.
+        skus:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSKUData'
+    TrackedItemDetailResponse:
+      type: object
+      description: 유저 저장 상품 상세 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/TrackedItemDetailData'
+    AddTrackedItemEntry:
+      type: object
+      description: 개별 상품 추가 결과
+      required:
+        - tracked_item_id
+        - already_tracked
+      properties:
+        tracked_item_id:
+          type: string
+          description: 유저 저장 상품 ID
+        already_tracked:
+          type: boolean
+          description: 이미 저장된 상품이어서 기존 관계를 재사용했는지 여부
+    AddTrackedItemData:
+      type: object
+      description: 유저 저장 상품 추가 응답 데이터
+      required:
+        - results
+        - total
+        - added
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddTrackedItemEntry'
+        total:
+          type: integer
+          description: 요청한 상품 수
+          example: 3
+        added:
+          type: integer
+          description: 새로 추가된 상품 수 (already_tracked 제외)
+          example: 2
+    AddTrackedItemResponse:
+      type: object
+      description: 유저 저장 상품 추가 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/AddTrackedItemData'
+    ListTrackedItemsResponse:
+      type: object
+      description: 유저 저장 상품 목록 응답 (커서 기반 페이지네이션)
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/ListTrackedItemsPageData'
+    ListTrackedItemsPageData:
+      type: object
+      description: 커서 기반 페이지네이션 목록 데이터
+      required:
+        - items
+        - has_more
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackedItemData'
+        next_cursor:
+          type: string
+          description: 다음 페이지를 조회하기 위한 커서 값. has_more가 false이면 생략된다.
+        has_more:
+          type: boolean
+          description: 다음 페이지 존재 여부
+    ProductPriceHistoryData:
+      type: object
+      description: 상품 가격 이력 데이터
+      required:
+        - price
+        - currency
+        - recorded_at
+        - change_value
+      properties:
+        price:
+          type: string
+          description: 기록 시점 가격
+        currency:
+          type: string
+          description: 가격 통화
+        recorded_at:
+          type: string
+          format: date-time
+          description: 기록 시각
+        change_value:
+          type: string
+          description: 이전 기록 대비 변동값
+    ProductDetailData:
+      type: object
+      description: 상품 상세 응답 데이터
+      required:
+        - product_id
+        - market
+        - external_product_id
+        - original_url
+        - title
+        - main_image_url
+        - current_price
+        - currency
+        - product_url
+        - is_tracked_by_user
+        - price_histories
+        - skus
+      properties:
+        product_id:
+          type: string
+          description: 내부 상품 ID
+        market:
+          type: string
+          description: 마켓 식별자
+          example: ALIEXPRESS
+        external_product_id:
+          type: string
+          description: 외부 상품 식별자
+        original_url:
+          type: string
+          description: 최초 원본 URL
+        title:
+          type: string
+          description: 상품명
+        main_image_url:
+          type: string
+          description: 대표 이미지 URL
+        current_price:
+          type: string
+          description: 현재 가격
+        currency:
+          type: string
+          description: 가격 통화
+        product_url:
+          type: string
+          description: 외부 상품 상세 URL
+        promotion_link:
+          type: string
+          nullable: true
+          description: Affiliate 프로모션 링크. 없으면 빈 문자열. 프론트에서 빈 값이면 product_url 사용.
+        is_tracked_by_user:
+          type: boolean
+          description: 요청 유저가 현재 저장 중인지 여부
+        tracked_item_id:
+          type: string
+          nullable: true
+          description: 저장 중인 경우 유저 저장 상품 ID
+        price_histories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductPriceHistoryData'
+        skus:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSKUData'
+    ProductDetailResponse:
+      type: object
+      description: 상품 상세 조회 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/ProductDetailData'
+    SelectSKURequest:
+      type: object
+      description: Tracked Item SKU 선택 요청
+      required:
+        - user_id
+        - sku_id
+      properties:
+        user_id:
+          type: string
+          description: 내부 사용자 ID
+          example: user_01
+        sku_id:
+          type: string
+          description: 선택할 SKU ID
+          example: sku_01
+    ProductSKUData:
+      type: object
+      description: 상품 SKU(옵션) 데이터
+      required:
+        - id
+        - external_sku_id
+        - sku_name
+        - color
+        - size
+        - price
+        - original_price
+        - currency
+        - image_url
+      properties:
+        id:
+          type: string
+          description: SKU 고유 ID
+        external_sku_id:
+          type: string
+          description: 외부 SKU 식별자
+        sku_name:
+          type: string
+          description: SKU 이름
+        color:
+          type: string
+          description: 색상
+        size:
+          type: string
+          description: 사이즈
+        price:
+          type: string
+          description: 현재 가격
+        original_price:
+          type: string
+          description: 원래 가격
+        currency:
+          type: string
+          description: 가격 통화
+          example: KRW
+        image_url:
+          type: string
+          description: SKU 이미지 URL
+        origin_sku_id:
+          type: string
+          description: 외부 마켓 원본 SKU ID
+        sku_properties:
+          type: string
+          description: 'SKU 속성 JSON 문자열 예: [{"색상":"000000","크기":"XXXL"}]'
+    HotProductItem:
+      type: object
+      description: 인기 상품 항목
+      required:
+        - product_id
+        - market
+        - title
+        - main_image_url
+        - current_price
+        - currency
+        - product_url
+      properties:
+        product_id:
+          type: string
+          description: 내부 상품 ID
+        market:
+          type: string
+          description: 마켓 식별자
+          example: ALIEXPRESS
+        title:
+          type: string
+          description: 상품명
+        main_image_url:
+          type: string
+          description: 대표 이미지 URL
+        current_price:
+          type: string
+          description: 현재 가격
+          example: '8335'
+        currency:
+          type: string
+          description: 가격 통화
+          example: KRW
+        product_url:
+          type: string
+          description: 외부 상품 상세 URL
+    ListHotProductsResponse:
+      type: object
+      description: 인기 상품 목록 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HotProductItem'
+    ListProductSKUsResponse:
+      type: object
+      description: 상품 SKU 목록 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSKUData'
+    RegisterPriceAlertRequest:
+      type: object
+      description: 가격 알림 등록 요청
+      properties:
+        channel:
+          type: string
+          description: '알림 채널 (기본값: EMAIL)'
+          example: EMAIL
+          enum:
+            - EMAIL
+    PriceAlertData:
+      type: object
+      description: 가격 알림 데이터
+      required:
+        - id
+        - product_id
+        - channel
+        - enabled
+        - created_at
+      properties:
+        id:
+          type: string
+          description: 알림 고유 ID
+        product_id:
+          type: string
+          description: 대상 상품 ID
+        channel:
+          type: string
+          description: 알림 채널
+          example: EMAIL
+        enabled:
+          type: boolean
+          description: 알림 활성화 여부
+        created_at:
+          type: string
+          description: 생성 일시 (ISO 8601)
+          example: '2026-04-01T12:00:00Z'
+    PriceAlertResponse:
+      type: object
+      description: 가격 알림 등록 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          $ref: '#/components/schemas/PriceAlertData'
+    ListPriceAlertsResponse:
+      type: object
+      description: 가격 알림 목록 응답
+      required:
+        - result
+        - data
+      properties:
+        result:
+          $ref: '#/components/schemas/ResultType'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceAlertData'

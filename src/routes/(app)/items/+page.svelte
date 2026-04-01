@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { PageProps } from './$types';
+	import { invalidate } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte';
 	import ItemCard from '$lib/components/ItemCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
@@ -7,7 +9,8 @@
 	import { resolve } from '$app/paths';
 	import { createItemsPage } from './items-page.svelte';
 
-	const page = createItemsPage();
+	const { data }: PageProps = $props();
+	const page = createItemsPage(() => data);
 </script>
 
 <div class="space-y-10 p-8 sm:p-10 lg:p-14">
@@ -127,7 +130,7 @@
 			<p class="text-sm text-rose-600">{page.model.listError}</p>
 			<button
 				type="button"
-				onclick={() => page.loadItems()}
+				onclick={() => invalidate('/api/v1/tracked-items')}
 				class="mt-4 rounded-2xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
 				style="background: linear-gradient(to right, #292524, #3f3f46);"
 			>
@@ -186,6 +189,28 @@
 				/>
 			{/each}
 		</div>
+
+		<!-- Load more -->
+		{#if page.model.hasMore}
+			<div class="flex justify-center py-4">
+				<button
+					type="button"
+					onclick={page.loadMore}
+					disabled={page.model.isLoadingMore}
+					class="inline-flex items-center gap-2 rounded-2xl border border-zinc-200/60 bg-white/60 px-6 py-3 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-white hover:shadow-sm disabled:opacity-50"
+				>
+					{#if page.model.isLoadingMore}
+						<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+						</svg>
+						{t('home_loading')}
+					{:else}
+						{t('items_load_more')}
+					{/if}
+				</button>
+			</div>
+		{/if}
 	{/if}
 </div>
 

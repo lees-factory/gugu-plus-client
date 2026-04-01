@@ -1,12 +1,11 @@
 import type { Pathname } from '$app/types';
 import { page } from '$app/state';
-import { goto } from '$app/navigation';
+import { goto, invalidate } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
 import { trackedItemsApi } from '$lib/api/tracked-items';
-import { invalidateTrackedItemsCache } from '$lib/api/tracked-items-cache';
 import { t } from '$lib/i18n/t';
-import type { AddItemData } from '$lib/types';
+import type { AddItemEntry } from '$lib/types';
 
 type LayoutData = { userEmail: string | null; userId: string | null };
 
@@ -74,15 +73,19 @@ export function createLayoutModel(getData: () => LayoutData) {
 		}
 	}
 
-	async function handleQuickAdd(itemData: AddItemData) {
-		if (!itemData.commerce.ok) throw new Error('유효한 상품 URL이 아닙니다.');
-		const res = await trackedItemsApi.create({
-			original_url: itemData.commerce.original_url,
-			provider_commerce: itemData.commerce.provider_commerce,
-			external_product_id: itemData.commerce.external_product_id
-		});
+	async function handleQuickAdd(entries: AddItemEntry[]) {
+		const items = entries
+			.map((e) => e.commerce)
+			.filter((c): c is Extract<typeof c, { ok: true }> => c.ok)
+			.map((c) => ({
+				original_url: c.original_url,
+				provider_commerce: c.provider_commerce,
+				external_product_id: c.external_product_id
+			}));
+		if (items.length === 0) throw new Error(t('no_valid_url'));
+		const res = await trackedItemsApi.create(items);
 		if (res.error) throw new Error(res.error);
-		invalidateTrackedItemsCache();
+		await invalidate('/api/v1/tracked-items');
 		await goto(resolve('/items'));
 	}
 

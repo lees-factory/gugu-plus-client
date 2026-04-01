@@ -106,6 +106,7 @@
 						type="text"
 						bind:value={layout.model.searchValue}
 						placeholder={t('search_placeholder')}
+						autocomplete="off"
 						onpaste={layout.handleSearchPaste}
 						onkeydown={layout.handleSearchKeydown}
 						class="h-12 w-full rounded-2xl border border-zinc-200/60 bg-white/50 pr-4 pl-11 text-sm font-normal transition-all duration-200 outline-none placeholder:text-zinc-400 focus:border-stone-300 focus:bg-white focus:ring-4 focus:ring-stone-100/50"

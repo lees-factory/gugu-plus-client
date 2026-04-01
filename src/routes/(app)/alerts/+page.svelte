@@ -1,15 +1,12 @@
 <script lang="ts">
+	import type { PageProps } from './$types';
 	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
 	import { marketToSite } from '$lib/commerce';
-	import { onMount } from 'svelte';
 	import { createAlertsPage } from './alerts-page.svelte';
 
-	const page = createAlertsPage();
-
-	onMount(() => {
-		page.load();
-	});
+	const { data }: PageProps = $props();
+	const page = createAlertsPage(() => data);
 </script>
 
 <div class="space-y-10 p-8 sm:p-10 lg:p-14">
