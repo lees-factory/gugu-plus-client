@@ -2,7 +2,6 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { getContext } from 'svelte';
-	import { auth } from '$lib/stores/auth.svelte';
 	import { t } from '$lib/i18n/t';
 
 	let {
@@ -16,7 +15,7 @@
 	const navItems = $derived([
 		{ path: '/' as const, label: t('nav_home') },
 		{ path: '/items' as const, label: t('nav_tracked_items') },
-		{ path: '/plan' as const, label: t('nav_plan') },
+		{ path: '/alerts' as const, label: t('alerts_title') },
 		{ path: '/settings' as const, label: t('nav_settings') }
 	]);
 
@@ -131,7 +130,7 @@
 								stroke-linejoin="round"
 							/>
 						</svg>
-					{:else if item.path === '/plan'}
+					{:else if item.path === '/alerts'}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -145,7 +144,7 @@
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+								d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
 							/>
 						</svg>
 					{:else if item.path === '/settings'}
@@ -224,36 +223,20 @@
 				</p>
 			</div>
 
-			<!-- Plan info -->
-			{#if auth.user}
-				<div
-					class="flex items-center justify-between rounded-xl px-3 py-2.5"
-					style="background-color: #f5f5f4;"
-				>
-					<div class="text-xs text-zinc-600">
-						{t('sidebar_plan_prefix')}
-						<span class="font-semibold text-zinc-900 capitalize">{auth.plan.type}</span>
-					</div>
-					{#if auth.plan.type === 'free'}
-						<a
-							href={resolve('/plan')}
-							class="text-xs font-semibold text-stone-700 transition hover:text-stone-900"
-						>
-							{t('sidebar_upgrade_pro')} →
-						</a>
-					{/if}
-				</div>
-			{/if}
 		</div>
 	{:else}
-		<!-- Collapsed: just upgrade icon -->
+		<!-- Collapsed: add button -->
 		<div
 			class="flex shrink-0 flex-col items-center gap-3 p-3"
 			style="border-top: 1px solid rgba(0, 0, 0, 0.06);"
 		>
-			<a
-				href={resolve('/plan')}
-				title={t('sidebar_upgrade_pro')}
+			<button
+				type="button"
+				onclick={() => {
+					onClose();
+					openQuickAdd();
+				}}
+				title={t('nav_add_item')}
 				class="flex size-10 items-center justify-center rounded-2xl text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5"
 				style="background: linear-gradient(135deg, #292524 0%, #3f3f46 100%);"
 			>
@@ -267,7 +250,7 @@
 				>
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
 				</svg>
-			</a>
+			</button>
 		</div>
 	{/if}
 </aside>

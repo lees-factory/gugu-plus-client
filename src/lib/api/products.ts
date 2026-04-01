@@ -1,4 +1,4 @@
-import { apiGet } from './client';
+import { apiGet, apiPost, apiDelete } from './client';
 import { ENDPOINTS } from './endpoints';
 
 export type ProductPriceHistory = {
@@ -17,9 +17,7 @@ export type ProductSku = {
 	price: string;
 	original_price: string;
 	currency: string;
-	/** 옵션별 썸네일; 없으면 빈 문자열 등으로 올 수 있음 */
-	image_url?: string;
-	/** JSON 배열 문자열, 원소는 `{ "색상"?, "크기"? }` 형태 */
+	image_url: string;
 	sku_properties?: string;
 	origin_sku_id?: string;
 };
@@ -34,8 +32,9 @@ export type ProductDetailData = {
 	current_price: string;
 	currency: string;
 	product_url: string;
+	promotion_link?: string | null;
 	is_tracked_by_user: boolean;
-	tracked_item_id: string;
+	tracked_item_id?: string | null;
 	price_histories: ProductPriceHistory[];
 	skus: ProductSku[];
 };
@@ -50,10 +49,42 @@ export type ProductSkusListSuccessResponse = {
 	data: ProductSku[];
 };
 
+export type PriceAlertData = {
+	id: string;
+	product_id: string;
+	channel: string;
+	enabled: boolean;
+	created_at: string;
+};
+
+export type PriceAlertResponse = {
+	result: string;
+	data: PriceAlertData;
+};
+
+export type SuccessResponse = {
+	result: string;
+};
+
+export type ListPriceAlertsResponse = {
+	result: string;
+	data: PriceAlertData[];
+};
+
+export const alertsApi = {
+	list: () => apiGet<ListPriceAlertsResponse>(ENDPOINTS.alerts.list)
+};
+
 export const productsApi = {
 	get: (productId: string) =>
 		apiGet<ProductDetailSuccessResponse>(ENDPOINTS.products.detail(productId)),
 
 	listSkus: (productId: string) =>
-		apiGet<ProductSkusListSuccessResponse>(ENDPOINTS.products.skus(productId))
+		apiGet<ProductSkusListSuccessResponse>(ENDPOINTS.products.skus(productId)),
+
+	registerAlert: (productId: string) =>
+		apiPost<PriceAlertResponse>(ENDPOINTS.products.alert(productId), { channel: 'EMAIL' }),
+
+	unregisterAlert: (productId: string) =>
+		apiDelete<SuccessResponse>(ENDPOINTS.products.alert(productId))
 };

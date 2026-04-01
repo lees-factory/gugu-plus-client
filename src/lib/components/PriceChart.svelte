@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
 	import type { ChartEntry } from './price-chart.svelte';
 	import { createPriceChartModel } from './price-chart.svelte';
@@ -12,40 +11,19 @@
 <!-- 기간 선택 탭 -->
 <div class="mb-4 flex items-center gap-1">
 	{#each chart.periods as p (p.value)}
-		{@const locked = p.proOnly && !chart.isPro}
 		<button
 			type="button"
 			onclick={() => {
-				if (!locked) chart.selectedPeriod = p.value;
+				chart.selectedPeriod = p.value;
 			}}
 			class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition"
 			style="
 				background-color: {chart.selectedPeriod === p.value ? '#2d2d2a' : '#f7f6f3'};
-				color: {chart.selectedPeriod === p.value
-				? '#ffffff'
-				: locked
-					? 'rgba(107,107,101,0.4)'
-					: '#6b6b65'};
-				cursor: {locked ? 'default' : 'pointer'};
+				color: {chart.selectedPeriod === p.value ? '#ffffff' : '#6b6b65'};
+				cursor: pointer;
 			"
 		>
 			{p.label}
-			{#if locked}
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.5"
-					style="width:10px;height:10px;opacity:0.4;"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-					/>
-				</svg>
-			{/if}
 		</button>
 	{/each}
 </div>
@@ -142,8 +120,8 @@
 			</text>
 		{/if}
 
-		<!-- 최저·최고 마커 (Pro) -->
-		{#if chart.isPro && chart.svgPoints.length > 0}
+		<!-- 최저·최고 마커 -->
+		{#if chart.svgPoints.length > 1}
 			{#if chart.minIdx >= 0}
 				<circle
 					cx={chart.svgPoints[chart.minIdx].x}
@@ -247,7 +225,7 @@
 </div>
 
 <!-- 통계 -->
-{#if chart.isPro && chart.stats}
+{#if chart.stats}
 	<div class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_min')}</p>
@@ -275,51 +253,6 @@
 			>
 				{chart.stats.change >= 0 ? '+' : ''}{chart.stats.change.toFixed(1)}%
 			</p>
-		</div>
-	</div>
-{:else if !chart.isPro && chart.stats}
-	<!-- Free 플랜: 통계 잠금 -->
-	<div class="relative mt-4">
-		<div
-			class="grid grid-cols-2 gap-2.5 sm:grid-cols-4"
-			style="filter: blur(5px); pointer-events: none; user-select: none;"
-		>
-			{#each [t('chart_stat_min'), t('chart_stat_max'), t('chart_stat_avg'), t('chart_stat_change')] as label (label)}
-				<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
-					<p class="mb-1.5 text-xs" style="color: #9b9b95;">{label}</p>
-					<p class="text-sm font-semibold" style="color: #1a1a17;">₩000,000</p>
-				</div>
-			{/each}
-		</div>
-		<div class="absolute inset-0 flex items-center justify-center">
-			<div
-				class="flex items-center gap-2 rounded-xl px-4 py-2.5"
-				style="background: white; border: 1px solid rgba(45,45,42,0.1); box-shadow: 0 2px 12px rgba(0,0,0,0.08);"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					class="size-3.5 shrink-0"
-					style="color: #6b6b65;"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-					/>
-				</svg>
-				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_lock')} </span>
-				<a
-					href={resolve('/plan')}
-					class="text-xs font-semibold"
-					style="color: #1a1a17; text-decoration: underline; text-underline-offset: 2px;"
-					>{t('chart_pro_link')}</a
-				>
-				<span class="text-xs" style="color: #6b6b65;">{t('chart_pro_suffix')}</span>
-			</div>
 		</div>
 	</div>
 {/if}

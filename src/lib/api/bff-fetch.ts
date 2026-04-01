@@ -7,7 +7,7 @@ import { API_BASE, COOKIE_OPTS } from './config';
 import type { Cookies } from '@sveltejs/kit';
 import type { AuthTokens } from './auth';
 
-let refreshPromise: Promise<AuthTokens | null> | null = null;
+const refreshMap = new WeakMap<Cookies, Promise<AuthTokens | null>>();
 
 async function doRefresh(refreshToken: string): Promise<AuthTokens | null> {
 	const res = await fetch(`${API_BASE}/v1/auth/refresh`, {
@@ -31,12 +31,12 @@ async function refreshAccessToken(cookies: Cookies): Promise<string | null> {
 	if (!refreshToken) return null;
 
 	// 이미 진행 중인 refresh가 있으면 대기
-	if (!refreshPromise) {
-		refreshPromise = doRefresh(refreshToken);
+	if (!refreshMap.has(cookies)) {
+		refreshMap.set(cookies, doRefresh(refreshToken));
 	}
 
 	try {
-		const tokens = await refreshPromise;
+		const tokens = await refreshMap.get(cookies)!;
 		if (!tokens?.access_token) {
 			// refresh 실패 → 세션 만료
 			cookies.delete('session', { path: '/' });
@@ -53,7 +53,7 @@ async function refreshAccessToken(cookies: Cookies): Promise<string | null> {
 
 		return tokens.access_token;
 	} finally {
-		refreshPromise = null;
+		refreshMap.delete(cookies);
 	}
 }
 

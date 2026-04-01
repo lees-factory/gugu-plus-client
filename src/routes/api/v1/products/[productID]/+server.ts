@@ -34,5 +34,8 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 	}
 
 	const data = await res.json().catch(() => ({}));
-	return json(data, { status: res.status });
+	return json(data, {
+		status: res.status,
+		headers: res.ok ? { 'Cache-Control': 'private, max-age=60' } : undefined
+	});
 };

@@ -124,6 +124,37 @@
 		</div>
 	</div>
 
+	<!-- ── Data policy note (prominent position) ─────────────────── -->
+	<div
+		class="flex items-start gap-4 rounded-3xl border border-stone-200/80 bg-gradient-to-r from-stone-50 to-zinc-50 p-6 shadow-sm"
+	>
+		<div
+			class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-stone-800 to-zinc-700 text-white shadow-sm"
+		>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="size-5"
+				aria-hidden="true"
+			>
+				<polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+				<polyline points="16 7 22 7 22 13" />
+			</svg>
+		</div>
+		<div>
+			<p class="text-sm font-semibold text-zinc-900">
+				{t('plan_data_policy_title')}
+			</p>
+			<p class="mt-1.5 text-sm leading-relaxed text-zinc-600">
+				{t('plan_data_policy_desc')}
+			</p>
+		</div>
+	</div>
+
 	<!-- ── Plan cards ─────────────────────────────────────────────── -->
 	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 		<!-- Free -->
@@ -317,37 +348,6 @@
 					</button>
 				{/if}
 			</div>
-		</div>
-	</div>
-
-	<!-- ── Data policy note ───────────────────────────────────────── -->
-	<div
-		class="flex items-start gap-4 rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
-	>
-		<div
-			class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-100 to-stone-100 text-zinc-600 shadow-sm"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="size-5"
-				aria-hidden="true"
-			>
-				<polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-				<polyline points="16 7 22 7 22 13" />
-			</svg>
-		</div>
-		<div>
-			<p class="text-sm font-semibold text-zinc-900">
-				{t('plan_data_policy_title')}
-			</p>
-			<p class="mt-1 text-xs leading-relaxed text-zinc-500">
-				{t('plan_data_policy_desc')}
-			</p>
 		</div>
 	</div>
 

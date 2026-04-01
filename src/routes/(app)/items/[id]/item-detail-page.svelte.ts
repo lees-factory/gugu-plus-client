@@ -1,6 +1,5 @@
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
@@ -9,6 +8,8 @@ import {
 } from '$lib/product-detail/map-product';
 import type { TrackedItemDetailData } from '$lib/api/tracked-items';
 import { trackedItemsApi } from '$lib/api/tracked-items';
+import { invalidateTrackedItemsCache } from '$lib/api/tracked-items-cache';
+import { productsApi } from '$lib/api/products';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
 
@@ -28,17 +29,17 @@ export type MatrixColorOption = { value: string; image: string | null };
 export function createItemDetailPage(
 	getTrackedItem: () => TrackedItemDetailData | null | undefined
 ) {
-	const item = $derived(
-		getTrackedItem()
-			? mapTrackedItemDetail(getTrackedItem() as TrackedItemDetailData)
-			: null
-	);
+	const item = $derived.by(() => {
+		const raw = getTrackedItem();
+		return raw ? mapTrackedItemDetail(raw) : null;
+	});
 
 	const ui = $state({
 		selectedSkuId: '',
 		propColor: '',
 		propSize: '',
 		alertEnabled: false,
+		alertLoading: false,
 		imgError: false,
 		deleting: false
 	});
@@ -52,9 +53,31 @@ export function createItemDetailPage(
 		!!item && item.skus.some((s) => s.propSize != null && s.propSize !== '')
 	);
 
+	/** 컬러가 1종인데 이미지가 여러 종 → 이미지(디자인)로 그룹핑 */
+	const groupByImage = $derived.by(() => {
+		if (!item?.variantMatrix) return false;
+		const uniqueColors = new Set(item.skus.map((s) => s.propColor).filter(Boolean));
+		if (uniqueColors.size > 1) return false;
+		const uniqueImages = new Set(item.skus.map((s) => s.image).filter(Boolean));
+		return uniqueImages.size > 1;
+	});
+
 	const matrixColorOptions = $derived.by<MatrixColorOption[]>(() => {
 		if (!item?.variantMatrix) return [];
-		const seen = new SvelteSet<string>();
+
+		if (groupByImage) {
+			const seen = new Set<string>();
+			const opts: MatrixColorOption[] = [];
+			for (const s of item.skus) {
+				const img = s.image;
+				if (!img || seen.has(img)) continue;
+				seen.add(img);
+				opts.push({ value: img, image: img });
+			}
+			return opts;
+		}
+
+		const seen = new Set<string>();
 		const opts: MatrixColorOption[] = [];
 		for (const s of item.skus) {
 			const v = s.propColor;
@@ -66,13 +89,15 @@ export function createItemDetailPage(
 		return opts;
 	});
 
-	/** $effect 전 첫 프레임에 ui.propColor가 ''이면 필터가 비어 크기 줄이 통째로 사라짐 → 첫 SKU 색상으로 폴백 */
-	const effectivePropColor = $derived(ui.propColor || item?.skus[0]?.propColor || '');
+	const effectivePropColor = $derived.by(() => {
+		if (groupByImage) return ui.propColor || item?.skus[0]?.image || '';
+		return ui.propColor || item?.skus[0]?.propColor || '';
+	});
 
 	const matrixSizeOptions = $derived.by(() => {
 		if (!item?.variantMatrix || !needSize) return [] as string[];
 		const sizes = item.skus.map((s) => s.propSize).filter((x): x is string => !!x && x !== '');
-		const uniq = [...new SvelteSet(sizes)];
+		const uniq = [...new Set(sizes)];
 		uniq.sort((a, b) => {
 			const ra = getSizeRank(a);
 			const rb = getSizeRank(b);
@@ -83,13 +108,15 @@ export function createItemDetailPage(
 	});
 
 	const availableSizesForColor = $derived.by(() => {
-		if (!item?.variantMatrix || !needSize) return new SvelteSet<string>();
-		if (!needColor) return new SvelteSet(matrixSizeOptions);
-		return new SvelteSet(
-			item.skus
-				.filter((s) => s.propColor === effectivePropColor)
-				.map((s) => s.propSize)
-				.filter((x): x is string => !!x && x !== '')
+		if (!item?.variantMatrix || !needSize) return new Set<string>();
+		if (!needColor && !groupByImage) return new Set(matrixSizeOptions);
+
+		const filtered = groupByImage
+			? item.skus.filter((s) => s.image === effectivePropColor)
+			: item.skus.filter((s) => s.propColor === effectivePropColor);
+
+		return new Set(
+			filtered.map((s) => s.propSize).filter((x): x is string => !!x && x !== '')
 		);
 	});
 
@@ -102,7 +129,7 @@ export function createItemDetailPage(
 	});
 
 	const showColorRow = $derived(
-		!!item?.variantMatrix && needColor && matrixColorOptions.length > 1
+		!!item?.variantMatrix && (needColor || groupByImage) && matrixColorOptions.length > 1
 	);
 	const showSizeRow = $derived(!!item?.variantMatrix && needSize && matrixSizeOptions.length > 1);
 
@@ -122,7 +149,7 @@ export function createItemDetailPage(
 			prevProductId = item.productId;
 			const first = item.skus[0];
 			if (item.variantMatrix) {
-				ui.propColor = first.propColor ?? '';
+				ui.propColor = groupByImage ? (first.image ?? '') : (first.propColor ?? '');
 				ui.propSize = first.propSize ?? '';
 			}
 			ui.selectedSkuId = first?.skuId ?? '';
@@ -151,7 +178,9 @@ export function createItemDetailPage(
 
 		if (item.variantMatrix) {
 			const match = item.skus.find((s) => {
-				if (needColor) {
+				if (groupByImage) {
+					if (!s.image || s.image !== effectivePropColor) return false;
+				} else if (needColor) {
 					if (s.propColor == null || s.propColor === '') return false;
 					if (s.propColor !== effectivePropColor) return false;
 				}
@@ -188,6 +217,43 @@ export function createItemDetailPage(
 		ui.imgError = false;
 	});
 
+	type PriceInsight = {
+		level: 'good' | 'normal' | 'high';
+		percentile: number;
+		vsAvg: number;
+		vsMin: number;
+		minPrice: number;
+		maxPrice: number;
+		avgPrice: number;
+		allSame: boolean;
+	};
+
+	const priceInsight = $derived.by<PriceInsight | null>(() => {
+		if (!item || item.priceHistory.length <= 1) return null;
+
+		const prices = item.priceHistory.map((e) => e.price).filter((p) => p > 0);
+		if (prices.length <= 1) return null;
+
+		const minPrice = Math.min(...prices);
+		const maxPrice = Math.max(...prices);
+		const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+		const allSame = minPrice === maxPrice;
+
+		const current = displayPrice > 0 ? displayPrice : prices[0];
+		const range = maxPrice - minPrice;
+		const percentile = allSame ? 50 : Math.round(((current - minPrice) / range) * 100);
+		const vsAvg = avgPrice > 0 ? Math.round(((current - avgPrice) / avgPrice) * 100) : 0;
+		const vsMin = minPrice > 0 ? Math.round(((current - minPrice) / minPrice) * 100) : 0;
+
+		let level: 'good' | 'normal' | 'high';
+		if (percentile <= 30) level = 'good';
+		else if (percentile >= 70) level = 'high';
+		else level = 'normal';
+
+		return { level, percentile, vsAvg, vsMin, minPrice, maxPrice, avgPrice, allSame };
+	});
+
 	const siteBadgeStyle = $derived(
 		SITE_COLORS[item?.site ?? ''] ?? { bg: '#f7f6f3', text: '#6b6b65' }
 	);
@@ -206,8 +272,28 @@ export function createItemDetailPage(
 		ui.propSize = value;
 	}
 
-	function toggleAlert() {
-		ui.alertEnabled = !ui.alertEnabled;
+	async function toggleAlert() {
+		if (!item?.productId || ui.alertLoading) return;
+		ui.alertLoading = true;
+		try {
+			if (ui.alertEnabled) {
+				const res = await productsApi.unregisterAlert(item.productId);
+				if (res.error) {
+					alert(t('alert_toggle_fail'));
+				} else {
+					ui.alertEnabled = false;
+				}
+			} else {
+				const res = await productsApi.registerAlert(item.productId);
+				if (res.error) {
+					alert(t('alert_toggle_fail'));
+				} else {
+					ui.alertEnabled = true;
+				}
+			}
+		} finally {
+			ui.alertLoading = false;
+		}
 	}
 
 	function onImageError() {
@@ -224,6 +310,7 @@ export function createItemDetailPage(
 				alert(res.error);
 				return;
 			}
+			invalidateTrackedItemsCache();
 			await goto(resolve('/items'));
 		} finally {
 			ui.deleting = false;
@@ -247,6 +334,9 @@ export function createItemDetailPage(
 		},
 		get needColor() {
 			return needColor;
+		},
+		get groupByImage() {
+			return groupByImage;
 		},
 		get needSize() {
 			return needSize;
@@ -292,6 +382,9 @@ export function createItemDetailPage(
 		},
 		get discountPct() {
 			return discountPct;
+		},
+		get priceInsight() {
+			return priceInsight;
 		},
 		get siteBadgeStyle() {
 			return siteBadgeStyle;

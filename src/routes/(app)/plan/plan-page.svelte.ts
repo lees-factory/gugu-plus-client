@@ -27,14 +27,6 @@ export function createPlanPage() {
 
 	const currentPlan = $derived(auth.plan.type);
 
-	const monthlyToggleStyle = $derived(
-		`background-color: ${model.billingCycle === 'monthly' ? '#ffffff' : 'transparent'}; color: ${model.billingCycle === 'monthly' ? '#1a1a17' : '#6b6b65'}; box-shadow: ${model.billingCycle === 'monthly' ? '0 1px 4px rgba(45,45,42,0.08)' : 'none'};`
-	);
-
-	const yearlyToggleStyle = $derived(
-		`background-color: ${model.billingCycle === 'yearly' ? '#ffffff' : 'transparent'}; color: ${model.billingCycle === 'yearly' ? '#1a1a17' : '#6b6b65'}; box-shadow: ${model.billingCycle === 'yearly' ? '0 1px 4px rgba(45,45,42,0.08)' : 'none'};`
-	);
-
 	const upgradeButtonLabel = $derived(
 		model.loading
 			? t('plan_upgrading')
@@ -102,12 +94,6 @@ export function createPlanPage() {
 		model,
 		get currentPlan() {
 			return currentPlan;
-		},
-		get monthlyToggleStyle() {
-			return monthlyToggleStyle;
-		},
-		get yearlyToggleStyle() {
-			return yearlyToggleStyle;
 		},
 		get upgradeButtonLabel() {
 			return upgradeButtonLabel;

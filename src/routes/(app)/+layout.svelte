@@ -5,6 +5,7 @@
 	import AppFooter from '$lib/components/AppFooter.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
 	import { hydratePreferencesFromStorage } from '$lib/stores/preferences.svelte';
+	import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import { t } from '$lib/i18n/t';
 	import { onMount, setContext } from 'svelte';
 	import { createLayoutModel } from './app-layout.svelte';
@@ -14,6 +15,14 @@
 	const layout = createLayoutModel(() => data);
 
 	let userMenuOpen = $state(false);
+	let localeModalOpen = $state(false);
+
+	const currentLocale = $derived(getLocale());
+
+	function selectLocale(locale: 'en' | 'ko') {
+		if (getLocale() !== locale) setLocale(locale);
+		localeModalOpen = false;
+	}
 
 	let mainEl: HTMLElement | undefined = $state();
 
@@ -53,7 +62,7 @@
 			: 'md:ml-[280px]'}"
 	>
 		<!-- Sticky glass header -->
-		<header class="sticky top-0 z-10 border-b border-zinc-200/50 bg-white/70 backdrop-blur-2xl">
+		<header class="sticky top-0 z-10 border-b border-zinc-200/50 bg-[#F5F4F1]">
 			<div class="flex h-20 items-center gap-4 px-4 sm:px-8">
 				<button
 					type="button"
@@ -106,6 +115,30 @@
 				<div class="flex-1"></div>
 
 				<!-- Right actions -->
+				<div class="flex shrink-0 items-center gap-3">
+					<!-- Locale globe button -->
+					<button
+						type="button"
+						onclick={() => (localeModalOpen = true)}
+						title={t('locale_switch_label')}
+						class="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 text-zinc-500 transition-all duration-200 hover:bg-zinc-50 hover:text-zinc-900"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.5"
+							class="size-[18px]"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-2.247m0 0A8.966 8.966 0 0 1 3 12c0-1.264.26-2.467.732-3.558"
+							/>
+						</svg>
+					</button>
+				</div>
 				<div class="flex shrink-0 items-center gap-3">
 					{#if layout.userInitial !== '?'}
 						<div class="relative">
@@ -174,7 +207,7 @@
 
 	<!-- Mobile bottom nav -->
 	<div
-		class="fixed right-0 bottom-0 left-0 z-30 border-t border-zinc-200/50 bg-white/80 backdrop-blur-2xl md:hidden"
+		class="fixed right-0 bottom-0 left-0 z-30 border-t border-zinc-200/50 bg-[#F5F4F1] md:hidden"
 	>
 		<div class="flex items-center justify-around px-2 py-2">
 			{#each layout.mobileNavItems as item (item.path)}
@@ -213,7 +246,7 @@
 								stroke-linejoin="round"
 							/>
 						</svg>
-					{:else if item.path === '/plan'}
+					{:else if item.path === '/alerts'}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -225,7 +258,7 @@
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+								d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
 							/>
 						</svg>
 					{:else if item.path === '/settings'}
@@ -255,6 +288,61 @@
 		</div>
 	</div>
 </div>
+
+<!-- Locale Modal -->
+{#if localeModalOpen}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		style="background-color: rgba(0,0,0,0.4);"
+		role="presentation"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) localeModalOpen = false;
+		}}
+	>
+		<div class="w-full max-w-xs overflow-hidden rounded-3xl bg-white shadow-xl">
+			<div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5">
+				<h3 class="text-base font-semibold text-zinc-900">{t('locale_switch_label')}</h3>
+				<button
+					type="button"
+					onclick={() => (localeModalOpen = false)}
+					class="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900"
+				>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+			<div class="p-2">
+				<button
+					type="button"
+					onclick={() => selectLocale('ko')}
+					class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition hover:bg-zinc-50"
+					style="background-color: {currentLocale === 'ko' ? '#f5f5f4' : 'transparent'};"
+				>
+					<span class="text-sm font-medium text-zinc-900">한국어</span>
+					{#if currentLocale === 'ko'}
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-4" style="color: #2d2d2a;" aria-hidden="true">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+						</svg>
+					{/if}
+				</button>
+				<button
+					type="button"
+					onclick={() => selectLocale('en')}
+					class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition hover:bg-zinc-50"
+					style="background-color: {currentLocale === 'en' ? '#f5f5f4' : 'transparent'};"
+				>
+					<span class="text-sm font-medium text-zinc-900">English</span>
+					{#if currentLocale === 'en'}
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-4" style="color: #2d2d2a;" aria-hidden="true">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+						</svg>
+					{/if}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <AddItemModal
 	open={layout.model.quickAddOpen}

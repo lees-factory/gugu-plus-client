@@ -3,19 +3,14 @@ import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
 import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
-export const GET: RequestHandler = async ({ params, cookies }) => {
+export const GET: RequestHandler = async ({ cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) {
-		throw error(401, 'Unauthorized');
-	}
-
-	const productID = params.productID;
-	const target = `${API_BASE}/v1/products/${encodeURIComponent(productID)}/skus`;
+	if (!accessToken) throw error(401, 'Unauthorized');
 
 	let res: Response;
 	try {
 		res = await bffFetch(
-			target,
+			`${API_BASE}/v1/alerts`,
 			{ headers: { Authorization: `Bearer ${accessToken}` } },
 			cookies
 		);
@@ -26,8 +21,5 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 	}
 
 	const data = await res.json().catch(() => ({}));
-	return json(data, {
-		status: res.status,
-		headers: res.ok ? { 'Cache-Control': 'private, max-age=60' } : undefined
-	});
+	return json(data, { status: res.status });
 };

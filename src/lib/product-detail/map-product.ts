@@ -52,10 +52,11 @@ function skuImageFromApi(s: ProductSku): string | null {
 }
 
 /**
- * `[{ "색상": "…", "크기": "…" }]` 형태 문자열 파싱.
- * 키는 `색상` / `크기` 만 사용.
+ * `sku_properties` 파싱. 두 가지 형식 지원:
+ * 1) JSON: `[{ "색상": "…", "크기": "…" }]`
+ * 2) 세미콜론 구분: `"색상:Black;크기:XL"`
  */
-function parseSkuPropertiesJson(raw: string | undefined | null): {
+function parseSkuProperties(raw: string | undefined | null): {
 	color: string | null;
 	size: string | null;
 	ok: boolean;
@@ -63,20 +64,41 @@ function parseSkuPropertiesJson(raw: string | undefined | null): {
 	if (raw == null || !String(raw).trim()) {
 		return { color: null, size: null, ok: false };
 	}
-	try {
-		const arr = JSON.parse(String(raw)) as unknown;
-		if (!Array.isArray(arr) || arr.length === 0) return { color: null, size: null, ok: false };
-		const obj = arr[0];
-		if (!obj || typeof obj !== 'object') return { color: null, size: null, ok: false };
-		const rec = obj as Record<string, unknown>;
-		const c = rec[PROP_COLOR];
-		const z = rec[PROP_SIZE];
-		const color = typeof c === 'string' && c.trim() ? c.trim() : null;
-		const size = typeof z === 'string' && z.trim() ? z.trim() : null;
-		return { color, size, ok: true };
-	} catch {
-		return { color: null, size: null, ok: false };
+	const str = String(raw).trim();
+
+	// JSON 형식 시도
+	if (str.startsWith('[') || str.startsWith('{')) {
+		try {
+			const arr = JSON.parse(str) as unknown;
+			if (!Array.isArray(arr) || arr.length === 0) return { color: null, size: null, ok: false };
+			const obj = arr[0];
+			if (!obj || typeof obj !== 'object') return { color: null, size: null, ok: false };
+			const rec = obj as Record<string, unknown>;
+			const c = rec[PROP_COLOR];
+			const z = rec[PROP_SIZE];
+			const color = typeof c === 'string' && c.trim() ? c.trim() : null;
+			const size = typeof z === 'string' && z.trim() ? z.trim() : null;
+			return { color, size, ok: true };
+		} catch {
+			return { color: null, size: null, ok: false };
+		}
 	}
+
+	// 세미콜론 구분 형식: "색상:Black;크기:XL"
+	const pairs = str.split(';');
+	let color: string | null = null;
+	let size: string | null = null;
+	for (const pair of pairs) {
+		const sep = pair.indexOf(':');
+		if (sep < 0) continue;
+		const key = pair.slice(0, sep).trim();
+		const val = pair.slice(sep + 1).trim();
+		if (!val) continue;
+		if (key === PROP_COLOR) color = val;
+		else if (key === PROP_SIZE) size = val;
+	}
+	if (color != null || size != null) return { color, size, ok: true };
+	return { color: null, size: null, ok: false };
 }
 
 function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
@@ -89,24 +111,19 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 		const skuName =
 			(s.sku_name && s.sku_name.trim()) || `${colorCode}${size ? ' / ' + size : ''}` || skuId;
 
-		const rawProps = s.sku_properties;
-		const hasRaw = typeof rawProps === 'string' && rawProps.trim().length > 0;
-		const parsed = hasRaw
-			? parseSkuPropertiesJson(rawProps)
-			: { color: null, size: null, ok: false };
+		// color/size 필드 우선, 없으면 sku_properties 파싱으로 폴백
+		const apiColor = s.color?.trim() || null;
+		const apiSize = s.size?.trim() || null;
 
-		let propColor: string | null;
-		let propSize: string | null;
-		let propertiesFromJson: boolean;
+		let propColor: string | null = apiColor;
+		let propSize: string | null = apiSize;
 
-		if (hasRaw && parsed.ok) {
-			propertiesFromJson = true;
-			propColor = parsed.color ?? (s.color?.trim() || null);
-			propSize = parsed.size ?? (s.size?.trim() || null);
-		} else {
-			propertiesFromJson = false;
-			propColor = s.color?.trim() || null;
-			propSize = s.size?.trim() || null;
+		if (!propColor || !propSize) {
+			const parsed = parseSkuProperties(s.sku_properties);
+			if (parsed.ok) {
+				propColor = propColor ?? parsed.color;
+				propSize = propSize ?? parsed.size;
+			}
 		}
 
 		return {
@@ -119,7 +136,7 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 			image: skuImageFromApi(s),
 			propColor,
 			propSize,
-			propertiesFromJson
+			propertiesFromJson: !!propColor || !!propSize
 		};
 	});
 }
@@ -214,12 +231,12 @@ export function mapProductDetail(
 	const variantMatrix = hasVariantOptions(skusParsed);
 
 	return {
-		trackedItemId: d.tracked_item_id,
+		trackedItemId: d.tracked_item_id ?? '',
 		productId: d.product_id,
 		title: d.title,
 		site: marketToSite(d.market),
 		imageUrl: d.main_image_url,
-		url: d.product_url || d.original_url,
+		url: d.promotion_link || d.product_url || d.original_url,
 		currency: d.currency,
 		lastChecked: '—',
 		trackingFrequency: '24h',
@@ -277,11 +294,11 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 
 	return {
 		trackedItemId: d.tracked_item_id,
-		productId: d.tracked_item_id,
+		productId: d.product_id,
 		title: d.title,
 		site: marketToSite(d.market),
 		imageUrl: d.main_image_url,
-		url: d.product_url || d.original_url,
+		url: d.promotion_link || d.product_url || d.original_url,
 		currency: d.currency,
 		lastChecked: '—',
 		trackingFrequency: '24h',

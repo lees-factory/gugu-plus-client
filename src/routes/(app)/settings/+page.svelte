@@ -2,24 +2,10 @@
 	import { resolve } from '$app/paths';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { t } from '$lib/i18n/t';
-	import {
-		LANGUAGE_LABELS,
-		preferences,
-		setTargetCurrency,
-		setTargetLanguage,
-		TARGET_CURRENCIES,
-		TARGET_LANGUAGES,
-		type TargetCurrency,
-		type TargetLanguage
-	} from '$lib/stores/preferences.svelte';
-	import {
-		settings,
-		planLabel,
-		handlePasswordChange,
-		handleNotifSave,
-		handleDeleteAccount,
-		closeDeleteModal
-	} from './settings-page.svelte';
+	import { createSettingsPage } from './settings-page.svelte';
+
+	const { settings, handlePasswordChange, handleNotifSave, handleDeleteAccount, closeDeleteModal } =
+		createSettingsPage();
 
 	$effect(() => {
 		const e = auth.user?.email;
@@ -83,95 +69,6 @@
 					<p class="mt-1.5 text-xs text-zinc-500">{t('settings_email_hint')}</p>
 				</div>
 
-				<!-- Plan -->
-				<div
-					class="flex items-center justify-between rounded-2xl p-4"
-					style="background-color: #f5f5f4;"
-				>
-					<div>
-						<p class="text-sm font-medium text-zinc-900">{t('settings_plan_current')}</p>
-						<p class="mt-0.5 text-xs text-zinc-500">
-							{#if auth.plan.type === 'free'}
-								{t('settings_plan_free_desc')}
-							{:else}
-								{t('settings_plan_pro_desc')}
-							{/if}
-						</p>
-					</div>
-					<div class="flex items-center gap-3">
-						<span
-							class="rounded-lg px-2.5 py-1 text-xs font-semibold"
-							style="
-								background-color: {auth.plan.type === 'pro' ? '#e8f2f0' : 'rgba(45,45,42,0.06)'};
-								color: {auth.plan.type === 'pro' ? '#3a8a7a' : '#6b6b65'};
-							"
-						>
-							{planLabel[auth.plan.type] ?? auth.plan.type}
-						</span>
-						{#if auth.plan.type === 'free'}
-							<a
-								href={resolve('/plan')}
-								class="rounded-xl px-3.5 py-2 text-xs font-medium text-white transition hover:opacity-90"
-								style="background: linear-gradient(to right, #292524, #3f3f46);"
-							>
-								{t('settings_upgrade')}
-							</a>
-						{/if}
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- 언어 및 통화 -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
-			<h2 class="mb-2 text-base font-semibold text-zinc-900">{t('settings_lang_currency')}</h2>
-			<p class="mb-6 text-sm text-zinc-500">
-				{t('settings_lang_currency_desc')}
-			</p>
-
-			<div class="space-y-5">
-				<div>
-					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="pref-lang">
-						{t('settings_language')}
-					</label>
-					<select
-						id="pref-lang"
-						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
-						style="
-							background-color: #f5f5f4;
-							border: 1px solid rgba(45, 45, 42, 0.1);
-							color: #1a1a17;
-							outline: none;
-						"
-						value={preferences.targetLanguage}
-						onchange={(e) => setTargetLanguage(e.currentTarget.value as TargetLanguage)}
-					>
-						{#each TARGET_LANGUAGES as code (code)}
-							<option value={code}>{code} — {LANGUAGE_LABELS[code]}</option>
-						{/each}
-					</select>
-				</div>
-				<div>
-					<label class="mb-1.5 block text-sm font-medium text-zinc-900" for="pref-currency">
-						{t('settings_currency')}
-					</label>
-					<select
-						id="pref-currency"
-						class="w-full cursor-pointer rounded-xl px-4 py-2.5 text-sm"
-						style="
-							background-color: #f5f5f4;
-							border: 1px solid rgba(45, 45, 42, 0.1);
-							color: #1a1a17;
-							outline: none;
-						"
-						value={preferences.targetCurrency}
-						onchange={(e) => setTargetCurrency(e.currentTarget.value as TargetCurrency)}
-					>
-						{#each TARGET_CURRENCIES as code (code)}
-							<option value={code}>{code}</option>
-						{/each}
-					</select>
-				</div>
 			</div>
 		</section>
 

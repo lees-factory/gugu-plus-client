@@ -9,12 +9,17 @@ export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
 		throw error(401, 'Unauthorized');
 	}
 
+	const userId = cookies.get('user_id');
+	if (!userId) {
+		throw error(401, 'Unauthorized');
+	}
+
 	const id = params.trackedItemID;
 
 	let body: string;
 	try {
-		const parsed = JSON.parse(await request.text());
-		body = JSON.stringify(parsed);
+		const parsed = JSON.parse(await request.text()) as Record<string, unknown>;
+		body = JSON.stringify({ ...parsed, user_id: userId });
 	} catch {
 		throw error(400, 'Invalid JSON');
 	}

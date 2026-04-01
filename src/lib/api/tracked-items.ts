@@ -12,24 +12,15 @@ export type CreateTrackedItemBody = {
 	external_product_id: string;
 };
 
-/** 201 응답 `data` */
-export type TrackedItemCreatedData = {
+/** 201 응답 `data` — AddTrackedItemData */
+export type AddTrackedItemData = {
 	tracked_item_id: string;
-	product_id: string;
-	market: ProductMarket;
-	external_product_id: string;
-	original_url: string;
-	title: string;
-	main_image_url: string;
-	current_price: string;
-	currency: string;
-	product_url: string;
 	already_tracked: boolean;
 };
 
 export type CreateTrackedItemSuccessResponse = {
 	result: 'SUCCESS';
-	data: TrackedItemCreatedData;
+	data: AddTrackedItemData;
 };
 
 export type TrackedItemErrorResponse = {
@@ -46,9 +37,25 @@ export type TrackedItemEmptySuccessResponse = {
 	result: 'SUCCESS';
 };
 
+/** GET /v1/tracked-items/ — 목록 항목 (TrackedItemData) */
+export type TrackedItemData = {
+	tracked_item_id: string;
+	product_id: string;
+	market: ProductMarket;
+	external_product_id: string;
+	original_url: string;
+	title: string;
+	main_image_url: string;
+	current_price: string;
+	currency: string;
+	product_url: string;
+	promotion_link?: string | null;
+};
+
 /** GET /v1/tracked-items/{trackedItemID} — 상세 데이터 */
 export type TrackedItemDetailData = {
 	tracked_item_id: string;
+	product_id: string;
 	sku_id?: string;
 	market: ProductMarket;
 	external_product_id: string;
@@ -58,6 +65,7 @@ export type TrackedItemDetailData = {
 	current_price: string;
 	currency: string;
 	product_url: string;
+	promotion_link?: string | null;
 	skus: ProductSKUData[];
 };
 
@@ -80,49 +88,15 @@ export type TrackedItemDetailSuccessResponse = {
 	data: TrackedItemDetailData;
 };
 
-/** PATCH /v1/tracked-items/{trackedItemID}/sku 요청 본문 */
+/** PATCH /v1/tracked-items/{trackedItemID}/sku 요청 본문 (BFF가 user_id 주입) */
 export type SelectTrackedItemSkuBody = {
 	sku_id: string;
 };
 
-/** GET /v1/tracked-items/ — 목록 항목 */
-export type TrackedItemSummary = {
-	tracked_item_id: string;
-	/** 있으면 상세 페이지에 사용 */
-	product_id?: string;
-	title: string;
-	market: ProductMarket;
-	main_image_url: string;
-	/** 백엔드가 내려주면 목록에서 가격·추세 표시 */
-	current_price?: string;
-	currency?: string;
-	target_price?: string;
-	alert_threshold?: string;
-	/** 일부 API 변형 */
-	alert_price?: string;
-	price_change_percent?: string;
-	change_percent?: string;
-	last_change_percent?: string;
-};
-
 export type ListTrackedItemsSuccessResponse = {
 	result: string;
-	data:
-		| TrackedItemSummary[]
-		| { items?: TrackedItemSummary[]; tracked_items?: TrackedItemSummary[] };
+	data: TrackedItemData[];
 };
-
-export function normalizeTrackedItemsList(
-	data: ListTrackedItemsSuccessResponse['data'] | undefined
-): TrackedItemSummary[] {
-	if (!data) return [];
-	if (Array.isArray(data)) return data;
-	if (typeof data === 'object') {
-		if (Array.isArray(data.items)) return data.items;
-		if (Array.isArray(data.tracked_items)) return data.tracked_items;
-	}
-	return [];
-}
 
 export const trackedItemsApi = {
 	create: (body: CreateTrackedItemBody) =>

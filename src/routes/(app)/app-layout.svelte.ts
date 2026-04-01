@@ -4,6 +4,7 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
 import { trackedItemsApi } from '$lib/api/tracked-items';
+import { invalidateTrackedItemsCache } from '$lib/api/tracked-items-cache';
 import { t } from '$lib/i18n/t';
 import type { AddItemData } from '$lib/types';
 
@@ -33,7 +34,7 @@ export function createLayoutModel(getData: () => LayoutData) {
 	const mobileNavItems: Array<{ path: Pathname; label: string }> = $derived([
 		{ path: '/', label: t('nav_home') },
 		{ path: '/items', label: t('nav_tracked_items') },
-		{ path: '/plan', label: t('nav_plan') },
+		{ path: '/alerts', label: t('alerts_title') },
 		{ path: '/settings', label: t('nav_settings') }
 	]);
 
@@ -81,8 +82,8 @@ export function createLayoutModel(getData: () => LayoutData) {
 			external_product_id: itemData.commerce.external_product_id
 		});
 		if (res.error) throw new Error(res.error);
-		// 추가 후 items 페이지로 이동 (이미 있으면 reload)
-		await goto(resolve('/items'), { invalidateAll: true });
+		invalidateTrackedItemsCache();
+		await goto(resolve('/items'));
 	}
 
 	return {

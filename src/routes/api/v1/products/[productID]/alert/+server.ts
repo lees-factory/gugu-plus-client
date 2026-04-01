@@ -3,25 +3,27 @@ import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config';
 import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
-export const GET: RequestHandler = async ({ params, cookies }) => {
+const buildTarget = (productID: string) =>
+	`${API_BASE}/v1/products/${encodeURIComponent(productID)}/alert`;
+
+export const POST: RequestHandler = async ({ params, request, cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) {
-		throw error(401, 'Unauthorized');
-	}
+	if (!accessToken) throw error(401, 'Unauthorized');
 
-	const userId = cookies.get('user_id');
-	if (!userId) {
-		throw error(401, 'Unauthorized');
-	}
-
-	const id = params.trackedItemID;
-	const qs = new URLSearchParams({ user_id: userId }).toString();
+	const body = await request.text();
 
 	let res: Response;
 	try {
 		res = await bffFetch(
-			`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`,
-			{ headers: { Authorization: `Bearer ${accessToken}` } },
+			buildTarget(params.productID),
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'application/json'
+				},
+				body
+			},
 			cookies
 		);
 	} catch (e) {
@@ -31,30 +33,17 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 	}
 
 	const data = await res.json().catch(() => ({}));
-	return json(data, {
-		status: res.status,
-		headers: res.ok ? { 'Cache-Control': 'private, max-age=30' } : undefined
-	});
+	return json(data, { status: res.status });
 };
 
 export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) {
-		throw error(401, 'Unauthorized');
-	}
-
-	const userId = cookies.get('user_id');
-	if (!userId) {
-		throw error(401, 'Unauthorized');
-	}
-
-	const id = params.trackedItemID;
-	const qs = new URLSearchParams({ user_id: userId }).toString();
+	if (!accessToken) throw error(401, 'Unauthorized');
 
 	let res: Response;
 	try {
 		res = await bffFetch(
-			`${API_BASE}/v1/tracked-items/${encodeURIComponent(id)}?${qs}`,
+			buildTarget(params.productID),
 			{
 				method: 'DELETE',
 				headers: { Authorization: `Bearer ${accessToken}` }

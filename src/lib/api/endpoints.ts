@@ -40,9 +40,15 @@ export const ENDPOINTS = {
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`
 	},
 
+	/** 브라우저 → BFF → GET /v1/alerts (Bearer) */
+	alerts: {
+		list: '/api/v1/alerts'
+	},
+
 	/** 브라우저 → BFF → GET /v1/products/… (Bearer) */
 	products: {
 		detail: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}`,
-		skus: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/skus`
+		skus: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/skus`,
+		alert: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/alert`
 	}
 } as const;

@@ -1,17 +1,16 @@
-import { auth } from '$lib/stores/auth.svelte';
 import { t } from '$lib/i18n/t';
 
 export type ChartEntry = { date: string; price: number; change: number };
 
 export type ChartPeriod = '7' | '14' | '30' | '90' | 'all';
 
-export function getPriceChartPeriods(): { value: ChartPeriod; label: string; proOnly: boolean }[] {
+export function getPriceChartPeriods(): { value: ChartPeriod; label: string }[] {
 	return [
-		{ value: '7', label: t('chart_period_7'), proOnly: false },
-		{ value: '14', label: t('chart_period_14'), proOnly: false },
-		{ value: '30', label: t('chart_period_30'), proOnly: true },
-		{ value: '90', label: t('chart_period_90'), proOnly: true },
-		{ value: 'all', label: t('chart_period_all'), proOnly: true }
+		{ value: '7', label: t('chart_period_7') },
+		{ value: '14', label: t('chart_period_14') },
+		{ value: '30', label: t('chart_period_30') },
+		{ value: '90', label: t('chart_period_90') },
+		{ value: 'all', label: t('chart_period_all') }
 	];
 }
 
@@ -42,8 +41,9 @@ export function fmtPriceChart(n: number) {
 
 export function fmtPriceChartShort(n: number) {
 	if (Math.abs(n) >= 10000) {
-		const v = n / 10000;
-		return `${v % 1 === 0 ? v : v.toFixed(1)}만`;
+		const sign = n < 0 ? '-' : '';
+		const v = Math.abs(n) / 10000;
+		return `${sign}${v % 1 === 0 ? v : v.toFixed(1)}만`;
 	}
 	return n.toLocaleString();
 }
@@ -63,17 +63,6 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 
 	let selectedPeriod = $state<ChartPeriod>('14');
 	let hoverIdx = $state<number | null>(null);
-
-	const isPro = $derived(auth.plan.type === 'pro');
-
-	$effect(() => {
-		if (
-			!isPro &&
-			(selectedPeriod === '30' || selectedPeriod === '90' || selectedPeriod === 'all')
-		) {
-			selectedPeriod = '14';
-		}
-	});
 
 	const chartData = $derived.by(() => {
 		const data = getData();
@@ -102,8 +91,9 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		return { min, max, avg, change };
 	});
 
-	const svgPoints = $derived.by(() => {
-		if (chartData.length === 0) return [];
+	/** 공유 Y축 범위 계산 */
+	const yScale = $derived.by(() => {
+		if (chartData.length === 0) return null;
 		const prices = chartData.map((d) => d.price);
 		const lo = Math.min(...prices);
 		const hi = Math.max(...prices);
@@ -111,6 +101,12 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		const yMin = lo - range * 0.15;
 		const yMax = hi + range * 0.15;
 		const yRange = yMax - yMin;
+		return { yMin, yMax, yRange };
+	});
+
+	const svgPoints = $derived.by(() => {
+		if (!yScale) return [];
+		const { yMin, yRange } = yScale;
 		const n = chartData.length;
 		return chartData.map((d, i) => ({
 			x: n === 1 ? PL + cW / 2 : PL + (i / (n - 1)) * cW,
@@ -121,14 +117,8 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 	});
 
 	const yGrid = $derived.by(() => {
-		if (chartData.length === 0) return [];
-		const prices = chartData.map((d) => d.price);
-		const lo = Math.min(...prices);
-		const hi = Math.max(...prices);
-		const range = hi - lo || lo * 0.1 || 1;
-		const yMin = lo - range * 0.15;
-		const yMax = hi + range * 0.15;
-		const yRange = yMax - yMin;
+		if (!yScale) return [];
+		const { yMin, yRange } = yScale;
 		return [0, 0.25, 0.5, 0.75, 1].map((t) => ({
 			y: PT + (1 - t) * cH,
 			price: Math.round(yMin + yRange * t)
@@ -216,9 +206,6 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		},
 		set selectedPeriod(v: ChartPeriod) {
 			selectedPeriod = v;
-		},
-		get isPro() {
-			return isPro;
 		},
 		get chartData() {
 			return chartData;

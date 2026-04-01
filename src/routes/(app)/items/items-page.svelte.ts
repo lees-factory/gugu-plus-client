@@ -1,7 +1,11 @@
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
-import { normalizeTrackedItemsList, trackedItemsApi } from '$lib/api/tracked-items';
+import { trackedItemsApi } from '$lib/api/tracked-items';
+import {
+	getCachedTrackedItems,
+	invalidateTrackedItemsCache
+} from '$lib/api/tracked-items-cache';
 import { t } from '$lib/i18n/t';
 import type { AddItemData, TrackedItem } from '$lib/types';
 import { summaryToCard } from '$lib/tracked-items/map-summary';
@@ -10,9 +14,6 @@ export type SortKey = 'recent' | 'title' | 'site' | 'price';
 
 export const CHROME_EXTENSION_STORE_URL =
 	'https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb';
-
-/** 모듈 레벨 캐시 — 추가/삭제/새로고침 시에만 갱신 */
-let cachedItems: TrackedItem[] | null = null;
 
 export function createItemsPage() {
 	/**
@@ -32,11 +33,7 @@ export function createItemsPage() {
 	let filterOpen = $state(false);
 
 	const marketplaceSites = $derived.by(() => {
-		const uniq: string[] = [];
-		for (const i of model.items) {
-			if (!uniq.includes(i.site)) uniq.push(i.site);
-		}
-		return uniq.sort((a, b) => a.localeCompare(b));
+		return [...new Set(model.items.map((i) => i.site))].sort((a, b) => a.localeCompare(b));
 	});
 
 	const displayedItems = $derived.by(() => {
@@ -90,31 +87,13 @@ export function createItemsPage() {
 	}
 
 	async function loadItems(force = false) {
-		if (!force && cachedItems) {
-			model.items = cachedItems;
-			model.loading = false;
-			return;
-		}
-
 		model.loading = true;
 		model.listError = null;
 		try {
-			const listRes = await trackedItemsApi.list();
-
-			if (listRes.status === 401) {
-				await goto(resolve('/auth/login'));
-				return;
-			}
-
-			if (listRes.error || !listRes.data) {
-				model.listError = listRes.error ?? '목록을 불러오지 못했습니다.';
-				return;
-			}
-
-			const body = listRes.data;
-			const list = normalizeTrackedItemsList(body.data);
+			const list = await getCachedTrackedItems(force);
 			model.items = list.map(summaryToCard);
-			cachedItems = model.items;
+		} catch {
+			model.listError = '목록을 불러오지 못했습니다.';
 		} finally {
 			model.loading = false;
 		}
@@ -153,7 +132,7 @@ export function createItemsPage() {
 				return;
 			}
 			model.items = model.items.filter((i) => i.id !== trackedItemId);
-			cachedItems = model.items;
+			invalidateTrackedItemsCache();
 		} finally {
 			model.deletingId = null;
 		}
