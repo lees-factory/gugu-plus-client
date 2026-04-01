@@ -50,26 +50,23 @@ export function createSettingsPage() {
 		try {
 			// TODO: 실제 API 연동
 			await new Promise((r) => setTimeout(r, 800));
-			p.success = true;
-			p.current = '';
-			p.next = '';
-			p.confirm = '';
-			setTimeout(() => (p.success = false), 3000);
-		} finally {
+			alert(t('settings_password_changed_relogin'));
+			auth.logout();
+			window.location.href = '/auth/logout';
+		} catch {
 			p.loading = false;
 		}
 	}
 
-	async function handleNotifSave() {
+	async function toggleEmailNotif() {
 		const n = settings.notifications;
-		n.saveLoading = true;
+		const prev = n.email;
+		n.email = !prev;
 		try {
 			// TODO: 실제 API 연동
 			await new Promise((r) => setTimeout(r, 500));
-			n.saveSuccess = true;
-			setTimeout(() => (n.saveSuccess = false), 3000);
-		} finally {
-			n.saveLoading = false;
+		} catch {
+			n.email = prev;
 		}
 	}
 
@@ -95,7 +92,7 @@ export function createSettingsPage() {
 	return {
 		settings,
 		handlePasswordChange,
-		handleNotifSave,
+		toggleEmailNotif,
 		handleDeleteAccount,
 		closeDeleteModal
 	};

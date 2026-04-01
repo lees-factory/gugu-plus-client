@@ -144,7 +144,7 @@ export function createDiscoverPage(getData: () => { hotProducts: HotProductData[
 			}]);
 			if (!res.error && res.data) {
 				addedIds = [...addedIds, product.id];
-				await invalidate('/api/v1/tracked-items');
+				await invalidate('app:tracked-items');
 			}
 		} finally {
 			addingId = '';

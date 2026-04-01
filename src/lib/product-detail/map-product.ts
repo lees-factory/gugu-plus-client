@@ -270,8 +270,7 @@ function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
  * TrackedItemDetailData에는 price_histories가 없으므로 current_price 기반 단일 엔트리를 만든다.
  */
 export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
-	const rawSkus =
-		d.skus && d.skus.length > 0 ? d.skus.map(trackedSkuToProductSku) : null;
+	const rawSkus = d.skus && d.skus.length > 0 ? d.skus.map(trackedSkuToProductSku) : null;
 
 	const skusParsed = rawSkus
 		? parseSkusFromApi(rawSkus)
@@ -292,6 +291,10 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 
 	const variantMatrix = hasVariantOptions(skusParsed);
 
+	// current_price는 백엔드 대표가로 SKU 실제 할인가와 다를 수 있음
+	// SKU가 있으면 첫 SKU의 할인가를 대표 가격으로 사용
+	const representativePrice = skusParsed[0]?.price || parsePriceAmount(d.current_price);
+
 	return {
 		trackedItemId: d.tracked_item_id,
 		productId: d.product_id,
@@ -303,13 +306,15 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 		lastChecked: '—',
 		trackingFrequency: '24h',
 		alertEnabled: true,
-		alertThreshold: parsePriceAmount(d.current_price),
+		alertThreshold: representativePrice,
 		skus: skusParsed,
 		variantMatrix,
-		priceHistory: [{
-			date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
-			price: parsePriceAmount(d.current_price),
-			change: 0
-		}]
+		priceHistory: [
+			{
+				date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+				price: representativePrice,
+				change: 0
+			}
+		]
 	};
 }

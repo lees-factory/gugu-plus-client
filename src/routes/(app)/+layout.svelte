@@ -88,6 +88,9 @@
 
 				<!-- Search bar -->
 				<div class="relative max-w-2xl flex-1">
+					<!-- 브라우저 자동완성 차단용 더미 -->
+					<input type="text" name="fake-email" autocomplete="username" class="absolute size-0 opacity-0" tabindex="-1" aria-hidden="true" />
+					<input type="password" name="fake-pw" autocomplete="current-password" class="absolute size-0 opacity-0" tabindex="-1" aria-hidden="true" />
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -104,9 +107,13 @@
 					</svg>
 					<input
 						type="text"
+						role="searchbox"
 						bind:value={layout.model.searchValue}
 						placeholder={t('search_placeholder')}
 						autocomplete="off"
+						data-1p-ignore
+						data-lpignore="true"
+						data-form-type="other"
 						onpaste={layout.handleSearchPaste}
 						onkeydown={layout.handleSearchKeydown}
 						class="h-12 w-full rounded-2xl border border-zinc-200/60 bg-white/50 pr-4 pl-11 text-sm font-normal transition-all duration-200 outline-none placeholder:text-zinc-400 focus:border-stone-300 focus:bg-white focus:ring-4 focus:ring-stone-100/50"

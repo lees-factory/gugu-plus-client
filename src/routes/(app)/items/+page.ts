@@ -2,7 +2,9 @@ import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { TrackedItemData } from '$lib/api/tracked-items';
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+export const load: PageLoad = async ({ fetch, parent, depends }) => {
+	depends('app:tracked-items');
+
 	const { userEmail } = await parent();
 	if (!userEmail) {
 		redirect(303, '/auth/login');

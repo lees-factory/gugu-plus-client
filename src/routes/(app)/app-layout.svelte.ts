@@ -85,7 +85,7 @@ export function createLayoutModel(getData: () => LayoutData) {
 		if (items.length === 0) throw new Error(t('no_valid_url'));
 		const res = await trackedItemsApi.create(items);
 		if (res.error) throw new Error(res.error);
-		await invalidate('/api/v1/tracked-items');
+		await invalidate('app:tracked-items');
 		await goto(resolve('/items'));
 	}
 

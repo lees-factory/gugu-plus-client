@@ -359,5 +359,6 @@
 	"items_view_all": "View all",
 	"items_load_more": "Load more",
 	"discover_add_track": "Track",
-	"discover_added": "Added"
+	"discover_added": "Added",
+	"settings_password_changed_relogin": "Password changed. Please sign in again for security."
 }

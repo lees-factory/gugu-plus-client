@@ -2,7 +2,8 @@ import type { PageLoad } from './$types';
 import type { HotProductData } from '$lib/api/discover';
 import type { TrackedItemData } from '$lib/api/tracked-items';
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageLoad = async ({ fetch, depends }) => {
+	depends('app:tracked-items');
 	const [discoverRes, itemsRes] = await Promise.all([
 		fetch('/api/v1/discover/hot-products?page=1&size=20'),
 		fetch('/api/v1/tracked-items').catch(() => null)

@@ -130,7 +130,7 @@
 			<p class="text-sm text-rose-600">{page.model.listError}</p>
 			<button
 				type="button"
-				onclick={() => invalidate('/api/v1/tracked-items')}
+				onclick={() => invalidate('app:tracked-items')}
 				class="mt-4 rounded-2xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
 				style="background: linear-gradient(to right, #292524, #3f3f46);"
 			>

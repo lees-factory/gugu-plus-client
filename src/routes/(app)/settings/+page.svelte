@@ -4,7 +4,7 @@
 	import { t } from '$lib/i18n/t';
 	import { createSettingsPage } from './settings-page.svelte';
 
-	const { settings, handlePasswordChange, handleNotifSave, handleDeleteAccount, closeDeleteModal } =
+	const { settings, handlePasswordChange, toggleEmailNotif, handleDeleteAccount, closeDeleteModal } =
 		createSettingsPage();
 
 	$effect(() => {
@@ -136,7 +136,13 @@
 					<p class="text-xs text-rose-600">{settings.password.error}</p>
 				{/if}
 
-				<div class="flex items-center gap-3 pt-1">
+				<div class="flex items-center justify-end gap-3 pt-1">
+					{#if settings.password.loading}
+						<svg class="size-4 animate-spin text-zinc-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+						</svg>
+					{/if}
 					<button
 						type="button"
 						onclick={handlePasswordChange}
@@ -144,40 +150,8 @@
 						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
 						style="background: linear-gradient(to right, #292524, #3f3f46);"
 					>
-						{#if settings.password.loading}
-							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-								<circle
-									class="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									stroke-width="4"
-								></circle>
-								<path
-									class="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-								></path>
-							</svg>
-						{/if}
 						{t('settings_password_submit')}
 					</button>
-					{#if settings.password.success}
-						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								class="size-4"
-								aria-hidden="true"
-							>
-								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-							</svg>
-							{t('settings_password_success')}
-						</span>
-					{/if}
 				</div>
 			</div>
 		</section>
@@ -199,7 +173,7 @@
 						role="switch"
 						aria-checked={settings.notifications.email}
 						title={settings.notifications.email ? t('settings_notif_on') : t('settings_notif_off')}
-						onclick={() => (settings.notifications.email = !settings.notifications.email)}
+						onclick={toggleEmailNotif}
 						class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none"
 						style="width: 44px; height: 24px; background-color: {settings.notifications.email
 							? '#2d2d2a'
@@ -212,50 +186,6 @@
 								: '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
 						></span>
 					</button>
-				</div>
-
-				<div class="flex items-center gap-3 pt-1">
-					<button
-						type="button"
-						onclick={handleNotifSave}
-						disabled={settings.notifications.saveLoading}
-						class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-						style="background: linear-gradient(to right, #292524, #3f3f46);"
-					>
-						{#if settings.notifications.saveLoading}
-							<svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-								<circle
-									class="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									stroke-width="4"
-								></circle>
-								<path
-									class="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-								></path>
-							</svg>
-						{/if}
-						{t('settings_save')}
-					</button>
-					{#if settings.notifications.saveSuccess}
-						<span class="flex items-center gap-1.5 text-sm" style="color: #3a8a7a;">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								class="size-4"
-								aria-hidden="true"
-							>
-								<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-							</svg>
-							{t('settings_saved')}
-						</span>
-					{/if}
 				</div>
 			</div>
 		</section>

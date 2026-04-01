@@ -119,7 +119,7 @@ export function createItemsPage(getData: () => {
 		}
 
 		// load 함수 재실행 → model 자동 갱신
-		await invalidate('/api/v1/tracked-items');
+		await invalidate('app:tracked-items');
 	}
 
 	async function deleteItem(trackedItemId: string) {
@@ -133,7 +133,7 @@ export function createItemsPage(getData: () => {
 			}
 			// optimistic UI + load 재실행
 			model.items = model.items.filter((i) => i.id !== trackedItemId);
-			await invalidate('/api/v1/tracked-items');
+			await invalidate('app:tracked-items');
 		} finally {
 			model.deletingId = null;
 		}

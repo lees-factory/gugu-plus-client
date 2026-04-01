@@ -212,6 +212,7 @@ export function createItemDetailPage(
 			: null
 	);
 
+
 	$effect(() => {
 		void displayImage;
 		ui.imgError = false;
@@ -310,7 +311,7 @@ export function createItemDetailPage(
 				alert(res.error);
 				return;
 			}
-			await invalidate('/api/v1/tracked-items');
+			await invalidate('app:tracked-items');
 			await goto(resolve('/items'));
 		} finally {
 			ui.deleting = false;
