@@ -47,13 +47,13 @@
 			</div>
 		{:else if page.error}
 			<div
-				class="rounded-3xl border border-zinc-200/60 bg-white/60 p-10 text-center backdrop-blur-sm"
+				class="rounded-3xl border border-zinc-200/60 bg-white p-10 text-center"
 			>
 				<p class="text-sm text-rose-600">{page.error}</p>
 			</div>
 		{:else if page.alerts.length === 0}
 			<div
-				class="rounded-3xl border border-zinc-200/60 bg-white/60 p-14 text-center backdrop-blur-sm"
+				class="rounded-3xl border border-zinc-200/60 bg-white p-14 text-center"
 			>
 				<div
 					class="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl"
@@ -80,7 +80,7 @@
 			</div>
 		{:else}
 			<div
-				class="overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/60 backdrop-blur-sm"
+				class="overflow-hidden rounded-3xl border border-zinc-200/60 bg-white"
 			>
 				<div class="px-6 py-5" style="border-bottom: 1px solid rgba(45, 45, 42, 0.06);">
 					<p class="text-sm font-medium text-zinc-900">

@@ -144,7 +144,7 @@
 	{:else}
 		<!-- Chrome extension banner -->
 		<div
-			class="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
+			class="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white p-5 shadow-sm"
 		>
 			<div class="flex items-center gap-4">
 				<div

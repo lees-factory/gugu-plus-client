@@ -106,6 +106,20 @@ export type SelectTrackedItemSkuBody = {
 	sku_id: string;
 };
 
+/** SKU 가격 변동 내역 항목 */
+export type SKUPriceHistoryItem = {
+	sku_id: string;
+	price: string;
+	currency: string;
+	recorded_at: string;
+	change_value: string;
+};
+
+export type SKUPriceHistoryResponse = {
+	result: string;
+	data: SKUPriceHistoryItem[];
+};
+
 /** 커서 기반 페이지네이션 목록 데이터 */
 export type ListTrackedItemsPageData = {
 	items: TrackedItemData[];
@@ -142,5 +156,13 @@ export const trackedItemsApi = {
 		apiDelete<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.delete(trackedItemId)),
 
 	selectSku: (trackedItemId: string, body: SelectTrackedItemSkuBody) =>
-		apiPatch<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.selectSku(trackedItemId), body)
+		apiPatch<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.selectSku(trackedItemId), body),
+
+	/** GET — SKU 가격 변동 내역 조회 */
+	getSkuPriceHistories: (trackedItemId: string, params: { sku_id: string; currency?: string }) => {
+		const base = ENDPOINTS.trackedItems.skuPriceHistories(trackedItemId);
+		const qs = new URLSearchParams({ sku_id: params.sku_id });
+		if (params.currency) qs.set('currency', params.currency);
+		return apiGet<SKUPriceHistoryResponse>(`${base}?${qs}`);
+	}
 };

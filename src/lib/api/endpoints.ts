@@ -37,7 +37,9 @@ export const ENDPOINTS = {
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		delete: (trackedItemId: string) => `/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		selectSku: (trackedItemId: string) =>
-			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`,
+		skuPriceHistories: (trackedItemId: string) =>
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-histories`
 	},
 
 	/** 브라우저 → BFF → GET /v1/alerts (Bearer) */

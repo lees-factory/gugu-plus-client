@@ -43,7 +43,7 @@
 	<!-- ── Current plan banner ────────────────────────────────────── -->
 	{#if page.currentPlan === 'free'}
 		<div
-			class="flex items-center gap-4 rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
+			class="flex items-center gap-4 rounded-3xl border border-zinc-200/60 bg-white p-5 shadow-sm"
 		>
 			<div
 				class="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 bg-zinc-100/80"
@@ -72,7 +72,7 @@
 		</div>
 	{:else}
 		<div
-			class="flex items-center gap-4 rounded-3xl border border-zinc-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
+			class="flex items-center gap-4 rounded-3xl border border-zinc-200/60 bg-white p-5 shadow-sm"
 		>
 			<div
 				class="flex size-10 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
@@ -159,7 +159,7 @@
 	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 		<!-- Free -->
 		<div
-			class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm"
+			class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm"
 		>
 			<div class="mb-6">
 				<div class="mb-4 flex items-center justify-between">
@@ -378,7 +378,7 @@
 		</div>
 
 		<div
-			class="overflow-x-auto rounded-3xl border border-zinc-200/60 bg-white/60 shadow-sm backdrop-blur-sm"
+			class="overflow-x-auto rounded-3xl border border-zinc-200/60 bg-white shadow-sm"
 		>
 			<table class="w-full min-w-0 text-xs sm:text-sm">
 				<thead>
@@ -445,7 +445,7 @@
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			{#each page.faqItems as faq (faq.q)}
 				<div
-					class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 shadow-sm backdrop-blur-sm"
+					class="rounded-3xl border border-zinc-200/60 bg-white p-6 shadow-sm"
 				>
 					<h3 class="mb-2 text-sm font-semibold text-zinc-900">{faq.q}</h3>
 					<p class="text-sm leading-relaxed text-zinc-500">{faq.a}</p>

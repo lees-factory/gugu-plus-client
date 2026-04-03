@@ -2,51 +2,51 @@ import { apiPost } from './client';
 import { ENDPOINTS } from './endpoints';
 export type { ApiResult } from './client';
 
-export interface AuthUser {
+export type AuthUser = {
 	id: string;
 	email: string;
 	display_name: string;
 	email_verified: boolean;
 	created_at: string;
-}
+};
 
-export interface AuthTokens {
+export type AuthTokens = {
 	access_token: string;
 	refresh_token: string;
 	token_type: string;
 	access_expires_at: string;
 	refresh_expires_at: string;
-}
+};
 
-export interface LoginResponse {
+export type LoginResponse = {
 	result: string;
 	data: {
 		user: AuthUser;
 		tokens: AuthTokens;
 	};
-}
+};
 
-export interface OAuthLoginResponse {
+export type OAuthLoginResponse = {
 	result: string;
 	data: {
 		user: AuthUser;
 		tokens: AuthTokens;
 	};
-}
+};
 
-export interface RegisterResponse {
+export type RegisterResponse = {
 	result: string;
 	data: {
 		user: AuthUser;
 		verification_dispatched: boolean;
 		verification_code?: string;
 	};
-}
+};
 
-export interface VerifyResponse {
+export type VerifyResponse = {
 	result: string;
 	data: { user: AuthUser };
-}
+};
 
 export type OAuthProvider = 'google' | 'kakao' | 'naver' | 'apple';
 

@@ -74,17 +74,15 @@
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 				<!-- Image -->
 				<div
-					class="flex items-center justify-center overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm"
+					class="flex items-center justify-center overflow-hidden rounded-3xl border border-zinc-200/60 bg-white p-6"
 				>
 					{#if !page.ui.imgError && page.displayImage}
-						{#key `${page.currentSku?.skuId ?? ''}|${page.displayImage}`}
-							<img
-								src={page.displayImage}
-								alt={item.title}
-								class="max-h-72 w-full rounded-xl object-contain sm:max-h-96"
-								onerror={page.onImageError}
-							/>
-						{/key}
+						<img
+							src={page.displayImage}
+							alt={item.title}
+							class="max-h-72 w-full rounded-xl object-contain sm:max-h-96"
+							onerror={page.onImageError}
+						/>
 					{:else}
 						<div
 							class="flex h-48 w-full items-center justify-center rounded-xl sm:h-64"
@@ -111,7 +109,7 @@
 
 				<!-- Price + CTA -->
 				<div
-					class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white/60 p-8 backdrop-blur-sm"
+					class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white p-8"
 				>
 					<p class="mb-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
 						{t('detail_current_price')}
@@ -253,7 +251,7 @@
 						: insight.level === 'normal'
 							? t('insight_normal_title')
 							: t('insight_high_title')}
-				<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm">
+				<div class="rounded-3xl border border-zinc-200/60 bg-white p-6">
 					<!-- Header: signal dot + title + description -->
 					<div class="flex items-start gap-3.5">
 						<div
@@ -321,7 +319,7 @@
 			<!-- sku_properties: 색상 / 크기 매트릭스 -->
 			{#if page.showMatrixPanel}
 				<div
-					class="space-y-6 rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm"
+					class="space-y-6 rounded-3xl border border-zinc-200/60 bg-white p-6"
 				>
 					{#if page.showColorRow}
 						<div>
@@ -410,7 +408,7 @@
 			<!-- sku_properties 없음: 전체 SKU 행 목록 -->
 			{#if page.hasSkuList}
 				<div
-					class="space-y-5 rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm"
+					class="space-y-5 rounded-3xl border border-zinc-200/60 bg-white p-6"
 				>
 					<p class="text-sm font-medium text-zinc-900">
 						{t('detail_sku_list_heading', { count: item.skus.length })}
@@ -465,17 +463,26 @@
 			{/if}
 
 			<!-- Price history -->
-			<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-6 backdrop-blur-sm">
+			<div class="rounded-3xl border border-zinc-200/60 bg-white p-6">
 				<h2 class="mb-5 text-base font-semibold text-zinc-900">{t('detail_price_history')}</h2>
 
-				<PriceChart data={item.priceHistory} />
+				<div class="relative">
+					<div class="transition-opacity duration-200" class:opacity-40={page.historyLoading}>
+						<PriceChart data={page.skuPriceHistory} />
+					</div>
+					{#if page.historyLoading}
+						<div class="absolute inset-0 flex items-center justify-center">
+							<div class="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600"></div>
+						</div>
+					{/if}
+				</div>
 
-				{#if item.priceHistory.length > 1}
+				{#if !page.historyLoading && page.skuPriceHistory.length > 1}
 					<div class="mt-6">
 						<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">
 							{t('detail_recent_changes')}
 						</p>
-						{#each item.priceHistory.slice(0, 10) as entry, i (i)}
+						{#each page.skuPriceHistory.slice(0, 10) as entry, i (i)}
 							<div
 								class="flex items-center justify-between py-2.5"
 								style={i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}

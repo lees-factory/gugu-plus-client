@@ -4,8 +4,10 @@ import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
+	mapPriceHistories,
 	formatDisplayPrice,
-	type ParsedSku
+	type ParsedSku,
+	type PriceEntry
 } from '$lib/product-detail/map-product';
 import type { TrackedItemDetailData } from '$lib/api/tracked-items';
 import { trackedItemsApi } from '$lib/api/tracked-items';
@@ -43,6 +45,10 @@ export function createItemDetailPage(
 		imgError: false,
 		deleting: false
 	});
+
+	let skuPriceHistory = $state<PriceEntry[]>([]);
+	let historyLoading = $state(false);
+	const historyCache = new Map<string, PriceEntry[]>();
 
 	let prevProductId = $state('');
 
@@ -155,7 +161,6 @@ export function createItemDetailPage(
 			ui.selectedSkuId = first?.skuId ?? '';
 		}
 		ui.alertEnabled = item.alertEnabled;
-		ui.imgError = false;
 	});
 
 	$effect(() => {
@@ -213,9 +218,51 @@ export function createItemDetailPage(
 	);
 
 
+	let prevDisplayImage = '';
 	$effect(() => {
-		void displayImage;
-		ui.imgError = false;
+		const img = displayImage;
+		if (img !== prevDisplayImage) {
+			prevDisplayImage = img;
+			ui.imgError = false;
+		}
+	});
+
+	// SKU 변경 시 가격 히스토리 fetch (캐시 우선)
+	$effect(() => {
+		const sku = currentSku;
+		const trackedItemId = item?.trackedItemId;
+		const currency = item?.currency;
+		if (!sku || !trackedItemId || sku.skuId === 'default') {
+			skuPriceHistory = item?.priceHistory ?? [];
+			return;
+		}
+
+		const cacheKey = `${trackedItemId}:${sku.skuId}`;
+		const cached = historyCache.get(cacheKey);
+		if (cached) {
+			skuPriceHistory = cached;
+			return;
+		}
+
+		historyLoading = true;
+		trackedItemsApi
+			.getSkuPriceHistories(trackedItemId, { sku_id: sku.skuId, currency })
+			.then((res) => {
+				if (res.error || !res.data) {
+					skuPriceHistory = item?.priceHistory ?? [];
+					return;
+				}
+				const mapped = mapPriceHistories(res.data.data, String(sku.price));
+				const result = mapped.length > 0 ? mapped : (item?.priceHistory ?? []);
+				historyCache.set(cacheKey, result);
+				skuPriceHistory = result;
+			})
+			.catch(() => {
+				skuPriceHistory = item?.priceHistory ?? [];
+			})
+			.finally(() => {
+				historyLoading = false;
+			});
 	});
 
 	type PriceInsight = {
@@ -230,9 +277,9 @@ export function createItemDetailPage(
 	};
 
 	const priceInsight = $derived.by<PriceInsight | null>(() => {
-		if (!item || item.priceHistory.length <= 1) return null;
+		if (!item || skuPriceHistory.length <= 1) return null;
 
-		const prices = item.priceHistory.map((e) => e.price).filter((p) => p > 0);
+		const prices = skuPriceHistory.map((e) => e.price).filter((p) => p > 0);
 		if (prices.length <= 1) return null;
 
 		const minPrice = Math.min(...prices);
@@ -389,6 +436,12 @@ export function createItemDetailPage(
 		},
 		get siteBadgeStyle() {
 			return siteBadgeStyle;
+		},
+		get skuPriceHistory() {
+			return skuPriceHistory;
+		},
+		get historyLoading() {
+			return historyLoading;
 		},
 		selectSku,
 		selectMatrixColor,

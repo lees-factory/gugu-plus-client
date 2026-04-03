@@ -31,7 +31,7 @@
 </script>
 
 <div
-	class="group flex flex-col rounded-3xl border border-zinc-200/60 bg-white/60 backdrop-blur-sm transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:flex-row sm:items-center sm:rounded-2xl"
+	class="group flex flex-col rounded-3xl border border-zinc-200/60 bg-white transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:flex-row sm:items-center sm:rounded-2xl"
 >
 	<a
 		href={resolve(`/items/${item.id}`)}

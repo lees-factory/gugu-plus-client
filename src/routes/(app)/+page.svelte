@@ -107,10 +107,19 @@
 						{@const isAdded = page.addedIds.includes(product.id)}
 						{@const isAdding = page.addingId === product.id}
 						<div
-							class="group flex flex-col gap-3 rounded-3xl border border-zinc-200/60 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:gap-4 sm:p-5 md:flex-row md:items-center md:gap-5 md:rounded-2xl md:p-4"
+							class="group relative flex flex-col gap-3 rounded-3xl border border-zinc-200/60 bg-white p-4 transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:gap-4 sm:p-5 md:flex-row md:items-center md:gap-5 md:rounded-2xl md:p-4"
 						>
+							<!-- Stretched link covering entire row -->
+							<a
+								href={product.url}
+								target="_blank"
+								rel="external noopener noreferrer"
+								class="absolute inset-0 z-0 rounded-[inherit]"
+								aria-label={product.title}
+							></a>
+
 							<!-- Image -->
-							<a href={product.url} target="_blank" rel="external noopener noreferrer" class="flex items-start justify-between md:block">
+							<div class="flex items-start justify-between md:block">
 								<div
 									class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-200/60 bg-zinc-100 shadow-sm sm:h-24 sm:w-24 sm:rounded-2xl md:h-16 md:w-16 md:rounded-xl"
 								>
@@ -121,18 +130,15 @@
 										loading="lazy"
 									/>
 								</div>
-							</a>
+							</div>
 
 							<!-- Title + badge -->
 							<div class="flex min-w-0 flex-1 flex-col justify-center">
-								<a
-									href={product.url}
-									target="_blank"
-									rel="external noopener noreferrer"
-									class="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors hover:text-stone-600 md:line-clamp-1"
+								<span
+									class="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-stone-600 md:line-clamp-1"
 								>
 									{product.title}
-								</a>
+								</span>
 								<div class="mt-2 flex items-center gap-2 md:mt-1.5">
 									<span
 										class="rounded-lg border border-zinc-200/60 bg-zinc-50/80 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-zinc-600 uppercase"
@@ -170,7 +176,7 @@
 							</div>
 
 							<!-- Add button -->
-							<div class="shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0">
+							<div class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0">
 								{#if isAdded}
 									<span class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2 text-xs font-semibold text-emerald-700">
 										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3.5" aria-hidden="true">
@@ -244,7 +250,7 @@
 		<aside
 			class="w-full shrink-0 [contain:layout] xl:sticky xl:top-[80px] xl:w-[340px] xl:self-start"
 		>
-			<div class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm">
+			<div class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm">
 				<div class="mb-7 flex items-center justify-between">
 					<h3 class="text-lg font-semibold tracking-tight text-zinc-900">
 						{t('nav_tracked_items')}

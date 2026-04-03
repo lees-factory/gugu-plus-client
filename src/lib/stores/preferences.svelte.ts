@@ -56,48 +56,62 @@ function isTargetLanguage(s: string): s is TargetLanguage {
 	return (TARGET_LANGUAGES as readonly string[]).includes(s);
 }
 
-/** 가격·API 요청에 쓰는 표시 통화 */
-export const preferences = $state({
-	targetCurrency: 'KRW' as TargetCurrency,
-	targetLanguage: 'KO' as TargetLanguage
-});
+/** 컴포넌트 내부에서 호출. $state를 팩토리 내부에 두어 SSR 상태 오염을 방지한다. */
+export function createPreferences() {
+	const state = $state({
+		targetCurrency: 'KRW' as TargetCurrency,
+		targetLanguage: 'KO' as TargetLanguage
+	});
 
-export function hydratePreferencesFromStorage() {
-	if (typeof localStorage === 'undefined') return;
-	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) return;
-		const j = JSON.parse(raw) as { targetCurrency?: string; targetLanguage?: string };
-		if (j.targetCurrency && isTargetCurrency(j.targetCurrency)) {
-			preferences.targetCurrency = j.targetCurrency;
+	function hydrate(): void {
+		if (typeof localStorage === 'undefined') return;
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return;
+			const j = JSON.parse(raw) as { targetCurrency?: string; targetLanguage?: string };
+			if (j.targetCurrency && isTargetCurrency(j.targetCurrency)) {
+				state.targetCurrency = j.targetCurrency;
+			}
+			if (j.targetLanguage && isTargetLanguage(j.targetLanguage)) {
+				state.targetLanguage = j.targetLanguage;
+			}
+		} catch {
+			/* ignore */
 		}
-		if (j.targetLanguage && isTargetLanguage(j.targetLanguage)) {
-			preferences.targetLanguage = j.targetLanguage;
-		}
-	} catch {
-		/* ignore */
 	}
-}
 
-export function persistPreferencesToStorage() {
-	if (typeof localStorage === 'undefined') return;
-	localStorage.setItem(
-		STORAGE_KEY,
-		JSON.stringify({
-			targetCurrency: preferences.targetCurrency,
-			targetLanguage: preferences.targetLanguage
-		})
-	);
-}
+	function persist(): void {
+		if (typeof localStorage === 'undefined') return;
+		localStorage.setItem(
+			STORAGE_KEY,
+			JSON.stringify({
+				targetCurrency: state.targetCurrency,
+				targetLanguage: state.targetLanguage
+			})
+		);
+	}
 
-export function setTargetCurrency(c: TargetCurrency) {
-	preferences.targetCurrency = c;
-	persistPreferencesToStorage();
-}
+	function setTargetCurrency(c: TargetCurrency): void {
+		state.targetCurrency = c;
+		persist();
+	}
 
-export function setTargetLanguage(l: TargetLanguage) {
-	preferences.targetLanguage = l;
-	persistPreferencesToStorage();
+	function setTargetLanguage(l: TargetLanguage): void {
+		state.targetLanguage = l;
+		persist();
+	}
+
+	return {
+		get targetCurrency() {
+			return state.targetCurrency;
+		},
+		get targetLanguage() {
+			return state.targetLanguage;
+		},
+		hydrate,
+		setTargetCurrency,
+		setTargetLanguage
+	};
 }
 
 /** 설정 화면용 짧은 라벨 */

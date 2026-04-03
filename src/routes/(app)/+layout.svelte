@@ -4,7 +4,7 @@
 	import AddItemModal from '$lib/components/AddItemModal.svelte';
 	import AppFooter from '$lib/components/AppFooter.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
-	import { hydratePreferencesFromStorage } from '$lib/stores/preferences.svelte';
+	import { createPreferences } from '$lib/stores/preferences.svelte';
 	import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import { t } from '$lib/i18n/t';
 	import { onMount, setContext } from 'svelte';
@@ -13,6 +13,7 @@
 	let { data, children } = $props();
 
 	const layout = createLayoutModel(() => data);
+	const preferences = createPreferences();
 
 	let userMenuOpen = $state(false);
 	let localeModalOpen = $state(false);
@@ -27,7 +28,7 @@
 	let mainEl: HTMLElement | undefined = $state();
 
 	onMount(() => {
-		hydratePreferencesFromStorage();
+		preferences.hydrate();
 	});
 
 	afterNavigate(({ from, to, type }) => {

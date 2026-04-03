@@ -19,6 +19,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 	const res = await fetch(`/api/v1/tracked-items/${encodeURIComponent(id)}`);
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
 
+
 	if (!res.ok) {
 		const err = json?.error as { message?: string } | string | undefined;
 		const msg =

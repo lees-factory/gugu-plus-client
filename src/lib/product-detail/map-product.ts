@@ -142,8 +142,8 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 }
 
 /** 최신순 priceHistory (차트·표 공용) */
-function mapPriceHistories(
-	hist: ProductDetailData['price_histories'],
+export function mapPriceHistories(
+	hist: { price: string; recorded_at: string; change_value: string }[],
 	fallbackPrice: string
 ): PriceEntry[] {
 	if (!hist?.length) {

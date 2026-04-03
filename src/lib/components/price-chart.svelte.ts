@@ -35,11 +35,11 @@ export function buildSmoothPath(pts: { x: number; y: number }[]): string {
 	return d;
 }
 
-export function fmtPriceChart(n: number) {
+export function fmtPriceChart(n: number): string {
 	return `₩${n.toLocaleString('ko-KR')}`;
 }
 
-export function fmtPriceChartShort(n: number) {
+export function fmtPriceChartShort(n: number): string {
 	if (Math.abs(n) >= 10000) {
 		const sign = n < 0 ? '-' : '';
 		const v = Math.abs(n) / 10000;
@@ -48,7 +48,7 @@ export function fmtPriceChartShort(n: number) {
 	return n.toLocaleString();
 }
 
-export function priceChartChangeColor(v: number) {
+export function priceChartChangeColor(v: number): string {
 	return v < 0 ? '#5aad9c' : v > 0 ? '#d4183d' : '#6b6b65';
 }
 

@@ -44,7 +44,7 @@
 
 	<div class="mx-auto max-w-2xl space-y-6">
 		<!-- Account Info -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_account')}</h2>
 
 			<div class="space-y-5">
@@ -73,7 +73,7 @@
 		</section>
 
 		<!-- Password Change -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_password')}</h2>
 
 			<div class="space-y-4">
@@ -157,7 +157,7 @@
 		</section>
 
 		<!-- Notifications -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_notifications')}</h2>
 
 			<div class="space-y-4">
@@ -191,7 +191,7 @@
 		</section>
 
 		<!-- 로그아웃 -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<div class="flex items-center justify-between">
 				<div>
 					<h2 class="text-base font-semibold text-zinc-900">{t('sidebar_log_out')}</h2>
@@ -208,7 +208,7 @@
 		</section>
 
 		<!-- 회원 탈퇴 -->
-		<section class="rounded-3xl border border-zinc-200/60 bg-white/60 p-7 shadow-sm backdrop-blur-sm sm:p-8">
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<h2 class="mb-4 text-base font-semibold text-zinc-900">{t('settings_delete_account')}</h2>
 			<p class="mb-5 text-sm text-zinc-500">{t('settings_delete_account_desc')}</p>
 			<div class="flex justify-end">
@@ -235,7 +235,7 @@
 			if (e.target === e.currentTarget) closeDeleteModal();
 		}}
 	>
-		<div class="w-full max-w-md rounded-3xl bg-white/60 p-7 shadow-xl backdrop-blur-sm">
+		<div class="w-full max-w-md rounded-3xl bg-white p-7 shadow-xl">
 			<div
 				class="mb-5 flex size-12 items-center justify-center rounded-xl"
 				style="background-color: #fee8e8;"
