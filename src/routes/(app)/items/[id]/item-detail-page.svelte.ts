@@ -42,6 +42,7 @@ export function createItemDetailPage(
 		propSize: '',
 		alertEnabled: false,
 		alertLoading: false,
+		alertError: '',
 		imgError: false,
 		deleting: false
 	});
@@ -325,18 +326,19 @@ export function createItemDetailPage(
 		const skuId = currentSku?.skuId;
 		if (!trackedItemId || ui.alertLoading) return;
 		ui.alertLoading = true;
+		ui.alertError = '';
 		try {
 			if (ui.alertEnabled) {
 				const res = await trackedItemsApi.unregisterPriceAlert(trackedItemId, skuId);
 				if (res.error) {
-					alert(t('alert_toggle_fail'));
+					ui.alertError = t('alert_toggle_fail');
 				} else {
 					ui.alertEnabled = false;
 				}
 			} else {
 				const res = await trackedItemsApi.registerPriceAlert(trackedItemId, skuId);
 				if (res.error) {
-					alert(t('alert_toggle_fail'));
+					ui.alertError = t('alert_toggle_fail');
 				} else {
 					ui.alertEnabled = true;
 				}

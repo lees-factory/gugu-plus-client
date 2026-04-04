@@ -1,10 +1,15 @@
 <script lang="ts">
+	import SeoHead from '$lib/components/SeoHead.svelte';
+	import { t } from '$lib/i18n/t';
+
 	let { children } = $props();
 </script>
 
+<SeoHead title="Price Eye" noindex={true} />
+
 <div class="flex min-h-svh items-center justify-center bg-[#F5F4F1] p-4">
 	<div class="w-full max-w-sm">
-		<div class="mb-10 flex items-center justify-center gap-3">
+		<a href="/" class="mb-10 flex items-center justify-center gap-3 no-underline">
 			<div
 				class="flex size-11 items-center justify-center rounded-2xl text-white shadow-lg shadow-zinc-900/10"
 				style="background: linear-gradient(135deg, #3f3f46 0%, #1c1917 100%);"
@@ -32,10 +37,10 @@
 			<div>
 				<div class="text-xl leading-none font-semibold tracking-tight text-zinc-900">Price Eye</div>
 				<div class="mt-1 text-[9px] font-medium tracking-wider text-zinc-400">
-					Smart Price Companion
+					{t('sidebar_tagline')}
 				</div>
 			</div>
-		</div>
+		</a>
 		{@render children()}
 	</div>
 </div>

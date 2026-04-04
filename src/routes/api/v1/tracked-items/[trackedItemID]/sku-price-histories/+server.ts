@@ -1,17 +1,17 @@
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { API_BASE } from '$lib/api/config';
+import { API_BASE } from '$lib/api/config.server';
 import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 export const GET: RequestHandler = async ({ params, url, cookies }) => {
 	const accessToken = cookies.get('access_token');
 	if (!accessToken) {
-		throw error(401, 'Unauthorized');
+		return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 	}
 
 	const userId = cookies.get('user_id');
 	if (!userId) {
-		throw error(401, 'Unauthorized');
+		return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 	}
 
 	const id = params.trackedItemID;

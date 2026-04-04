@@ -1,3 +1,10 @@
-# allow crawling everything by default
 User-agent: *
-Disallow:
+Allow: /
+
+Disallow: /api/
+Disallow: /auth/
+Disallow: /items
+Disallow: /alerts
+Disallow: /settings
+
+Sitemap: https://priceeye.com/sitemap.xml

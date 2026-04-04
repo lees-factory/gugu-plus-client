@@ -1,3 +1,5 @@
+import { t } from '$lib/i18n/t';
+
 type ApiSuccess<T> = { data: T; error: null; status: number };
 type ApiError = { data: null; error: string; status: number };
 export type ApiResult<T> = ApiSuccess<T> | ApiError;
@@ -20,15 +22,15 @@ function isRetryable(status: number): boolean {
 	);
 }
 
-/** 상태 코드별 사용자 친화적 메시지 */
+/** 상태 코드별 사용자 친화적 메시지 (i18n) */
 function friendlyError(status: number, serverMsg?: string): string {
-	if (status === 401) return '로그인이 필요합니다. 다시 로그인해 주세요.';
-	if (status === 403) return '접근 권한이 없습니다.';
-	if (status === 404) return '요청한 정보를 찾을 수 없습니다.';
-	if (status === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';
-	if (status === 503) return '서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.';
-	if (status >= 500) return '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
-	return serverMsg || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+	if (status === 401) return t('error_auth_required');
+	if (status === 403) return t('error_forbidden');
+	if (status === 404) return t('error_not_found');
+	if (status === 429) return t('error_too_many_requests');
+	if (status === 503) return t('error_service_unavailable');
+	if (status >= 500) return t('error_server');
+	return serverMsg || t('error_default');
 }
 
 function delay(ms: number): Promise<void> {

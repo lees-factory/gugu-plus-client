@@ -1,6 +1,6 @@
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { API_BASE } from '$lib/api/config';
+import { API_BASE } from '$lib/api/config.server';
 import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
 const buildTarget = (trackedItemID: string, extra?: URLSearchParams) => {
@@ -10,10 +10,10 @@ const buildTarget = (trackedItemID: string, extra?: URLSearchParams) => {
 
 export const GET: RequestHandler = async ({ params, url, cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) throw error(401, 'Unauthorized');
+	if (!accessToken) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 
 	const userId = cookies.get('user_id');
-	if (!userId) throw error(401, 'Unauthorized');
+	if (!userId) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 
 	const qs = new URLSearchParams(url.searchParams);
 	qs.set('user_id', userId);
@@ -37,15 +37,22 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 
 export const POST: RequestHandler = async ({ params, request, url, cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) throw error(401, 'Unauthorized');
+	if (!accessToken) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 
 	const userId = cookies.get('user_id');
-	if (!userId) throw error(401, 'Unauthorized');
+	if (!userId) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
+
+	let parsed: Record<string, unknown>;
+	try {
+		parsed = JSON.parse(await request.text()) as Record<string, unknown>;
+	} catch {
+		return json({ error: { message: 'Invalid JSON' } }, { status: 400 });
+	}
 
 	const qs = new URLSearchParams(url.searchParams);
 	qs.set('user_id', userId);
 
-	const body = await request.text();
+	const body = JSON.stringify({ ...parsed, user_id: userId });
 
 	let res: Response;
 	try {
@@ -73,10 +80,10 @@ export const POST: RequestHandler = async ({ params, request, url, cookies }) =>
 
 export const DELETE: RequestHandler = async ({ params, url, cookies }) => {
 	const accessToken = cookies.get('access_token');
-	if (!accessToken) throw error(401, 'Unauthorized');
+	if (!accessToken) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 
 	const userId = cookies.get('user_id');
-	if (!userId) throw error(401, 'Unauthorized');
+	if (!userId) return json({ error: { message: 'Unauthorized' } }, { status: 401 });
 
 	const qs = new URLSearchParams(url.searchParams);
 	qs.set('user_id', userId);

@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { authApi } from '$lib/api/auth';
+import { authApi } from '$lib/api/auth.server';
 
 export const actions: Actions = {
 	verify: async ({ request }) => {

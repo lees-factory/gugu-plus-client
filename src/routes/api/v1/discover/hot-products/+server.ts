@@ -1,13 +1,16 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { API_BASE } from '$lib/api/config';
+import { API_BASE } from '$lib/api/config.server';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const page = url.searchParams.get('page') ?? '1';
-	const size = url.searchParams.get('size') ?? '20';
+	const rawPage = Number(url.searchParams.get('page') ?? '1');
+	const rawSize = Number(url.searchParams.get('size') ?? '20');
 	const language = url.searchParams.get('language') ?? 'KO';
 
-	const target = `${API_BASE}/v1/discover/hot-products?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}&language=${encodeURIComponent(language)}`;
+	const page = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage : 1;
+	const size = Number.isInteger(rawSize) && rawSize >= 1 ? Math.min(rawSize, 100) : 20;
+
+	const target = `${API_BASE}/v1/discover/hot-products?page=${page}&size=${size}&language=${encodeURIComponent(language)}`;
 
 	const res = await fetch(target).catch(() => null);
 

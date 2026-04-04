@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import AddItemModal from '$lib/components/AddItemModal.svelte';
 	import AppFooter from '$lib/components/AppFooter.svelte';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import { createPreferences } from '$lib/stores/preferences.svelte';
 	import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import { t } from '$lib/i18n/t';
@@ -11,6 +13,13 @@
 	import { createLayoutModel } from './app-layout.svelte';
 
 	let { data, children } = $props();
+
+	/** 공개 페이지는 각 페이지에서 자체 SeoHead를 렌더링하므로 레이아웃 noindex를 건너뛴다. */
+	const PUBLIC_PATHS = ['/plan', '/terms', '/privacy'];
+	const isPublicPage = $derived(PUBLIC_PATHS.includes($page.url.pathname));
+
+	/** 비로그인 + (루트 or 공개 페이지) = 사이드바/헤더 숨김 */
+	const isLanding = $derived(!data.userEmail && ($page.url.pathname === '/' || isPublicPage));
 
 	const layout = createLayoutModel(() => data);
 	const preferences = createPreferences();
@@ -41,6 +50,16 @@
 	setContext('openQuickAdd', layout.openQuickAdd);
 </script>
 
+{#if !isPublicPage && !isLanding}
+	<SeoHead title="Price Eye" noindex={true} />
+{/if}
+
+{#if isLanding}
+	<!-- Landing page: no sidebar, no header, no bottom nav -->
+	<div class="min-h-svh bg-[#F5F4F1]">
+		{@render children()}
+	</div>
+{:else}
 <div class="flex h-svh overflow-hidden bg-[#F5F4F1]">
 	<AppSidebar
 		collapsed={layout.model.collapsed}
@@ -68,7 +87,7 @@
 				<button
 					type="button"
 					onclick={layout.toggleSidebar}
-					aria-label="Toggle sidebar"
+					aria-label={t('aria_toggle_sidebar')}
 					class="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 p-2.5 text-zinc-600 transition-all duration-200 hover:bg-zinc-50"
 				>
 					<svg
@@ -417,3 +436,4 @@
 	onClose={() => (layout.model.quickAddOpen = false)}
 	onAdd={layout.handleQuickAdd}
 />
+{/if}

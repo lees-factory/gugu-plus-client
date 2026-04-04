@@ -3,7 +3,7 @@
  * 백엔드가 401을 반환하면 refresh token으로 access_token을 갱신하고 1회 재시도한다.
  * 동시 요청의 race condition을 방지하기 위해 refresh를 한 번만 수행한다.
  */
-import { API_BASE, COOKIE_OPTS } from './config';
+import { API_BASE, COOKIE_OPTS } from './config.server';
 import type { Cookies } from '@sveltejs/kit';
 import type { AuthTokens } from './auth';
 

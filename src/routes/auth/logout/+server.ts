@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { authApi } from '$lib/api/auth';
+import { authApi } from '$lib/api/auth.server';
 
 export const GET: RequestHandler = async ({ cookies }) => {
 	const refreshToken = cookies.get('refresh_token');

@@ -3,11 +3,6 @@ import { resolve } from '$app/paths';
 import { auth } from '$lib/stores/auth.svelte';
 import { t } from '$lib/i18n/t';
 
-export const planLabel: Record<string, string> = {
-	free: 'Free',
-	pro: 'Pro'
-};
-
 export function createSettingsPage() {
 	const settings = $state({
 		email: auth.user?.email ?? '',
@@ -51,7 +46,7 @@ export function createSettingsPage() {
 		try {
 			// TODO: 실제 API 연동
 			await new Promise((r) => setTimeout(r, 800));
-			alert(t('settings_password_changed_relogin'));
+			p.success = true;
 			auth.logout();
 			window.location.href = '/auth/logout';
 		} catch {

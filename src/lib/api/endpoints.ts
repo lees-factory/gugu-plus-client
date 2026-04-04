@@ -1,22 +1,8 @@
-import { API_BASE } from './config';
-
+/**
+ * 클라이언트 전용 엔드포인트 — 모두 동일 출처 BFF 프록시 경로.
+ * 백엔드 URL이 포함되지 않으므로 클라이언트 번들에 안전하게 포함됨.
+ */
 export const ENDPOINTS = {
-	/** GET /health */
-	health: `${API_BASE}/health`,
-
-	/**
-	 * 서버 전용: form actions, hooks 등에서 백엔드를 직접 호출할 때 사용.
-	 * 브라우저에서 호출하면 CORS 문제가 발생하므로 클라이언트 JS에서는 authBff를 사용한다.
-	 */
-	auth: {
-		registerEmail: `${API_BASE}/v1/auth/register/email`,
-		loginEmail: `${API_BASE}/v1/auth/login/email`,
-		verifyEmail: `${API_BASE}/v1/auth/verify-email`,
-		oauthLogin: `${API_BASE}/v1/auth/oauth/login`,
-		refresh: `${API_BASE}/v1/auth/refresh`,
-		logout: `${API_BASE}/v1/auth/logout`
-	},
-
 	/** 브라우저 → 동일 출처 BFF 프록시 → 백엔드 인증 API */
 	authBff: {
 		registerEmail: '/api/v1/auth/register/email',

@@ -13,7 +13,6 @@ export const load: PageLoad = async ({ fetch, parent, depends }) => {
 
 	const res = await fetch(`${ENDPOINTS.trackedItems.list}?size=20`);
 	const json = await res.json().catch(() => ({}));
-	console.log('🚀 ~ load ~ json:', json);
 
 	if (!res.ok) {
 		return {

@@ -2,7 +2,7 @@ import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { deLocalizeHref } from '$lib/paraglide/runtime.js';
 import { paraglideMiddleware } from '$lib/paraglide/server.js';
-import { API_BASE, COOKIE_OPTS } from '$lib/api/config';
+import { API_BASE, COOKIE_OPTS } from '$lib/api/config.server';
 import type { AuthTokens } from '$lib/api/auth';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
@@ -74,4 +74,24 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleParaglide, handleAuth);
+/** 보안 헤더 추가 */
+const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+
+	response.headers.set('X-Frame-Options', 'DENY');
+	response.headers.set('X-Content-Type-Options', 'nosniff');
+	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+	response.headers.set(
+		'Content-Security-Policy',
+		"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; font-src 'self' data:; frame-src https://accounts.google.com https://*.firebaseapp.com;"
+	);
+	response.headers.set(
+		'Strict-Transport-Security',
+		'max-age=31536000; includeSubDomains'
+	);
+
+	return response;
+};
+
+export const handle: Handle = sequence(handleParaglide, handleAuth, handleSecurityHeaders);

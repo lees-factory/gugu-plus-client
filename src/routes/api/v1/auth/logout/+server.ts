@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { API_BASE } from '$lib/api/config';
+import { API_BASE } from '$lib/api/config.server';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const body = await request.text();

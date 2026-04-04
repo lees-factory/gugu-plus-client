@@ -75,7 +75,7 @@
 						{t('brand_name')}
 					</div>
 					<div class="mt-1 text-[9px] font-medium tracking-wider whitespace-nowrap text-zinc-400">
-						Smart Price Companion
+						{t('sidebar_tagline')}
 					</div>
 				</div>
 			{/if}
@@ -213,7 +213,7 @@
 					class="text-[9px] font-semibold tracking-wider uppercase"
 					style="color: rgba(180, 83, 9, 0.7);"
 				>
-					Pro Tip
+					{t('sidebar_pro_tip')}
 				</div>
 				<div class="mt-2.5 text-sm leading-snug font-semibold text-zinc-900">
 					{t('sidebar_chrome_extension')}
