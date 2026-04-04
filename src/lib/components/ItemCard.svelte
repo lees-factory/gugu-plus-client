@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
 	import type { TrackedItem } from '$lib/types';
+	import { formatPrice } from '$lib/utils/format-price';
 
 	let {
 		item,
@@ -14,29 +15,12 @@
 	} = $props();
 
 	let imgError = $state(false);
-
-	function formatPrice(amount: number, currency: string): string {
-		const c = currency.trim();
-		try {
-			const code = c === '₩' ? 'KRW' : c === '$' ? 'USD' : c.length === 3 ? c : 'KRW';
-			return new Intl.NumberFormat('ko-KR', {
-				style: 'currency',
-				currency: code,
-				maximumFractionDigits: 0
-			}).format(amount);
-		} catch {
-			return `${Math.round(amount).toLocaleString('ko-KR')} ${c}`;
-		}
-	}
 </script>
 
 <div
 	class="group flex flex-col rounded-3xl border border-zinc-200/60 bg-white transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:flex-row sm:items-center sm:rounded-2xl"
 >
-	<a
-		href={resolve(`/items/${item.id}`)}
-		class="flex min-w-0 flex-1 items-center gap-4 p-5 sm:p-4"
-	>
+	<a href={resolve(`/items/${item.id}`)} class="flex min-w-0 flex-1 items-center gap-4 p-5 sm:p-4">
 		<!-- Thumbnail -->
 		<div
 			class="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-100 shadow-sm sm:size-14 sm:rounded-xl"

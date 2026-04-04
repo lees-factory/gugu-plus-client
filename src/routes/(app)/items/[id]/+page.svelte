@@ -4,10 +4,11 @@
 	import { t } from '$lib/i18n/t';
 	import { createItemDetailPage } from './item-detail-page.svelte';
 	import PriceChart from '$lib/components/PriceChart.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 
 	const { data }: PageProps = $props();
 
-	const page = createItemDetailPage(() => data.trackedItem);
+	const page = createItemDetailPage(() => data.trackedItem, () => data.alertState);
 
 	const item = $derived(page.item);
 </script>
@@ -33,54 +34,61 @@
 		</a>
 	</div>
 {:else}
-	<div class="space-y-10 p-8 sm:p-10 lg:p-14">
-		<!-- Page header -->
-		<div class="max-w-2xl">
-			<div
-				class="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
-			>
-				<a
-					href={resolve('/items')}
-					class="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 transition hover:text-zinc-900"
-				>
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						class="size-3"
-						aria-hidden="true"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-						/>
-					</svg>
-					{t('detail_back_dashboard')}
-				</a>
-				<span class="text-zinc-300">·</span>
-				<span class="text-[10px] font-semibold tracking-wider text-zinc-600 uppercase">
-					{item.site}
-				</span>
-			</div>
-			<h1 class="line-clamp-4 text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
-				{item.title}
-			</h1>
-		</div>
+	<div class="space-y-6 p-5 sm:p-6 lg:p-8">
+		<!-- ad:top -->
 
-		<div class="mx-auto max-w-5xl space-y-8">
+		<div class="space-y-8">
+			<!-- Page header -->
+			<div class="max-w-2xl">
+				<div
+					class="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
+				>
+					<a
+						href={resolve('/items')}
+						class="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 transition hover:text-zinc-900"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							class="size-3"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+							/>
+						</svg>
+						{t('detail_back_dashboard')}
+					</a>
+				</div>
+				<h1 class="line-clamp-4 text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
+					{item.title}
+				</h1>
+			</div>
 			<!-- Image + Price grid -->
-			<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+			<div class="grid grid-cols-1 gap-0 md:grid-cols-2 md:gap-8">
 				<!-- Image -->
 				<div
-					class="flex items-center justify-center overflow-hidden rounded-3xl border border-zinc-200/60 bg-white p-6"
+					class="relative flex items-center justify-center overflow-hidden rounded-t-3xl border border-zinc-200/60 md:rounded-3xl"
+					style="min-height: 280px;"
 				>
 					{#if !page.ui.imgError && page.displayImage}
+						<!-- Blurred background fill -->
+						<img
+							src={page.displayImage}
+							alt=""
+							aria-hidden="true"
+							class="absolute inset-0 size-full scale-110 object-cover blur-xl opacity-70"
+						/>
+						<div class="absolute inset-0 bg-white/30"></div>
+						<!-- Main image -->
 						<img
 							src={page.displayImage}
 							alt={item.title}
-							class="max-h-72 w-full rounded-xl object-contain sm:max-h-96"
+							class="relative z-10 m-4 max-h-72 rounded-2xl object-cover sm:m-6 sm:max-h-96"
 							onerror={page.onImageError}
 						/>
 					{:else}
@@ -108,9 +116,7 @@
 				</div>
 
 				<!-- Price + CTA -->
-				<div
-					class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white p-8"
-				>
+				<div class="flex flex-col rounded-b-3xl border border-t-0 border-zinc-200/60 bg-white p-8 md:rounded-3xl md:border-t">
 					<p class="mb-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
 						{t('detail_current_price')}
 					</p>
@@ -318,9 +324,7 @@
 
 			<!-- sku_properties: 색상 / 크기 매트릭스 -->
 			{#if page.showMatrixPanel}
-				<div
-					class="space-y-6 rounded-3xl border border-zinc-200/60 bg-white p-6"
-				>
+				<div class="space-y-6 rounded-3xl border border-zinc-200/60 bg-white p-6">
 					{#if page.showColorRow}
 						<div>
 							<p class="mb-3 text-sm font-medium text-zinc-900">
@@ -407,9 +411,7 @@
 
 			<!-- sku_properties 없음: 전체 SKU 행 목록 -->
 			{#if page.hasSkuList}
-				<div
-					class="space-y-5 rounded-3xl border border-zinc-200/60 bg-white p-6"
-				>
+				<div class="space-y-5 rounded-3xl border border-zinc-200/60 bg-white p-6">
 					<p class="text-sm font-medium text-zinc-900">
 						{t('detail_sku_list_heading', { count: item.skus.length })}
 					</p>
@@ -468,36 +470,47 @@
 
 				<div class="relative">
 					<div class="transition-opacity duration-200" class:opacity-40={page.historyLoading}>
-						<PriceChart data={page.skuPriceHistory} />
+						<PriceChart data={page.skuPriceHistory} currency={item?.currency} />
 					</div>
 					{#if page.historyLoading}
 						<div class="absolute inset-0 flex items-center justify-center">
-							<div class="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600"></div>
+							<div
+								class="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600"
+							></div>
 						</div>
 					{/if}
 				</div>
 
 				{#if !page.historyLoading && page.skuPriceHistory.length > 1}
 					<div class="mt-6">
-						<p class="mb-3 text-xs font-medium" style="color: #9b9b95;">
-							{t('detail_recent_changes')}
-						</p>
+						<div class="flex items-center justify-between py-2 text-xs text-zinc-400">
+							<span>{t('detail_history_col_date')}</span>
+							<div class="flex items-center gap-4">
+								<span>{t('detail_history_col_price')}</span>
+								<span class="w-20 text-right">{t('detail_history_col_change')}</span>
+							</div>
+						</div>
 						{#each page.skuPriceHistory.slice(0, 10) as entry, i (i)}
 							<div
 								class="flex items-center justify-between py-2.5"
 								style={i < 9 ? 'border-bottom: 1px solid rgba(45, 45, 42, 0.05);' : ''}
 							>
-								<span class="text-sm text-zinc-500">{entry.date}</span>
+								<span class="flex items-center gap-1.5 text-sm text-zinc-500">
+									{#if i === 0}
+										<span class="inline-block size-1.5 rounded-full bg-blue-500"></span>
+									{/if}
+									{entry.date}
+								</span>
 								<div class="flex items-center gap-4">
-									<span class="text-sm font-medium text-zinc-900 tabular-nums"
+									<span class="text-sm tabular-nums {i === 0 ? 'font-semibold text-zinc-900' : 'font-medium text-zinc-900'}"
 										>{page.fmt(entry.price)}</span
 									>
 									{#if entry.change < 0}
-										<span class="w-20 text-right text-xs font-medium text-emerald-600 tabular-nums">
+										<span class="w-20 text-right text-xs font-medium text-blue-500 tabular-nums">
 											{page.fmt(Math.abs(entry.change))}
 										</span>
 									{:else if entry.change > 0}
-										<span class="w-20 text-right text-xs font-medium text-rose-600 tabular-nums">
+										<span class="w-20 text-right text-xs font-medium text-red-500 tabular-nums">
 											{page.fmt(entry.change)}
 										</span>
 									{:else}
@@ -510,5 +523,14 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- ad:bottom -->
 	</div>
+
+	<ConfirmDialog
+		open={page.confirmDeleteOpen}
+		message={t('confirm_delete_track')}
+		onConfirm={page.confirmDelete}
+		onCancel={page.cancelDelete}
+	/>
 {/if}

@@ -1,23 +1,24 @@
 import { goto, invalidate } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { SvelteSet } from 'svelte/reactivity';
 import { auth } from '$lib/stores/auth.svelte';
 import { trackedItemsApi, type TrackedItemData } from '$lib/api/tracked-items';
 import { t } from '$lib/i18n/t';
 import type { AddItemEntry, TrackedItem } from '$lib/types';
 import { summaryToCard } from '$lib/tracked-items/map-summary';
 
-export type SortKey = 'recent' | 'title' | 'site' | 'price';
+export type SortKey = 'recent' | 'title' | 'price';
 
 export const CHROME_EXTENSION_STORE_URL =
 	'https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb';
 
-export function createItemsPage(getData: () => {
-	items: TrackedItemData[];
-	hasMore: boolean;
-	nextCursor?: string;
-	error: string | null;
-}) {
+export function createItemsPage(
+	getData: () => {
+		items: TrackedItemData[];
+		hasMore: boolean;
+		nextCursor?: string;
+		error: string | null;
+	}
+) {
 	const model = $state({
 		modalOpen: false,
 		items: [] as TrackedItem[],
@@ -26,13 +27,15 @@ export function createItemsPage(getData: () => {
 		deletingId: null as string | null,
 		isLoadingMore: false,
 		hasMore: false,
-		nextCursor: undefined as string | undefined
+		nextCursor: undefined as string | undefined,
+		sentinel: undefined as HTMLElement | undefined
 	});
 
 	let searchQuery = $state('');
-	let marketplace = $state('all');
 	let sortBy = $state<SortKey>('recent');
-	let filterOpen = $state(false);
+	let bannerDismissed = $state(
+		typeof localStorage !== 'undefined' && localStorage.getItem('chrome-banner-dismissed') === '1'
+	);
 
 	// load 데이터가 바뀔 때마다 model 갱신
 	$effect(() => {
@@ -44,10 +47,6 @@ export function createItemsPage(getData: () => {
 		model.nextCursor = data.nextCursor;
 	});
 
-	const marketplaceSites = $derived.by(() => {
-		return [...new SvelteSet(model.items.map((i) => i.site))].sort((a, b) => a.localeCompare(b));
-	});
-
 	const displayedItems = $derived.by(() => {
 		let list: TrackedItem[] = model.items;
 		const q = searchQuery.trim().toLowerCase();
@@ -56,14 +55,9 @@ export function createItemsPage(getData: () => {
 				(i) => i.title.toLowerCase().includes(q) || i.site.toLowerCase().includes(q)
 			);
 		}
-		if (marketplace !== 'all') {
-			list = list.filter((i) => i.site === marketplace);
-		}
 		const sorted = [...list];
 		if (sortBy === 'title') {
 			sorted.sort((a, b) => a.title.localeCompare(b.title));
-		} else if (sortBy === 'site') {
-			sorted.sort((a, b) => a.site.localeCompare(b.site) || a.title.localeCompare(b.title));
 		} else if (sortBy === 'price') {
 			sorted.sort((a, b) => {
 				const pa = a.currentPrice;
@@ -79,11 +73,12 @@ export function createItemsPage(getData: () => {
 
 	function setSortFromSelect(ev: Event) {
 		const v = (ev.currentTarget as HTMLSelectElement).value;
-		if (v === 'recent' || v === 'title' || v === 'site' || v === 'price') sortBy = v;
+		if (v === 'recent' || v === 'title' || v === 'price') sortBy = v;
 	}
 
-	function toggleFilterOpen() {
-		filterOpen = !filterOpen;
+	function dismissBanner() {
+		bannerDismissed = true;
+		localStorage.setItem('chrome-banner-dismissed', '1');
 	}
 
 	function handleAddClick() {
@@ -122,22 +117,50 @@ export function createItemsPage(getData: () => {
 		await invalidate('app:tracked-items');
 	}
 
-	async function deleteItem(trackedItemId: string) {
-		if (!confirm(t('confirm_delete_track'))) return;
+	let confirmDeleteId = $state<string | null>(null);
+
+	function deleteItem(trackedItemId: string) {
+		confirmDeleteId = trackedItemId;
+	}
+
+	function cancelDelete() {
+		confirmDeleteId = null;
+	}
+
+	async function confirmDelete() {
+		const trackedItemId = confirmDeleteId;
+		if (!trackedItemId) return;
+		confirmDeleteId = null;
 		model.deletingId = trackedItemId;
 		try {
 			const res = await trackedItemsApi.deleteItem(trackedItemId);
-			if (res.error) {
-				alert(res.error);
-				return;
-			}
-			// optimistic UI + load 재실행
+			if (res.error) return;
 			model.items = model.items.filter((i) => i.id !== trackedItemId);
 			await invalidate('app:tracked-items');
 		} finally {
 			model.deletingId = null;
 		}
 	}
+
+	// infinite scroll observer
+	$effect(() => {
+		if (!model.sentinel) return;
+		let cooldown = false;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (!entries[0].isIntersecting || cooldown || model.isLoadingMore || !model.hasMore) return;
+				cooldown = true;
+				void loadMore().finally(() => {
+					setTimeout(() => {
+						cooldown = false;
+					}, 80);
+				});
+			},
+			{ root: null, rootMargin: '280px', threshold: 0 }
+		);
+		observer.observe(model.sentinel);
+		return () => observer.disconnect();
+	});
 
 	async function loadMore() {
 		if (model.isLoadingMore || !model.hasMore || !model.nextCursor) return;
@@ -165,36 +188,29 @@ export function createItemsPage(getData: () => {
 		set searchQuery(v: string) {
 			searchQuery = v;
 		},
-		get marketplace() {
-			return marketplace;
-		},
-		set marketplace(v: string) {
-			marketplace = v;
-		},
 		get sortBy() {
 			return sortBy;
 		},
 		set sortBy(v: SortKey) {
 			sortBy = v;
 		},
-		get filterOpen() {
-			return filterOpen;
-		},
-		set filterOpen(v: boolean) {
-			filterOpen = v;
-		},
-		get marketplaceSites() {
-			return marketplaceSites;
-		},
 		get displayedItems() {
 			return displayedItems;
 		},
+		get bannerDismissed() {
+			return bannerDismissed;
+		},
 		setSortFromSelect,
-		toggleFilterOpen,
+		dismissBanner,
 		handleAddClick,
 		openChromeExtensionStore,
+		get confirmDeleteId() {
+			return confirmDeleteId;
+		},
 		handleAddItem,
 		deleteItem,
+		cancelDelete,
+		confirmDelete,
 		loadMore
 	};
 }

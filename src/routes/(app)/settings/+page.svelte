@@ -4,8 +4,13 @@
 	import { t } from '$lib/i18n/t';
 	import { createSettingsPage } from './settings-page.svelte';
 
-	const { settings, handlePasswordChange, toggleEmailNotif, handleDeleteAccount, closeDeleteModal } =
-		createSettingsPage();
+	const {
+		settings,
+		handlePasswordChange,
+		toggleEmailNotif,
+		handleDeleteAccount,
+		closeDeleteModal
+	} = createSettingsPage();
 
 	$effect(() => {
 		const e = auth.user?.email;
@@ -13,11 +18,11 @@
 	});
 </script>
 
-<div class="space-y-10 p-8 sm:p-10 lg:p-14">
+<div class="space-y-6 p-5 sm:p-6 lg:p-8">
 	<!-- Page hero -->
 	<div class="max-w-2xl">
 		<div
-			class="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
+			class="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
 		>
 			<svg
 				viewBox="0 0 24 24"
@@ -36,13 +41,15 @@
 			</svg>
 			<span class="text-xs font-semibold text-stone-800">{t('settings_title')}</span>
 		</div>
-		<h1 class="text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
+		<h1 class="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
 			{t('settings_title')}
 		</h1>
-		<p class="mt-6 text-base leading-relaxed text-zinc-600">{t('settings_subtitle')}</p>
+		<p class="mt-3 text-base leading-relaxed text-zinc-600">{t('settings_subtitle')}</p>
 	</div>
 
-	<div class="mx-auto max-w-2xl space-y-6">
+	<!-- ad:top -->
+
+	<div class="space-y-6">
 		<!-- Account Info -->
 		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
 			<h2 class="mb-6 text-base font-semibold text-zinc-900">{t('settings_account')}</h2>
@@ -68,7 +75,6 @@
 					/>
 					<p class="mt-1.5 text-xs text-zinc-500">{t('settings_email_hint')}</p>
 				</div>
-
 			</div>
 		</section>
 
@@ -138,9 +144,25 @@
 
 				<div class="flex items-center justify-end gap-3 pt-1">
 					{#if settings.password.loading}
-						<svg class="size-4 animate-spin text-zinc-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+						<svg
+							class="size-4 animate-spin text-zinc-400"
+							viewBox="0 0 24 24"
+							fill="none"
+							aria-hidden="true"
+						>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+							></path>
 						</svg>
 					{/if}
 					<button
@@ -223,6 +245,8 @@
 			</div>
 		</section>
 	</div>
+
+	<!-- ad:bottom -->
 </div>
 
 <!-- Delete Account Modal -->

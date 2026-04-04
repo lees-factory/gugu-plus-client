@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete } from './client';
+import { apiGet } from './client';
 import { ENDPOINTS } from './endpoints';
 
 export type ProductPriceHistory = {
@@ -49,42 +49,10 @@ export type ProductSkusListSuccessResponse = {
 	data: ProductSku[];
 };
 
-export type PriceAlertData = {
-	id: string;
-	product_id: string;
-	channel: string;
-	enabled: boolean;
-	created_at: string;
-};
-
-export type PriceAlertResponse = {
-	result: string;
-	data: PriceAlertData;
-};
-
-export type SuccessResponse = {
-	result: string;
-};
-
-export type ListPriceAlertsResponse = {
-	result: string;
-	data: PriceAlertData[];
-};
-
-export const alertsApi = {
-	list: () => apiGet<ListPriceAlertsResponse>(ENDPOINTS.alerts.list)
-};
-
 export const productsApi = {
 	get: (productId: string) =>
 		apiGet<ProductDetailSuccessResponse>(ENDPOINTS.products.detail(productId)),
 
 	listSkus: (productId: string) =>
-		apiGet<ProductSkusListSuccessResponse>(ENDPOINTS.products.skus(productId)),
-
-	registerAlert: (productId: string) =>
-		apiPost<PriceAlertResponse>(ENDPOINTS.products.alert(productId), { channel: 'EMAIL' }),
-
-	unregisterAlert: (productId: string) =>
-		apiDelete<SuccessResponse>(ENDPOINTS.products.alert(productId))
+		apiGet<ProductSkusListSuccessResponse>(ENDPOINTS.products.skus(productId))
 };

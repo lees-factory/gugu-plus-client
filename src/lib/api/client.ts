@@ -10,7 +10,14 @@ const BASE_DELAY_MS = 500;
 
 /** 재시도 대상: 네트워크 실패(0/503), 타임아웃(408), 과부하(429), 502/504 게이트웨이 에러만 */
 function isRetryable(status: number): boolean {
-	return status === 0 || status === 408 || status === 429 || status === 502 || status === 503 || status === 504;
+	return (
+		status === 0 ||
+		status === 408 ||
+		status === 429 ||
+		status === 502 ||
+		status === 503 ||
+		status === 504
+	);
 }
 
 /** 상태 코드별 사용자 친화적 메시지 */

@@ -125,61 +125,74 @@
 
 		<!-- Dialog -->
 		<div
-			class="relative z-10 w-full overflow-hidden rounded-t-3xl border border-zinc-200/50 bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl"
+			class="relative z-10 flex w-full max-h-[85svh] flex-col rounded-t-3xl border border-zinc-200/50 bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl"
 		>
-			<!-- Handle bar (mobile) -->
-			<div class="flex justify-center pt-3 sm:hidden">
-				<div class="h-1 w-10 rounded-full bg-zinc-200"></div>
-			</div>
-
-			<!-- Icon + Header -->
-			<div class="px-8 pt-8 pb-0 md:px-10 md:pt-10">
-				<div class="pr-12">
-					<div
-						class="mb-6 inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg shadow-zinc-900/10"
-						style="background: linear-gradient(135deg, #3f3f46 0%, #1c1917 100%);"
-					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2.5"
-							class="size-6"
-							aria-hidden="true"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-						</svg>
-					</div>
-					<h2 class="text-3xl font-semibold tracking-tight text-zinc-900">
-						{t('modal_add_title')}
-					</h2>
-					<p class="mt-3 text-sm leading-relaxed font-normal text-zinc-600">
-						{t('modal_supported_sites', { sites: supportedSites.join(', ') })}
-					</p>
-				</div>
-			</div>
-
-			<!-- Close button -->
-			<button
-				type="button"
-				onclick={onClose}
-				class="absolute top-6 right-6 flex size-10 items-center justify-center rounded-2xl bg-zinc-100/80 text-zinc-400 transition-all duration-200 hover:bg-zinc-200 hover:text-zinc-900"
-				aria-label={t('aria_close')}
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					class="size-5"
-					aria-hidden="true"
+			<!-- Handle bar + Close (fixed top) -->
+			<div class="flex shrink-0 items-center justify-between px-6 pt-3 pb-0 sm:hidden">
+				<div class="w-10"></div>
+				<div class="h-1 w-10 rounded-full bg-zinc-300"></div>
+				<button
+					type="button"
+					onclick={onClose}
+					class="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900"
+					aria-label={t('aria_close')}
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-				</svg>
-			</button>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
 
-			<!-- Body -->
-			<form onsubmit={handleSubmit} class="flex flex-col gap-4 px-8 pt-8 pb-8 md:px-10 md:pb-10">
+			<!-- Scrollable content -->
+			<div class="flex-1 overflow-y-auto overscroll-contain">
+				<!-- Icon + Header -->
+				<div class="px-8 pt-6 pb-0 sm:pt-8 md:px-10 md:pt-10">
+					<div class="pr-12">
+						<div
+							class="mb-6 inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg shadow-zinc-900/10"
+							style="background: linear-gradient(135deg, #3f3f46 0%, #1c1917 100%);"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								class="size-6"
+								aria-hidden="true"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+							</svg>
+						</div>
+						<h2 class="text-3xl font-semibold tracking-tight text-zinc-900">
+							{t('modal_add_title')}
+						</h2>
+						<p class="mt-3 text-sm leading-relaxed font-normal text-zinc-600">
+							{t('modal_supported_sites', { sites: supportedSites.join(', ') })}
+						</p>
+					</div>
+				</div>
+
+				<!-- Desktop close button -->
+				<button
+					type="button"
+					onclick={onClose}
+					class="absolute top-6 right-6 hidden size-10 items-center justify-center rounded-2xl bg-zinc-100/80 text-zinc-400 transition-all duration-200 hover:bg-zinc-200 hover:text-zinc-900 sm:flex"
+					aria-label={t('aria_close')}
+				>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						class="size-5"
+						aria-hidden="true"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+					</svg>
+				</button>
+
+				<!-- Body -->
+				<form onsubmit={handleSubmit} class="flex flex-col gap-4 px-8 pt-8 pb-8 md:px-10 md:pb-10">
 				<!-- URL rows -->
 				<div class="flex max-h-[280px] flex-col gap-3 overflow-y-auto">
 					{#each parsedRows as row, idx (row.id)}
@@ -327,6 +340,7 @@
 					</button>
 				</div>
 			</form>
+			</div>
 		</div>
 	</div>
 {/if}

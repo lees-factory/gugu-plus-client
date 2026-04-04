@@ -1,4 +1,5 @@
 import { t } from '$lib/i18n/t';
+import { formatPrice, formatPriceShort } from '$lib/utils/format-price';
 
 export type ChartEntry = { date: string; price: number; change: number };
 
@@ -14,14 +15,11 @@ export function getPriceChartPeriods(): { value: ChartPeriod; label: string }[] 
 	];
 }
 
-export const PRICE_CHART_LAYOUT = {
-	VW: 600,
-	VH: 210,
-	PL: 68,
-	PR: 16,
-	PT: 18,
-	PB: 34
-} as const;
+/** 고정 패딩 (px) — 텍스트 크기에 맞춘 값 */
+export const CHART_PADDING = { PL: 50, PR: 12, PT: 18, PB: 28 } as const;
+
+/** 높이 비율 — VH = VW * ASPECT */
+export const CHART_ASPECT = 0.55;
 
 export function buildSmoothPath(pts: { x: number; y: number }[]): string {
 	if (pts.length < 2) return '';
@@ -35,31 +33,33 @@ export function buildSmoothPath(pts: { x: number; y: number }[]): string {
 	return d;
 }
 
-export function fmtPriceChart(n: number): string {
-	return `₩${n.toLocaleString('ko-KR')}`;
+export function fmtPriceChart(n: number, currency?: string): string {
+	return formatPrice(n, currency);
 }
 
-export function fmtPriceChartShort(n: number): string {
-	if (Math.abs(n) >= 10000) {
-		const sign = n < 0 ? '-' : '';
-		const v = Math.abs(n) / 10000;
-		return `${sign}${v % 1 === 0 ? v : v.toFixed(1)}만`;
-	}
-	return n.toLocaleString();
+export function fmtPriceChartShort(n: number, currency?: string): string {
+	return formatPriceShort(n, currency);
 }
 
 export function priceChartChangeColor(v: number): string {
-	return v < 0 ? '#5aad9c' : v > 0 ? '#d4183d' : '#6b6b65';
+	return v < 0 ? '#3b82f6' : v > 0 ? '#ef4444' : '#6b6b65';
 }
 
 /**
  * PriceChart 전용 rune 모델. 컴포넌트 최상단에서 한 번만 호출하고,
  * `getData`는 최신 `data` prop을 읽는 함수로 넘긴다.
  */
-export function createPriceChartModel(getData: () => ChartEntry[]) {
-	const { VW, VH, PL, PR, PT, PB } = PRICE_CHART_LAYOUT;
-	const cW = VW - PL - PR;
-	const cH = VH - PT - PB;
+export function createPriceChartModel(
+	getData: () => ChartEntry[],
+	getCurrency?: () => string | undefined,
+	getWidth?: () => number
+) {
+	const { PL, PR, PT, PB } = CHART_PADDING;
+
+	const VW = $derived(getWidth?.() || 400);
+	const VH = $derived(Math.round(VW * CHART_ASPECT));
+	const cW = $derived(VW - PL - PR);
+	const cH = $derived(VH - PT - PB);
 
 	let selectedPeriod = $state<ChartPeriod>('14');
 	let hoverIdx = $state<number | null>(null);
@@ -192,14 +192,14 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 	}
 
 	return {
-		VW,
-		VH,
+		get VW() { return VW; },
+		get VH() { return VH; },
 		PL,
 		PR,
 		PT,
 		PB,
-		cW,
-		cH,
+		get cW() { return cW; },
+		get cH() { return cH; },
 		periods: getPriceChartPeriods(),
 		get selectedPeriod() {
 			return selectedPeriod;
@@ -251,8 +251,8 @@ export function createPriceChartModel(getData: () => ChartEntry[]) {
 		},
 		onMouseMove,
 		clearHover,
-		fmt: fmtPriceChart,
-		fmtShort: fmtPriceChartShort,
+		fmt: (n: number) => fmtPriceChart(n, getCurrency?.()),
+		fmtShort: (n: number) => fmtPriceChartShort(n, getCurrency?.()),
 		changeColor: priceChartChangeColor
 	};
 }

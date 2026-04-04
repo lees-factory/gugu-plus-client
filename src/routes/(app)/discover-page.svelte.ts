@@ -4,6 +4,8 @@ import { trackedItemsApi, type TrackedItemData } from '$lib/api/tracked-items';
 import { summaryToCard } from '$lib/tracked-items/map-summary';
 import { parseCommerceProductUrl } from '$lib/commerce/parse-product-url';
 import { marketToSite } from '$lib/commerce';
+import { formatPrice } from '$lib/utils/format-price';
+import { getLocale } from '$lib/paraglide/runtime.js';
 
 export type Site = string;
 export type SiteFilter = 'all' | Site;
@@ -41,7 +43,7 @@ export function mapProduct(raw: HotProductData): HotProduct {
 		url: raw.product_url,
 		currentPrice,
 		originalPrice: 0,
-		currency: raw.currency === 'KRW' ? '₩' : '$',
+		currency: raw.currency,
 		discountPct: 0,
 		isHot: false
 	};
@@ -49,16 +51,19 @@ export function mapProduct(raw: HotProductData): HotProduct {
 
 const PAGE_SIZE = 20;
 
-export function createDiscoverPage(getData: () => { hotProducts: HotProductData[]; trackedItems: TrackedItemData[]; error: string | null }) {
+export function createDiscoverPage(
+	getData: () => {
+		hotProducts: HotProductData[];
+		trackedItems: TrackedItemData[];
+		error: string | null;
+	}
+) {
 	let extraProducts = $state<HotProduct[]>([]);
 	let currentPage = 1;
 	let fetchedAll = false;
 
 	// load에서 받은 첫 페이지 + 추가 로드된 페이지
-	const allProducts = $derived([
-		...getData().hotProducts.map(mapProduct),
-		...extraProducts
-	]);
+	const allProducts = $derived([...getData().hotProducts.map(mapProduct), ...extraProducts]);
 
 	const loadError = $derived(getData().error);
 
@@ -115,7 +120,8 @@ export function createDiscoverPage(getData: () => { hotProducts: HotProductData[
 		if (model.isLoadingMore || !model.hasMore) return;
 		model.isLoadingMore = true;
 		const nextPage = currentPage + 1;
-		const res = await discoverApi.hotProducts(nextPage, PAGE_SIZE);
+		const language = getLocale().toUpperCase() as 'KO' | 'EN';
+		const res = await discoverApi.hotProducts(nextPage, PAGE_SIZE, language);
 		if (res.error || !res.data?.data || res.data.data.length === 0) {
 			model.hasMore = false;
 			model.isLoadingMore = false;
@@ -137,11 +143,13 @@ export function createDiscoverPage(getData: () => { hotProducts: HotProductData[
 		if (!parsed.ok) return;
 		addingId = product.id;
 		try {
-			const res = await trackedItemsApi.create([{
-				original_url: parsed.original_url,
-				provider_commerce: parsed.provider_commerce,
-				external_product_id: parsed.external_product_id
-			}]);
+			const res = await trackedItemsApi.create([
+				{
+					original_url: parsed.original_url,
+					provider_commerce: parsed.provider_commerce,
+					external_product_id: parsed.external_product_id
+				}
+			]);
 			if (!res.error && res.data) {
 				addedIds = [...addedIds, product.id];
 				await invalidate('app:tracked-items');
@@ -152,8 +160,7 @@ export function createDiscoverPage(getData: () => { hotProducts: HotProductData[
 	}
 
 	function fmt(price: number, currency: string): string {
-		if (currency === '₩') return `₩${price.toLocaleString('ko-KR')}`;
-		return `$${price.toFixed(2)}`;
+		return formatPrice(price, currency);
 	}
 
 	return {

@@ -22,11 +22,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 
 	let res: Response;
 	try {
-		res = await bffFetch(
-			target,
-			{ headers: { Authorization: `Bearer ${accessToken}` } },
-			cookies
-		);
+		res = await bffFetch(target, { headers: { Authorization: `Bearer ${accessToken}` } }, cookies);
 	} catch (e) {
 		if (e instanceof BffNetworkError)
 			return json({ error: { message: e.message } }, { status: 503 });

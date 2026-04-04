@@ -5,13 +5,12 @@ import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
 	mapPriceHistories,
-	formatDisplayPrice,
 	type ParsedSku,
 	type PriceEntry
 } from '$lib/product-detail/map-product';
-import type { TrackedItemDetailData } from '$lib/api/tracked-items';
+import { formatPrice } from '$lib/utils/format-price';
+import type { TrackedItemDetailData, PriceAlertStateData } from '$lib/api/tracked-items';
 import { trackedItemsApi } from '$lib/api/tracked-items';
-import { productsApi } from '$lib/api/products';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
 
@@ -29,7 +28,8 @@ const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 export type MatrixColorOption = { value: string; image: string | null };
 
 export function createItemDetailPage(
-	getTrackedItem: () => TrackedItemDetailData | null | undefined
+	getTrackedItem: () => TrackedItemDetailData | null | undefined,
+	getAlertState: () => PriceAlertStateData | null | undefined
 ) {
 	const item = $derived.by(() => {
 		const raw = getTrackedItem();
@@ -160,7 +160,8 @@ export function createItemDetailPage(
 			}
 			ui.selectedSkuId = first?.skuId ?? '';
 		}
-		ui.alertEnabled = item.alertEnabled;
+		const alert = getAlertState();
+		ui.alertEnabled = alert?.enabled ?? false;
 	});
 
 	$effect(() => {
@@ -216,7 +217,6 @@ export function createItemDetailPage(
 			? Math.round((1 - displayPrice / originalPrice) * 100)
 			: null
 	);
-
 
 	let prevDisplayImage = '';
 	$effect(() => {
@@ -321,18 +321,20 @@ export function createItemDetailPage(
 	}
 
 	async function toggleAlert() {
-		if (!item?.productId || ui.alertLoading) return;
+		const trackedItemId = item?.trackedItemId;
+		const skuId = currentSku?.skuId;
+		if (!trackedItemId || ui.alertLoading) return;
 		ui.alertLoading = true;
 		try {
 			if (ui.alertEnabled) {
-				const res = await productsApi.unregisterAlert(item.productId);
+				const res = await trackedItemsApi.unregisterPriceAlert(trackedItemId, skuId);
 				if (res.error) {
 					alert(t('alert_toggle_fail'));
 				} else {
 					ui.alertEnabled = false;
 				}
 			} else {
-				const res = await productsApi.registerAlert(item.productId);
+				const res = await trackedItemsApi.registerPriceAlert(trackedItemId, skuId);
 				if (res.error) {
 					alert(t('alert_toggle_fail'));
 				} else {
@@ -348,16 +350,23 @@ export function createItemDetailPage(
 		ui.imgError = true;
 	}
 
-	async function handleDelete() {
-		if (!confirm(t('confirm_delete_track'))) return;
+	let confirmDeleteOpen = $state(false);
+
+	function handleDelete() {
+		confirmDeleteOpen = true;
+	}
+
+	function cancelDelete() {
+		confirmDeleteOpen = false;
+	}
+
+	async function confirmDelete() {
+		confirmDeleteOpen = false;
 		if (!item?.trackedItemId) return;
 		ui.deleting = true;
 		try {
 			const res = await trackedItemsApi.deleteItem(item.trackedItemId);
-			if (res.error) {
-				alert(res.error);
-				return;
-			}
+			if (res.error) return;
 			await invalidate('app:tracked-items');
 			await goto(resolve('/items'));
 		} finally {
@@ -366,7 +375,7 @@ export function createItemDetailPage(
 	}
 
 	function fmt(n: number) {
-		return item ? formatDisplayPrice(n, item.currency) : String(n);
+		return item ? formatPrice(n, item.currency) : String(n);
 	}
 
 	return {
@@ -446,9 +455,14 @@ export function createItemDetailPage(
 		selectSku,
 		selectMatrixColor,
 		selectMatrixSize,
+		get confirmDeleteOpen() {
+			return confirmDeleteOpen;
+		},
 		toggleAlert,
 		onImageError,
 		handleDelete,
+		cancelDelete,
+		confirmDelete,
 		fmt
 	};
 }

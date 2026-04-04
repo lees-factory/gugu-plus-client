@@ -8,6 +8,7 @@ export type CreateTrackedItemEntry = {
 	provider_commerce: ProductMarket;
 	external_product_id: string;
 	currency?: string;
+	language?: string;
 };
 
 /**
@@ -75,7 +76,6 @@ export type TrackedItemDetailData = {
 	original_url: string;
 	title: string;
 	main_image_url: string;
-	current_price: string;
 	currency: string;
 	product_url: string;
 	promotion_link?: string | null;
@@ -120,6 +120,17 @@ export type SKUPriceHistoryResponse = {
 	data: SKUPriceHistoryItem[];
 };
 
+/** GET /v1/tracked-items/{trackedItemID}/price-alert 응답 */
+export type PriceAlertStateData = {
+	enabled: boolean;
+	channel?: string;
+};
+
+export type TrackedItemPriceAlertResponse = {
+	result: string;
+	data: PriceAlertStateData;
+};
+
 /** 커서 기반 페이지네이션 목록 데이터 */
 export type ListTrackedItemsPageData = {
 	items: TrackedItemData[];
@@ -156,7 +167,10 @@ export const trackedItemsApi = {
 		apiDelete<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.delete(trackedItemId)),
 
 	selectSku: (trackedItemId: string, body: SelectTrackedItemSkuBody) =>
-		apiPatch<TrackedItemEmptySuccessResponse>(ENDPOINTS.trackedItems.selectSku(trackedItemId), body),
+		apiPatch<TrackedItemEmptySuccessResponse>(
+			ENDPOINTS.trackedItems.selectSku(trackedItemId),
+			body
+		),
 
 	/** GET — SKU 가격 변동 내역 조회 */
 	getSkuPriceHistories: (trackedItemId: string, params: { sku_id: string; currency?: string }) => {
@@ -164,5 +178,31 @@ export const trackedItemsApi = {
 		const qs = new URLSearchParams({ sku_id: params.sku_id });
 		if (params.currency) qs.set('currency', params.currency);
 		return apiGet<SKUPriceHistoryResponse>(`${base}?${qs}`);
+	},
+
+	/** GET — SKU 가격 알림 상태 조회 */
+	getPriceAlert: (trackedItemId: string, skuId?: string) => {
+		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
+		const qs = new URLSearchParams();
+		if (skuId) qs.set('sku_id', skuId);
+		const query = qs.toString();
+		return apiGet<TrackedItemPriceAlertResponse>(query ? `${base}?${query}` : base);
+	},
+
+	/** POST — SKU 가격 알림 등록 */
+	registerPriceAlert: (trackedItemId: string, skuId?: string) => {
+		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
+		const body: Record<string, string> = { channel: 'EMAIL' };
+		if (skuId) body.sku_id = skuId;
+		return apiPost<TrackedItemPriceAlertResponse>(base, body);
+	},
+
+	/** DELETE — SKU 가격 알림 해제 */
+	unregisterPriceAlert: (trackedItemId: string, skuId?: string) => {
+		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
+		const qs = new URLSearchParams();
+		if (skuId) qs.set('sku_id', skuId);
+		const query = qs.toString();
+		return apiDelete<TrackedItemEmptySuccessResponse>(query ? `${base}?${query}` : base);
 	}
 };

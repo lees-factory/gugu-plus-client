@@ -33,18 +33,14 @@ export const ENDPOINTS = {
 	trackedItems: {
 		list: '/api/v1/tracked-items',
 		create: '/api/v1/tracked-items',
-		detail: (trackedItemId: string) =>
-			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
+		detail: (trackedItemId: string) => `/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		delete: (trackedItemId: string) => `/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}`,
 		selectSku: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`,
 		skuPriceHistories: (trackedItemId: string) =>
-			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-histories`
-	},
-
-	/** 브라우저 → BFF → GET /v1/alerts (Bearer) */
-	alerts: {
-		list: '/api/v1/alerts'
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-histories`,
+		priceAlert: (trackedItemId: string) =>
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/price-alert`
 	},
 
 	/** 브라우저 → BFF → GET /v1/discover/… */
@@ -55,7 +51,6 @@ export const ENDPOINTS = {
 	/** 브라우저 → BFF → GET /v1/products/… (Bearer) */
 	products: {
 		detail: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}`,
-		skus: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/skus`,
-		alert: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/alert`
+		skus: (productId: string) => `/api/v1/products/${encodeURIComponent(productId)}/skus`
 	}
 } as const;

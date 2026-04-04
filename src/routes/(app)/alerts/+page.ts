@@ -1,26 +1,16 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { PriceAlertData } from '$lib/api/products';
-import type { TrackedItemData } from '$lib/api/tracked-items';
 
-export const load: PageLoad = async ({ fetch, parent, depends }) => {
-	depends('app:tracked-items');
+export const load: PageLoad = async ({ parent }) => {
 	const { userEmail } = await parent();
 	if (!userEmail) {
 		redirect(303, '/auth/login');
 	}
 
-	const [alertsRes, itemsRes] = await Promise.all([
-		fetch('/api/v1/alerts'),
-		fetch('/api/v1/tracked-items')
-	]);
-
-	const alertsJson = await alertsRes.json().catch(() => ({}));
-	const itemsJson = await itemsRes.json().catch(() => ({}));
-
+	// 독립 알림 목록 API가 제거됨. 알림은 상품 상세에서 관리.
 	return {
-		alerts: (alertsRes.ok ? alertsJson?.data ?? [] : []) as PriceAlertData[],
-		trackedItems: (itemsRes.ok ? itemsJson?.data?.items ?? [] : []) as TrackedItemData[],
-		error: !alertsRes.ok ? (alertsJson?.error?.message ?? 'alerts_load_fail') : null as string | null
+		alerts: [] as never[],
+		trackedItems: [] as never[],
+		error: null as string | null
 	};
 };

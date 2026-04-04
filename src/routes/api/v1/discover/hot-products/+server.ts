@@ -5,8 +5,9 @@ import { API_BASE } from '$lib/api/config';
 export const GET: RequestHandler = async ({ url }) => {
 	const page = url.searchParams.get('page') ?? '1';
 	const size = url.searchParams.get('size') ?? '20';
+	const language = url.searchParams.get('language') ?? 'KO';
 
-	const target = `${API_BASE}/v1/discover/hot-products?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}`;
+	const target = `${API_BASE}/v1/discover/hot-products?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}&language=${encodeURIComponent(language)}`;
 
 	const res = await fetch(target).catch(() => null);
 

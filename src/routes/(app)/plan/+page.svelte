@@ -11,11 +11,11 @@
 	const page = createPlanPage();
 </script>
 
-<div class="space-y-10 p-8 sm:p-10 lg:p-14">
+<div class="space-y-6 p-5 sm:p-6 lg:p-8">
 	<!-- ── Page hero ──────────────────────────────────────────────── -->
 	<div class="max-w-2xl">
 		<div
-			class="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
+			class="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
 		>
 			<svg
 				viewBox="0 0 24 24"
@@ -31,14 +31,16 @@
 			</svg>
 			<span class="text-xs font-semibold text-stone-800">{t('plan_badge')}</span>
 		</div>
-		<h1 class="text-4xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
+		<h1 class="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
 			{t('plan_title')}<br />
 			<span class="text-zinc-600">{t('plan_title_accent')}</span>
 		</h1>
-		<p class="mt-6 text-base leading-relaxed text-zinc-600">
+		<p class="mt-3 text-base leading-relaxed text-zinc-600">
 			{t('plan_desc')}
 		</p>
 	</div>
+
+	<!-- ad:top -->
 
 	<!-- ── Current plan banner ────────────────────────────────────── -->
 	{#if page.currentPlan === 'free'}
@@ -158,9 +160,7 @@
 	<!-- ── Plan cards ─────────────────────────────────────────────── -->
 	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 		<!-- Free -->
-		<div
-			class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm"
-		>
+		<div class="flex flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm">
 			<div class="mb-6">
 				<div class="mb-4 flex items-center justify-between">
 					<span
@@ -377,9 +377,7 @@
 			</h2>
 		</div>
 
-		<div
-			class="overflow-x-auto rounded-3xl border border-zinc-200/60 bg-white shadow-sm"
-		>
+		<div class="overflow-x-auto rounded-3xl border border-zinc-200/60 bg-white shadow-sm">
 			<table class="w-full min-w-0 text-xs sm:text-sm">
 				<thead>
 					<tr class="border-b border-zinc-100">
@@ -444,9 +442,7 @@
 
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			{#each page.faqItems as faq (faq.q)}
-				<div
-					class="rounded-3xl border border-zinc-200/60 bg-white p-6 shadow-sm"
-				>
+				<div class="rounded-3xl border border-zinc-200/60 bg-white p-6 shadow-sm">
 					<h3 class="mb-2 text-sm font-semibold text-zinc-900">{faq.q}</h3>
 					<p class="text-sm leading-relaxed text-zinc-500">{faq.a}</p>
 				</div>
@@ -508,4 +504,6 @@
 			</div>
 		{/each}
 	</div>
+
+	<!-- ad:bottom -->
 </div>

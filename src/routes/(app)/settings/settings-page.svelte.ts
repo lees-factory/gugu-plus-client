@@ -22,7 +22,8 @@ export function createSettingsPage() {
 		notifications: {
 			email: true,
 			saveLoading: false,
-			saveSuccess: false
+			saveSuccess: false,
+			saveError: ''
 		},
 		accountDelete: {
 			confirmText: '',
@@ -54,6 +55,7 @@ export function createSettingsPage() {
 			auth.logout();
 			window.location.href = '/auth/logout';
 		} catch {
+			p.error = t('settings_password_err_generic');
 			p.loading = false;
 		}
 	}
@@ -67,6 +69,7 @@ export function createSettingsPage() {
 			await new Promise((r) => setTimeout(r, 500));
 		} catch {
 			n.email = prev;
+			n.saveError = t('settings_notif_err_generic');
 		}
 	}
 

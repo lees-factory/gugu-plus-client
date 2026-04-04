@@ -2,18 +2,20 @@
 	import type { PageProps } from './$types';
 	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
+	import { getContext } from 'svelte';
 	import { createDiscoverPage, siteLabels } from './discover-page.svelte';
 
 	const { data }: PageProps = $props();
 	const page = createDiscoverPage(() => data);
+	const openQuickAdd = getContext<() => void>('openQuickAdd');
 </script>
 
-<div class="space-y-10 p-8 sm:p-10 lg:p-14">
+<div class="space-y-6 p-5 sm:p-6 lg:p-8">
 	<!-- ── Hero ─────────────────────────────────────────────────── -->
-	<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+	<div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
 		<div class="max-w-2xl">
 			<div
-				class="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
+				class="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-200/50 bg-zinc-100/80 px-3 py-1.5"
 			>
 				<svg
 					viewBox="0 0 24 24"
@@ -28,84 +30,42 @@
 					<polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
 					<polyline points="16 7 22 7 22 13" />
 				</svg>
-				<span class="text-xs font-semibold text-stone-800">Live Price Tracking</span>
+				<span class="text-xs font-semibold text-stone-800">{t('discover_hero_badge')}</span>
 			</div>
 			<h1
-				class="text-4xl leading-tight font-semibold tracking-tight text-zinc-900 md:text-5xl lg:text-6xl"
+				class="text-2xl leading-tight font-semibold tracking-tight text-zinc-900 md:text-3xl"
 			>
-				Discover Your Next<br />
-				<span class="text-zinc-700">Smart Purchase</span>
+				{t('discover_hero_title_1')}<br />
+				<span class="text-zinc-700">{t('discover_hero_title_2')}</span>
 			</h1>
-			<p class="mt-6 text-base leading-relaxed text-zinc-600">
+			<p class="mt-3 text-base leading-relaxed text-zinc-600">
 				{t('discover_hero_desc_line1')}<br class="hidden sm:block" />
 				{t('discover_hero_desc_line2')}
 			</p>
 		</div>
-		<div class="shrink-0">
-			<a
-				href={resolve('/items')}
-				class="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-zinc-900/15"
-				style="background: linear-gradient(to right, #292524, #3f3f46);"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.5"
-					class="size-4"
-					aria-hidden="true"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-				</svg>
-				{t('home_add_item')}
-			</a>
-		</div>
 	</div>
 
-	<!-- ── Main: two columns (flex + items-start — grid stretch로 인한 열 높이 동기화 방지) -->
-	<div class="flex flex-col gap-8 xl:flex-row xl:items-start xl:gap-10">
-		<div class="min-w-0 flex-1 space-y-8">
-			<!-- Section header -->
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-4">
-					<div
-						class="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 text-orange-600 shadow-sm"
-					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							class="size-5"
-							aria-hidden="true"
-						>
-							<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-						</svg>
-					</div>
-					<div>
-						<h2 class="text-2xl font-semibold tracking-tight text-zinc-900">
-							{t('discover_trending_title')}
-						</h2>
-						<p class="mt-1 text-sm text-zinc-500">{t('discover_trending_subtitle')}</p>
-					</div>
-				</div>
-			</div>
+	<!-- ad:top -->
 
+	<!-- ── Main: two columns -->
+	<div class="flex flex-col gap-8 xl:flex-row xl:items-start xl:gap-10">
+		<div class="min-w-0 flex-1">
 			{#if page.loadError}
 				<div class="flex items-center justify-center py-20 text-sm text-red-400">
 					{t('discover_load_fail')}
 				</div>
 			{:else if page.displayed.length === 0}
 				<div class="flex items-center justify-center py-20 text-sm text-zinc-400">
-					{t('discover_no_more')}
+					{t('discover_empty')}
 				</div>
 			{:else}
 				<div class="flex flex-col gap-3">
-					{#each page.displayed as product (product.id)}
+					{#each page.displayed as product, idx (product.id)}
 						{@const isAdded = page.addedIds.includes(product.id)}
 						{@const isAdding = page.addingId === product.id}
+						{#if idx > 0 && idx % 5 === 0}
+							<!-- ad:infeed -->
+						{/if}
 						<div
 							class="group relative flex flex-col gap-3 rounded-3xl border border-zinc-200/60 bg-white p-4 transition-all duration-300 hover:border-stone-300/60 hover:shadow-lg hover:shadow-stone-500/5 sm:gap-4 sm:p-5 md:flex-row md:items-center md:gap-5 md:rounded-2xl md:p-4"
 						>
@@ -167,8 +127,11 @@
 								{#if product.discountPct > 0}
 									<div class="shrink-0 md:flex md:w-20 md:justify-end">
 										<span
-											class="inline-flex items-center gap-1 rounded-full border border-emerald-100/50 bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-emerald-700 shadow-sm"
+											class="inline-flex items-center gap-1 rounded-full border border-blue-100/50 bg-gradient-to-r from-blue-50 to-sky-50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-600 shadow-sm"
 										>
+											<svg viewBox="0 0 12 12" fill="none" class="size-3" aria-hidden="true">
+												<path d="M6 2v8M6 10l-3-3M6 10l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+											</svg>
 											-{product.discountPct}%
 										</span>
 									</div>
@@ -178,9 +141,22 @@
 							<!-- Add button -->
 							<div class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0">
 								{#if isAdded}
-									<span class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2 text-xs font-semibold text-emerald-700">
-										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3.5" aria-hidden="true">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+									<span
+										class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2 text-xs font-semibold text-emerald-700"
+									>
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2.5"
+											class="size-3.5"
+											aria-hidden="true"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M4.5 12.75l6 6 9-13.5"
+											/>
 										</svg>
 										{t('discover_added')}
 									</span>
@@ -189,16 +165,43 @@
 										type="button"
 										onclick={() => page.addItem(product)}
 										disabled={!!page.addingId}
-										class="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200/60 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm disabled:opacity-50"
+										class="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-zinc-200/60 bg-white px-5 py-3 text-xs font-semibold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm disabled:opacity-50 md:w-auto md:py-2 md:px-4"
 									>
 										{#if isAdding}
-											<svg class="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-												<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-												<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+											<svg
+												class="size-3.5 animate-spin"
+												viewBox="0 0 24 24"
+												fill="none"
+												aria-hidden="true"
+											>
+												<circle
+													class="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													stroke-width="4"
+												></circle>
+												<path
+													class="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+												></path>
 											</svg>
 										{:else}
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3.5" aria-hidden="true">
-												<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+											<svg
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2.5"
+												class="size-3.5"
+												aria-hidden="true"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M12 4.5v15m7.5-7.5h-15"
+												/>
 											</svg>
 										{/if}
 										{t('discover_add_track')}
@@ -248,24 +251,27 @@
 		</div>
 
 		<aside
-			class="w-full shrink-0 [contain:layout] xl:sticky xl:top-[80px] xl:w-[340px] xl:self-start"
+			class="w-full shrink-0 xl:sticky xl:top-[80px] xl:w-[340px] xl:self-start"
+			style="contain: layout style paint; content-visibility: auto; will-change: transform;"
 		>
-			<div class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm">
-				<div class="mb-7 flex items-center justify-between">
-					<h3 class="text-lg font-semibold tracking-tight text-zinc-900">
+			<div class="flex h-full flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm xl:min-h-[600px]">
+				<div class="mb-5 flex items-center justify-between">
+					<h3 class="text-sm font-semibold tracking-tight text-zinc-500 uppercase">
 						{t('nav_tracked_items')}
 					</h3>
 					<span
-						class="rounded-full border border-zinc-200/60 bg-gradient-to-r from-zinc-100 to-zinc-50 px-3 py-1.5 text-[9px] font-semibold tracking-wider text-zinc-600 uppercase"
+						class="rounded-full border border-zinc-200/60 bg-gradient-to-r from-zinc-100 to-zinc-50 px-2.5 py-1 text-[9px] font-semibold tracking-wider text-zinc-500 uppercase"
 					>
 						{page.trackedItems.length}
 					</span>
 				</div>
 
 				{#if page.trackedItems.length === 0}
-					<p class="py-6 text-center text-sm text-zinc-400">{t('items_empty')}</p>
+					<div class="flex flex-1 items-center justify-center">
+						<p class="text-center text-sm text-zinc-400">{t('items_empty')}</p>
+					</div>
 				{:else}
-					<div class="flex flex-col gap-4">
+					<div class="flex flex-1 flex-col gap-4">
 						{#each page.trackedItems as item (item.id)}
 							<a
 								href={resolve(`/items/${item.id}`)}
@@ -301,11 +307,33 @@
 
 				<a
 					href={resolve('/items')}
-					class="mt-7 block w-full rounded-2xl border border-zinc-200/60 bg-zinc-50/80 py-3.5 text-center text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900"
+					class="mt-auto block w-full rounded-2xl border border-zinc-200/60 bg-zinc-50/80 py-3.5 text-center text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900"
 				>
 					{t('items_view_all')} →
 				</a>
 			</div>
 		</aside>
 	</div>
+
+	<!-- ad:bottom -->
 </div>
+
+<!-- Mobile FAB: Quick Add -->
+<button
+	type="button"
+	onclick={() => openQuickAdd()}
+	aria-label={t('home_add_item')}
+	class="fixed right-4 bottom-20 z-20 flex size-12 items-center justify-center rounded-full shadow-lg shadow-zinc-900/15 transition-all duration-200 active:scale-95 md:hidden"
+	style="background: linear-gradient(to right, #292524, #3f3f46);"
+>
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2.5"
+		class="size-5 text-white"
+		aria-hidden="true"
+	>
+		<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+	</svg>
+</button>

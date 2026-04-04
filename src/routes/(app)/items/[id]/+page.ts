@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { TrackedItemDetailData } from '$lib/api/tracked-items';
+import type { TrackedItemDetailData, PriceAlertStateData } from '$lib/api/tracked-items';
+import { ENDPOINTS } from '$lib/api/endpoints';
 
 export const load: PageLoad = async ({ fetch, params, parent }) => {
 	const { userEmail } = await parent();
@@ -12,13 +13,13 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 	if (!id) {
 		return {
 			trackedItem: null as TrackedItemDetailData | null,
+			alertState: null as PriceAlertStateData | null,
 			error: 'item_id_missing'
 		};
 	}
 
-	const res = await fetch(`/api/v1/tracked-items/${encodeURIComponent(id)}`);
+	const res = await fetch(ENDPOINTS.trackedItems.detail(id));
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-
 
 	if (!res.ok) {
 		const err = json?.error as { message?: string } | string | undefined;
@@ -28,16 +29,22 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 				: typeof err === 'string'
 					? err
 					: 'item_load_fail';
-		return { trackedItem: null, error: msg };
+		return { trackedItem: null, alertState: null, error: msg };
 	}
 
 	const payload = json?.data;
 	if (!payload || typeof payload !== 'object') {
-		return { trackedItem: null, error: 'response_format_error' };
+		return { trackedItem: null, alertState: null, error: 'response_format_error' };
 	}
+
+	// 알림 상태 조회 (실패해도 상세 페이지는 표시)
+	const alertRes = await fetch(ENDPOINTS.trackedItems.priceAlert(id)).catch(() => null);
+	const alertJson = alertRes ? await alertRes.json().catch(() => ({})) : {};
+	const alertState = (alertRes?.ok ? alertJson?.data ?? null : null) as PriceAlertStateData | null;
 
 	return {
 		trackedItem: payload as TrackedItemDetailData,
+		alertState,
 		error: null as string | null
 	};
 };

@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { TrackedItemData } from '$lib/api/tracked-items';
+import { ENDPOINTS } from '$lib/api/endpoints';
 
 export const load: PageLoad = async ({ fetch, parent, depends }) => {
 	depends('app:tracked-items');
@@ -10,8 +11,9 @@ export const load: PageLoad = async ({ fetch, parent, depends }) => {
 		redirect(303, '/auth/login');
 	}
 
-	const res = await fetch('/api/v1/tracked-items?size=20');
+	const res = await fetch(`${ENDPOINTS.trackedItems.list}?size=20`);
 	const json = await res.json().catch(() => ({}));
+	console.log('🚀 ~ load ~ json:', json);
 
 	if (!res.ok) {
 		return {

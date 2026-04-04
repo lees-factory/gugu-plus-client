@@ -43,8 +43,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	}
 
 	// access_token이 없거나 만료 임박(60초 이내)이면 갱신 시도
-	const needsRefresh =
-		refreshToken && (!accessToken || getTokenRemainingSeconds(accessToken) < 60);
+	const needsRefresh = refreshToken && (!accessToken || getTokenRemainingSeconds(accessToken) < 60);
 
 	if (needsRefresh) {
 		const res = await fetch(`${API_BASE}/v1/auth/refresh`, {

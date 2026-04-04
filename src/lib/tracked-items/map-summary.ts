@@ -11,7 +11,7 @@ function numFromMaybeString(v: string | undefined | null): number | null {
 
 export function summaryToCard(s: TrackedItemData): TrackedItem {
 	const currentPrice = numFromMaybeString(s.current_price);
-	const currency = s.currency?.trim() || '₩';
+	const currency = s.currency?.trim() || 'KRW';
 
 	return {
 		id: s.tracked_item_id,

@@ -17,8 +17,8 @@ export type HotProductsResponse = {
 };
 
 export const discoverApi = {
-	hotProducts: (page = 1, size = 20) =>
+	hotProducts: (page = 1, size = 20, language: string = 'KO') =>
 		apiGet<HotProductsResponse>(
-			`${ENDPOINTS.discover.hotProducts}?page=${page}&size=${size}`
+			`${ENDPOINTS.discover.hotProducts}?page=${page}&size=${size}&language=${language}`
 		)
 };

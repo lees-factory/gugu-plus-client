@@ -3,9 +3,15 @@
 	import type { ChartEntry } from './price-chart.svelte';
 	import { createPriceChartModel } from './price-chart.svelte';
 
-	let { data }: { data: ChartEntry[] } = $props();
+	let { data, currency }: { data: ChartEntry[]; currency?: string } = $props();
 
-	const chart = createPriceChartModel(() => data);
+	let containerWidth = $state(400);
+
+	const chart = createPriceChartModel(
+		() => data,
+		() => currency,
+		() => containerWidth
+	);
 </script>
 
 <!-- 기간 선택 탭 -->
@@ -30,11 +36,14 @@
 
 <!-- SVG 차트 -->
 <div
+	bind:clientWidth={containerWidth}
 	class="overflow-hidden rounded-xl"
 	style="background-color: #fafaf8; border: 1px solid rgba(45,45,42,0.06);"
 >
 	<svg
 		viewBox="0 0 {chart.VW} {chart.VH}"
+		width={chart.VW}
+		height={chart.VH}
 		class="w-full"
 		style="display: block;"
 		role="img"
@@ -59,14 +68,14 @@
 				stroke="rgba(45,45,42,0.06)"
 				stroke-width="1"
 			/>
-			<text x={chart.PL - 6} y={g.y + 4} text-anchor="end" font-size="9.5" fill="#9b9b95">
+			<text x={chart.PL - 6} y={g.y + 4} text-anchor="end" font-size="11" fill="#9b9b95">
 				{chart.fmtShort(g.price)}
 			</text>
 		{/each}
 
 		<!-- X축 레이블 -->
 		{#each chart.xLabels as lbl (lbl.x)}
-			<text x={lbl.x} y={chart.VH - 8} text-anchor="middle" font-size="9.5" fill="#9b9b95">
+			<text x={lbl.x} y={chart.VH - 8} text-anchor="middle" font-size="11" fill="#9b9b95">
 				{lbl.label}
 			</text>
 		{/each}
@@ -98,21 +107,21 @@
 				fill-opacity="0.08"
 			>
 				<animate attributeName="r" values="8;14;8" dur="2.4s" repeatCount="indefinite" />
-				<animate attributeName="fill-opacity" values="0.12;0.04;0.12" dur="2.4s" repeatCount="indefinite" />
+				<animate
+					attributeName="fill-opacity"
+					values="0.12;0.04;0.12"
+					dur="2.4s"
+					repeatCount="indefinite"
+				/>
 			</circle>
-			<circle
-				cx={chart.svgPoints[0].x}
-				cy={chart.svgPoints[0].y}
-				r="5"
-				fill="#5aad9c"
-			>
+			<circle cx={chart.svgPoints[0].x} cy={chart.svgPoints[0].y} r="5" fill="#5aad9c">
 				<animate attributeName="r" values="4.5;6;4.5" dur="2.4s" repeatCount="indefinite" />
 			</circle>
 			<text
 				x={chart.svgPoints[0].x}
 				y={chart.svgPoints[0].y - 16}
 				text-anchor="middle"
-				font-size="11"
+				font-size="13"
 				font-weight="600"
 				fill="#1a1a17"
 			>
@@ -127,13 +136,13 @@
 					cx={chart.svgPoints[chart.minIdx].x}
 					cy={chart.svgPoints[chart.minIdx].y}
 					r="3.5"
-					fill="#5aad9c"
+					fill="#3b82f6"
 				/>
 				<circle
 					cx={chart.svgPoints[chart.minIdx].x}
 					cy={chart.svgPoints[chart.minIdx].y}
 					r="6"
-					fill="#5aad9c"
+					fill="#3b82f6"
 					fill-opacity="0.15"
 				/>
 			{/if}
@@ -142,13 +151,13 @@
 					cx={chart.svgPoints[chart.maxIdx].x}
 					cy={chart.svgPoints[chart.maxIdx].y}
 					r="3.5"
-					fill="#d4183d"
+					fill="#ef4444"
 				/>
 				<circle
 					cx={chart.svgPoints[chart.maxIdx].x}
 					cy={chart.svgPoints[chart.maxIdx].y}
 					r="6"
-					fill="#d4183d"
+					fill="#ef4444"
 					fill-opacity="0.15"
 				/>
 			{/if}
@@ -194,13 +203,13 @@
 				stroke="rgba(45,45,42,0.07)"
 				stroke-width="1"
 			/>
-			<text x={chart.tooltipX + 10} y={chart.tooltipY + 14} font-size="9.5" fill="#9b9b95">
+			<text x={chart.tooltipX + 10} y={chart.tooltipY + 14} font-size="11" fill="#9b9b95">
 				{chart.chartData[chart.hoverIdx].date}
 			</text>
 			<text
 				x={chart.tooltipX + 10}
 				y={chart.tooltipY + 30}
-				font-size="12"
+				font-size="13"
 				font-weight="600"
 				fill="#1a1a17"
 			>
@@ -210,7 +219,7 @@
 				<text
 					x={chart.tooltipX + 100}
 					y={chart.tooltipY + 30}
-					font-size="9"
+					font-size="10"
 					font-weight="500"
 					text-anchor="end"
 					fill={chart.changeColor(chart.chartData[chart.hoverIdx].change)}
@@ -229,13 +238,13 @@
 	<div class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_min')}</p>
-			<p class="text-sm font-semibold tabular-nums" style="color: #5aad9c;">
+			<p class="text-sm font-semibold tabular-nums" style="color: #3b82f6;">
 				{chart.fmt(chart.stats.min)}
 			</p>
 		</div>
 		<div class="rounded-xl p-4" style="background-color: #f7f6f3;">
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_max')}</p>
-			<p class="text-sm font-semibold tabular-nums" style="color: #d4183d;">
+			<p class="text-sm font-semibold tabular-nums" style="color: #ef4444;">
 				{chart.fmt(chart.stats.max)}
 			</p>
 		</div>
@@ -249,7 +258,7 @@
 			<p class="mb-1.5 text-xs" style="color: #9b9b95;">{t('chart_stat_change')}</p>
 			<p
 				class="text-sm font-semibold tabular-nums"
-				style="color: {chart.stats.change <= 0 ? '#5aad9c' : '#d4183d'};"
+				style="color: {chart.stats.change <= 0 ? '#3b82f6' : '#ef4444'};"
 			>
 				{chart.stats.change >= 0 ? '+' : ''}{chart.stats.change.toFixed(1)}%
 			</p>

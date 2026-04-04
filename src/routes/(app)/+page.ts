@@ -1,12 +1,15 @@
 import type { PageLoad } from './$types';
 import type { HotProductData } from '$lib/api/discover';
 import type { TrackedItemData } from '$lib/api/tracked-items';
+import { ENDPOINTS } from '$lib/api/endpoints';
+import { getLocale } from '$lib/paraglide/runtime.js';
 
 export const load: PageLoad = async ({ fetch, depends }) => {
 	depends('app:tracked-items');
+	const language = getLocale().toUpperCase();
 	const [discoverRes, itemsRes] = await Promise.all([
-		fetch('/api/v1/discover/hot-products?page=1&size=20'),
-		fetch('/api/v1/tracked-items').catch(() => null)
+		fetch(`${ENDPOINTS.discover.hotProducts}?page=1&size=20&language=${language}`),
+		fetch(ENDPOINTS.trackedItems.list).catch(() => null)
 	]);
 
 	const discoverJson = await discoverRes.json().catch(() => ({}));

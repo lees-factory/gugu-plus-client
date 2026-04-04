@@ -172,19 +172,6 @@ export function mapPriceHistories(
 	});
 }
 
-export function formatDisplayPrice(n: number, currency: string): string {
-	const code = currency?.length === 3 ? currency.toUpperCase() : 'KRW';
-	try {
-		return new Intl.NumberFormat('ko-KR', {
-			style: 'currency',
-			currency: code,
-			maximumFractionDigits: 0
-		}).format(n);
-	} catch {
-		return `${n.toLocaleString('ko-KR')} ${currency}`;
-	}
-}
-
 /**
  * SKU가 색상 또는 크기 옵션을 가지고 있으면 옵션 조합 UI를 사용한다.
  * sku_properties JSON 뿐 아니라 API의 color/size 필드도 인식한다.
@@ -280,7 +267,7 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 					skuName: d.title?.trim() || 'Default',
 					colorCode: 'Default',
 					size: '',
-					price: parsePriceAmount(d.current_price),
+					price: 0,
 					originalPrice: null,
 					image: d.main_image_url || null,
 					propColor: null,
@@ -291,9 +278,7 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 
 	const variantMatrix = hasVariantOptions(skusParsed);
 
-	// current_price는 백엔드 대표가로 SKU 실제 할인가와 다를 수 있음
-	// SKU가 있으면 첫 SKU의 할인가를 대표 가격으로 사용
-	const representativePrice = skusParsed[0]?.price || parsePriceAmount(d.current_price);
+	const representativePrice = skusParsed[0]?.price || 0;
 
 	return {
 		trackedItemId: d.tracked_item_id,
@@ -305,7 +290,7 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 		currency: d.currency,
 		lastChecked: '—',
 		trackingFrequency: '24h',
-		alertEnabled: true,
+		alertEnabled: false,
 		alertThreshold: representativePrice,
 		skus: skusParsed,
 		variantMatrix,

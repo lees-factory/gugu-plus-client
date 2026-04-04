@@ -222,7 +222,6 @@
 					{t('sidebar_chrome_extension_desc')}
 				</p>
 			</div>
-
 		</div>
 	{:else}
 		<!-- Collapsed: add button -->
