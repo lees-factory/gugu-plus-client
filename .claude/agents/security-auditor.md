@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크릿 누출, 의존성 취약점 감사 및 리포트 (읽기 전용, 코드 수정 금지)"
+description: '보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크릿 누출, 의존성 취약점 감사 및 리포트 (읽기 전용, 코드 수정 금지)'
 ---
 
 # 보안 감사관 (Security Auditor)
@@ -23,15 +23,15 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 
 ## 핵심 파일
 
-| 파일 | 보안 역할 |
-|------|-----------|
-| `src/hooks.server.ts` | 미들웨어: 토큰 갱신, 인증 체크 |
-| `src/lib/api/config.ts` | API_BASE, COOKIE_OPTS 정의 |
-| `src/lib/api/endpoints.ts` | 엔드포인트 목록 |
-| `src/routes/api/v1/**` | BFF 프록시 라우트 |
-| `src/routes/auth/**` | 인증 페이지/액션 |
-| `svelte.config.js` | CSRF 설정 (csrf.checkOrigin) |
-| `.env` / `.env.example` | 환경변수 |
+| 파일                       | 보안 역할                      |
+| -------------------------- | ------------------------------ |
+| `src/hooks.server.ts`      | 미들웨어: 토큰 갱신, 인증 체크 |
+| `src/lib/api/config.ts`    | API_BASE, COOKIE_OPTS 정의     |
+| `src/lib/api/endpoints.ts` | 엔드포인트 목록                |
+| `src/routes/api/v1/**`     | BFF 프록시 라우트              |
+| `src/routes/auth/**`       | 인증 페이지/액션               |
+| `svelte.config.js`         | CSRF 설정 (csrf.checkOrigin)   |
+| `.env` / `.env.example`    | 환경변수                       |
 
 ## 실행 순서
 
@@ -45,6 +45,7 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [Critical] 1. 시크릿 누출
 
 탐지 패턴:
+
 - `src/` 내 하드코딩된 시크릿 (`sk_`, `pk_`, `api_key`, `apikey`, `secret`, `password` 리터럴)
 - `.env.example`에 실제 값 포함 여부
 - `VITE_` 접두사 환경변수가 서버 전용 시크릿을 노출하는지 검증
@@ -53,6 +54,7 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [Critical] 2. XSS 취약점
 
 탐지 패턴:
+
 - `{@html` — Svelte 파일 내 비이스케이프 HTML 렌더링
 - `innerHTML`, `outerHTML`, `document.write` 사용
 - `eval(`, `new Function(` 사용
@@ -61,19 +63,22 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [Critical] 3. 인증 우회
 
 탐지 방법:
+
 - 모든 BFF 라우트(`src/routes/api/v1/`)에서 `access_token`/`user_id` 검증 일관성
-- 인증 불필요 엔드포인트(auth/*, discover/*) 목록 검증
+- 인증 불필요 엔드포인트(auth/_, discover/_) 목록 검증
 - `hooks.server.ts`의 토큰 갱신 로직에서 에러 시 안전한 폴백 확인
 
 ### [High] 4. CSRF 보호
 
 탐지 방법:
+
 - `svelte.config.js`에서 `csrf.checkOrigin` 설정 확인
 - POST/PUT/PATCH/DELETE 엔드포인트에 origin 검증 외 추가 보호 여부
 
 ### [High] 5. 쿠키 보안
 
 탐지 패턴:
+
 - `COOKIE_OPTS`에서 `httpOnly`, `secure`, `sameSite` 설정 확인
 - `cookies.set()` 호출 시 `COOKIE_OPTS` 일관 사용 여부
 - `cookies.delete()` 시 path 옵션 일관성
@@ -82,6 +87,7 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [High] 6. 보안 헤더
 
 탐지 방법:
+
 - CSP (Content-Security-Policy) 설정 여부
 - `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` 설정 여부
 - CORS 관련 헤더 설정 검토
@@ -89,6 +95,7 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [Medium] 7. 입력 검증
 
 탐지 패턴:
+
 - BFF 라우트에서 `request.json()` 후 스키마 검증 여부
 - URL 파라미터(`params.*`)의 인코딩 처리
 - `JSON.parse`에 대한 try-catch 일관성
@@ -96,18 +103,21 @@ description: "보안 감사관 - 인증/세션, XSS, CSRF, 보안 헤더, 시크
 ### [Medium] 8. 의존성 취약점
 
 탐지 방법:
+
 - `npm audit` 실행 결과 파싱
 - 알려진 취약 버전 사용 여부
 
 ### [Low] 9. Rate Limiting
 
 탐지 방법:
+
 - 로그인, 회원가입, 비밀번호 재설정 등 brute-force 대상 라우트 식별
 - rate limit 미들웨어 존재 여부
 
 ### [Low] 10. 정보 노출
 
 탐지 패턴:
+
 - 에러 응답에 스택 트레이스/내부 정보 포함 여부
 - `console.error`에 민감 정보 로깅 여부
 - 프로덕션 빌드에서 소스맵 노출 여부

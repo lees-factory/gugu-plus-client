@@ -19,7 +19,10 @@
 				{t('footer_privacy')}
 			</a>
 			<span class="opacity-30">·</span>
-			<a href="mailto:priceeye.support@gmail.com" class="transition-all duration-200 hover:text-zinc-700">
+			<a
+				href="mailto:priceeye.support@gmail.com"
+				class="transition-all duration-200 hover:text-zinc-700"
+			>
 				{t('footer_contact')}
 			</a>
 		</div>

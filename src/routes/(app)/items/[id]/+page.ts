@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 				? String(err.message)
 				: typeof err === 'string'
 					? err
-					: 'item_load_fail';
+					: 'item_lad_fail';
 		return { trackedItem: null, alertState: null, error: msg };
 	}
 
@@ -40,7 +40,9 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 	// 알림 상태 조회 (실패해도 상세 페이지는 표시)
 	const alertRes = await fetch(ENDPOINTS.trackedItems.priceAlert(id)).catch(() => null);
 	const alertJson = alertRes ? await alertRes.json().catch(() => ({})) : {};
-	const alertState = (alertRes?.ok ? alertJson?.data ?? null : null) as PriceAlertStateData | null;
+	const alertState = (
+		alertRes?.ok ? (alertJson?.data ?? null) : null
+	) as PriceAlertStateData | null;
 
 	return {
 		trackedItem: payload as TrackedItemDetailData,

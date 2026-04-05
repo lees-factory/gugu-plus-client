@@ -82,7 +82,7 @@ const en: LegalSection[] = [
 	},
 	{
 		title: 'Article 5 (Third-Party Disclosure)',
-		body: 'In principle, the Service does not provide users\' personal information to third parties. However, the following cases are exceptions:\n\n• When the user has given prior consent\n• When required by law or requested by investigative authorities\n\nThe Service currently uses Firebase (Google LLC) for Google social login.'
+		body: "In principle, the Service does not provide users' personal information to third parties. However, the following cases are exceptions:\n\n• When the user has given prior consent\n• When required by law or requested by investigative authorities\n\nThe Service currently uses Firebase (Google LLC) for Google social login."
 	},
 	{
 		title: 'Article 6 (User Rights)',

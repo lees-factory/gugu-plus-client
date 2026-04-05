@@ -79,7 +79,7 @@ const en: LegalSection[] = [
 	},
 	{
 		title: 'Article 9 (Dispute Resolution)',
-		body: 'Disputes related to these Terms are governed by the laws of the Republic of Korea. If litigation is necessary, the court with jurisdiction over the operator\'s location shall serve as the court of first instance. In the event of a dispute, please first contact priceeye.support@gmail.com to attempt resolution through consultation.'
+		body: "Disputes related to these Terms are governed by the laws of the Republic of Korea. If litigation is necessary, the court with jurisdiction over the operator's location shall serve as the court of first instance. In the event of a dispute, please first contact priceeye.support@gmail.com to attempt resolution through consultation."
 	}
 ];
 

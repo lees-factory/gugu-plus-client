@@ -86,10 +86,7 @@ const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
 		'Content-Security-Policy',
 		"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; font-src 'self' data:; frame-src https://accounts.google.com https://*.firebaseapp.com;"
 	);
-	response.headers.set(
-		'Strict-Transport-Security',
-		'max-age=31536000; includeSubDomains'
-	);
+	response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 
 	return response;
 };

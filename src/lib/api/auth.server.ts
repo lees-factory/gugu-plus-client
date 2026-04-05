@@ -1,6 +1,13 @@
 import { apiPost } from './client';
 import { SERVER_ENDPOINTS } from './endpoints.server';
-import type { LoginResponse, OAuthLoginResponse, RegisterResponse, VerifyResponse, AuthTokens, OAuthProvider } from './auth';
+import type {
+	LoginResponse,
+	OAuthLoginResponse,
+	RegisterResponse,
+	VerifyResponse,
+	AuthTokens,
+	OAuthProvider
+} from './auth';
 
 /**
  * 서버 전용 — form actions, hooks 등에서 백엔드를 직접 호출.
@@ -18,7 +25,11 @@ export const authApi = {
 	}) => apiPost<OAuthLoginResponse>(SERVER_ENDPOINTS.auth.oauthLogin, payload),
 
 	register: (email: string, password: string, display_name: string) =>
-		apiPost<RegisterResponse>(SERVER_ENDPOINTS.auth.registerEmail, { email, password, display_name }),
+		apiPost<RegisterResponse>(SERVER_ENDPOINTS.auth.registerEmail, {
+			email,
+			password,
+			display_name
+		}),
 
 	verify: (code: string) => apiPost<VerifyResponse>(SERVER_ENDPOINTS.auth.verifyEmail, { code }),
 

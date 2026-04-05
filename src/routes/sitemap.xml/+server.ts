@@ -11,9 +11,10 @@ const PUBLIC_PAGES = [
 ];
 
 export const GET: RequestHandler = () => {
-	const lastmod = '2025-01-01';
+	const today = new Date().toISOString().split('T')[0];
 
 	const urls = PUBLIC_PAGES.map((page) => {
+		const lastmod = page.changefreq === 'yearly' ? '2025-01-01' : today;
 		const loc = `${BASE_URL}${page.path}`;
 		const hreflangs = LOCALES.map(
 			(lang) => `    <xhtml:link rel="alternate" hreflang="${lang}" href="${loc}" />`

@@ -30,15 +30,24 @@
 
 {#if standalone}
 	<nav class="flex items-center justify-between px-5 pt-5 sm:px-8 sm:pt-6">
-		<a href={resolve('/')} class="text-lg font-bold tracking-tight text-[#1c1917]">
-			Price Eye
-		</a>
+		<a href={resolve('/')} class="text-lg font-bold tracking-tight text-[#1c1917]"> Price Eye </a>
 		<a
 			href={resolve('/')}
 			class="flex items-center gap-1.5 rounded-xl border border-zinc-200/60 bg-white/80 px-4 py-2 text-xs font-semibold text-zinc-600 shadow-sm transition hover:bg-white hover:text-zinc-900"
 		>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				class="size-3.5"
+				aria-hidden="true"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+				/>
 			</svg>
 			{t('legal_back_home')}
 		</a>
@@ -69,16 +78,16 @@
 		{#each sections as section, i (i)}
 			<div class={i < sections.length - 1 ? 'mb-7' : ''}>
 				<h2 class="mb-3 text-sm font-semibold text-zinc-900">{section.title}</h2>
-				<p class="whitespace-pre-line text-sm leading-relaxed text-zinc-500">
+				<p class="text-sm leading-relaxed whitespace-pre-line text-zinc-500">
 					{section.body}
 				</p>
 			</div>
 		{/each}
 
 		<div class="mt-8 rounded-xl bg-zinc-100/80 p-4 text-xs leading-relaxed text-zinc-500">
-			{t('legal_contact')}: <a
-				href="mailto:{contactEmail}"
-				class="text-zinc-900 underline underline-offset-2">{contactEmail}</a
+			{t('legal_contact')}:
+			<a href="mailto:{contactEmail}" class="text-zinc-900 underline underline-offset-2"
+				>{contactEmail}</a
 			>
 			&middot; {t('legal_effective')}: {effectiveDate}
 		</div>

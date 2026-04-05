@@ -8,7 +8,10 @@
 
 	const { data }: PageProps = $props();
 
-	const page = createItemDetailPage(() => data.trackedItem, () => data.alertState);
+	const page = createItemDetailPage(
+		() => data.trackedItem,
+		() => data.alertState
+	);
 
 	const item = $derived(page.item);
 </script>
@@ -81,7 +84,7 @@
 							src={page.displayImage}
 							alt=""
 							aria-hidden="true"
-							class="absolute inset-0 size-full scale-110 object-cover blur-xl opacity-70"
+							class="absolute inset-0 size-full scale-110 object-cover opacity-70 blur-xl"
 						/>
 						<div class="absolute inset-0 bg-white/30"></div>
 						<!-- Main image -->
@@ -116,7 +119,9 @@
 				</div>
 
 				<!-- Price + CTA -->
-				<div class="flex flex-col rounded-b-3xl border border-t-0 border-zinc-200/60 bg-white p-8 md:rounded-3xl md:border-t">
+				<div
+					class="flex flex-col rounded-b-3xl border border-t-0 border-zinc-200/60 bg-white p-8 md:rounded-3xl md:border-t"
+				>
 					<p class="mb-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
 						{t('detail_current_price')}
 					</p>
@@ -502,8 +507,10 @@
 									{entry.date}
 								</span>
 								<div class="flex items-center gap-4">
-									<span class="text-sm tabular-nums {i === 0 ? 'font-semibold text-zinc-900' : 'font-medium text-zinc-900'}"
-										>{page.fmt(entry.price)}</span
+									<span
+										class="text-sm tabular-nums {i === 0
+											? 'font-semibold text-zinc-900'
+											: 'font-medium text-zinc-900'}">{page.fmt(entry.price)}</span
 									>
 									{#if entry.change < 0}
 										<span class="w-20 text-right text-xs font-medium text-blue-500 tabular-nums">

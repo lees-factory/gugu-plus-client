@@ -59,9 +59,7 @@
 					</svg>
 					<span class="text-xs font-semibold text-stone-800">{t('discover_hero_badge')}</span>
 				</div>
-				<h1
-					class="text-2xl leading-tight font-semibold tracking-tight text-zinc-900 md:text-3xl"
-				>
+				<h1 class="text-2xl leading-tight font-semibold tracking-tight text-zinc-900 md:text-3xl">
 					{t('discover_hero_title_1')}<br />
 					<span class="text-zinc-700">{t('discover_hero_title_2')}</span>
 				</h1>
@@ -157,7 +155,13 @@
 												class="inline-flex items-center gap-1 rounded-full border border-blue-100/50 bg-gradient-to-r from-blue-50 to-sky-50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-600 shadow-sm"
 											>
 												<svg viewBox="0 0 12 12" fill="none" class="size-3" aria-hidden="true">
-													<path d="M6 2v8M6 10l-3-3M6 10l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+													<path
+														d="M6 2v8M6 10l-3-3M6 10l3-3"
+														stroke="currentColor"
+														stroke-width="1.5"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+													/>
 												</svg>
 												-{product.discountPct}%
 											</span>
@@ -166,7 +170,9 @@
 								</div>
 
 								<!-- Add button -->
-								<div class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0">
+								<div
+									class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0"
+								>
 									{#if isAdded}
 										<span
 											class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2 text-xs font-semibold text-emerald-700"
@@ -192,7 +198,7 @@
 											type="button"
 											onclick={() => page.addItem(product)}
 											disabled={!!page.addingId}
-											class="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-zinc-200/60 bg-white px-5 py-3 text-xs font-semibold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm disabled:opacity-50 md:w-auto md:py-2 md:px-4"
+											class="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-zinc-200/60 bg-white px-5 py-3 text-xs font-semibold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm disabled:opacity-50 md:w-auto md:px-4 md:py-2"
 										>
 											{#if isAdding}
 												<svg
@@ -281,7 +287,9 @@
 				class="w-full shrink-0 xl:sticky xl:top-[80px] xl:w-[340px] xl:self-start"
 				style="contain: layout style paint; content-visibility: auto; will-change: transform;"
 			>
-				<div class="flex h-full flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm xl:min-h-[600px]">
+				<div
+					class="flex h-full flex-col rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm xl:min-h-[600px]"
+				>
 					<div class="mb-5 flex items-center justify-between">
 						<h3 class="text-sm font-semibold tracking-tight text-zinc-500 uppercase">
 							{t('nav_tracked_items')}

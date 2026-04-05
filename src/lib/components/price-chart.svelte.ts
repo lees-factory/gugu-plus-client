@@ -192,14 +192,22 @@ export function createPriceChartModel(
 	}
 
 	return {
-		get VW() { return VW; },
-		get VH() { return VH; },
+		get VW() {
+			return VW;
+		},
+		get VH() {
+			return VH;
+		},
 		PL,
 		PR,
 		PT,
 		PB,
-		get cW() { return cW; },
-		get cH() { return cH; },
+		get cW() {
+			return cW;
+		},
+		get cH() {
+			return cH;
+		},
 		periods: getPriceChartPeriods(),
 		get selectedPeriod() {
 			return selectedPeriod;

@@ -34,9 +34,7 @@
 		canonical ? (canonical.startsWith('http') ? canonical : `${BASE_URL}${canonical}`) : undefined
 	);
 
-	const fullOgImage = $derived(
-		ogImage.startsWith('http') ? ogImage : `${BASE_URL}${ogImage}`
-	);
+	const fullOgImage = $derived(ogImage.startsWith('http') ? ogImage : `${BASE_URL}${ogImage}`);
 
 	const SCRIPT_CLOSE = '</' + 'script>';
 	const SCRIPT_CLOSE_ESCAPED = '<\\/' + 'script>';

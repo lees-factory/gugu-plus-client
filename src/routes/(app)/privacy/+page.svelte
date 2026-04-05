@@ -10,18 +10,14 @@
 	const summaryItems = $derived(getPrivacySummaryItems());
 </script>
 
-<SeoHead
-	title={t('privacy_seo_title')}
-	description={t('privacy_seo_desc')}
-	canonical="/privacy"
-/>
+<SeoHead title={t('privacy_seo_title')} description={t('privacy_seo_desc')} canonical="/privacy" />
 
 <LegalPageLayout
 	title={t('privacy_title')}
 	subtitle={t('privacy_subtitle')}
 	badgeText={t('privacy_badge')}
 	effectiveDate={t('privacy_effective_date')}
-	sections={sections}
+	{sections}
 	contactEmail="priceeye.support@gmail.com"
 	standalone={isGuest}
 >

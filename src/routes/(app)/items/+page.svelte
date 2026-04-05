@@ -152,17 +152,17 @@
 					fill="none"
 					stroke="currentColor"
 					stroke-width="2"
-					class="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-400"
+					class="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-zinc-400"
 					aria-hidden="true"
 				>
-					<circle cx="11" cy="11" r="8"/>
-					<path d="m21 21-4.3-4.3" stroke-linecap="round"/>
+					<circle cx="11" cy="11" r="8" />
+					<path d="m21 21-4.3-4.3" stroke-linecap="round" />
 				</svg>
 				<input
 					type="text"
 					bind:value={page.searchQuery}
 					placeholder={t('items_search_placeholder')}
-					class="w-full rounded-xl border border-zinc-200/60 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+					class="w-full rounded-xl border border-zinc-200/60 bg-white py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-300 focus:ring-1 focus:ring-zinc-300 focus:outline-none"
 				/>
 			</div>
 
@@ -170,7 +170,7 @@
 			<select
 				onchange={page.setSortFromSelect}
 				value={page.sortBy}
-				class="shrink-0 appearance-none rounded-xl border border-zinc-200/60 bg-white py-2.5 pl-3 pr-8 text-xs font-medium text-zinc-700 bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat focus:border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+				class="shrink-0 appearance-none rounded-xl border border-zinc-200/60 bg-white bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat py-2.5 pr-8 pl-3 text-xs font-medium text-zinc-700 focus:border-zinc-300 focus:ring-1 focus:ring-zinc-300 focus:outline-none"
 				style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2371717a'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E&quot;);"
 			>
 				<option value="recent">{t('items_sort_recent')}</option>
@@ -222,8 +222,15 @@
 						class="flex size-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
 						aria-label={t('aria_close')}
 					>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							class="size-4"
+							aria-hidden="true"
+						>
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
 						</svg>
 					</button>
 				</div>

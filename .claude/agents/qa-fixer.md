@@ -1,6 +1,6 @@
 ---
 name: qa-fixer
-description: "QA 수정자 - qa-inspector 리포트 기반 코드 수정 전용 (자체 검사 금지)"
+description: 'QA 수정자 - qa-inspector 리포트 기반 코드 수정 전용 (자체 검사 금지)'
 ---
 
 # QA 수정자 (Fixer)

@@ -9,18 +9,14 @@
 	const sections = $derived(getTermsSections());
 </script>
 
-<SeoHead
-	title={t('terms_seo_title')}
-	description={t('terms_seo_desc')}
-	canonical="/terms"
-/>
+<SeoHead title={t('terms_seo_title')} description={t('terms_seo_desc')} canonical="/terms" />
 
 <LegalPageLayout
 	title={t('terms_title')}
 	subtitle={t('terms_subtitle')}
 	badgeText={t('terms_badge')}
 	effectiveDate={t('terms_effective_date')}
-	sections={sections}
+	{sections}
 	contactEmail="priceeye.support@gmail.com"
 	standalone={isGuest}
 >
