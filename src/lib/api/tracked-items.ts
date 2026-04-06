@@ -131,6 +131,23 @@ export type TrackedItemPriceAlertResponse = {
 	data: PriceAlertStateData;
 };
 
+/** SKU 일별 가격 추세 포인트 */
+export type PriceTrendPoint = {
+	date: string;
+	price: string;
+	original_price?: string | null;
+	currency: string;
+};
+
+export type PriceTrendData = {
+	points: PriceTrendPoint[];
+};
+
+export type PriceTrendResponse = {
+	result: string;
+	data: PriceTrendData;
+};
+
 /** 커서 기반 페이지네이션 목록 데이터 */
 export type ListTrackedItemsPageData = {
 	items: TrackedItemData[];
@@ -195,6 +212,17 @@ export const trackedItemsApi = {
 		const body: Record<string, string> = { channel: 'EMAIL' };
 		if (skuId) body.sku_id = skuId;
 		return apiPost<TrackedItemPriceAlertResponse>(base, body);
+	},
+
+	/** GET — SKU 일별 가격 추세 조회 */
+	getSkuPriceTrend: (
+		trackedItemId: string,
+		params: { sku_id: string; from: string; to: string; currency?: string }
+	) => {
+		const base = ENDPOINTS.trackedItems.skuPriceTrend(trackedItemId);
+		const qs = new URLSearchParams({ sku_id: params.sku_id, from: params.from, to: params.to });
+		if (params.currency) qs.set('currency', params.currency);
+		return apiGet<PriceTrendResponse>(`${base}?${qs}`);
 	},
 
 	/** DELETE — SKU 가격 알림 해제 */

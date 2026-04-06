@@ -1,5 +1,5 @@
 import type { ProductDetailData, ProductSku } from '$lib/api/products';
-import type { TrackedItemDetailData, ProductSKUData } from '$lib/api/tracked-items';
+import type { TrackedItemDetailData, ProductSKUData, PriceTrendPoint } from '$lib/api/tracked-items';
 import { marketToSite } from '$lib/commerce';
 
 /** `sku_properties` JSON 객체에서 사용하는 키 (그 외 키는 무시) */
@@ -163,6 +163,31 @@ export function mapPriceHistories(
 				: Number(String(row.change_value).replace(/[^0-9.-]/g, '')) || 0;
 		return {
 			date: new Date(row.recorded_at).toLocaleDateString('ko-KR', {
+				month: 'short',
+				day: 'numeric'
+			}),
+			price,
+			change
+		};
+	});
+}
+
+/** 일별 가격 스냅샷(sku-price-trend)을 차트용 PriceEntry[]로 변환 (오래된 순 → 최신순) */
+export function mapPriceTrend(points: PriceTrendPoint[], fallbackPrice: string): PriceEntry[] {
+	if (!points?.length) {
+		const p = parsePriceAmount(fallbackPrice);
+		if (p <= 0) return [];
+		return [{ date: '—', price: p, change: 0 }];
+	}
+	const sorted = [...points].sort(
+		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+	);
+	return sorted.map((row, i) => {
+		const price = parsePriceAmount(row.price);
+		const older = sorted[i + 1];
+		const change = older != null ? price - parsePriceAmount(older.price) : 0;
+		return {
+			date: new Date(row.date).toLocaleDateString('ko-KR', {
 				month: 'short',
 				day: 'numeric'
 			}),

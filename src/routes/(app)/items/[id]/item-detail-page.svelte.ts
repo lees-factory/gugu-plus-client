@@ -4,7 +4,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
-	mapPriceHistories,
+	mapPriceTrend,
 	type ParsedSku,
 	type PriceEntry
 } from '$lib/product-detail/map-product';
@@ -228,11 +228,12 @@ export function createItemDetailPage(
 		}
 	});
 
-	// SKU 변경 시 가격 히스토리 fetch (캐시 우선)
+	// SKU 변경 시 가격 추세(일별 스냅샷) fetch (캐시 우선)
 	$effect(() => {
 		const sku = currentSku;
 		const trackedItemId = item?.trackedItemId;
 		const currency = item?.currency;
+		console.log('🚀 ~ createItemDetailPage ~ item:', item);
 		if (!sku || !trackedItemId || sku.skuId === 'default') {
 			skuPriceHistory = item?.priceHistory ?? [];
 			return;
@@ -245,15 +246,23 @@ export function createItemDetailPage(
 			return;
 		}
 
+		const to = new Date();
+		const from = new Date();
+		from.setDate(from.getDate() - 365);
+		const toStr = to.toISOString().slice(0, 10);
+		const fromStr = from.toISOString().slice(0, 10);
+		console.log('🚀 ~ createItemDetailPage ~ fromStr:', currency, fromStr, toStr);
+
 		historyLoading = true;
 		trackedItemsApi
-			.getSkuPriceHistories(trackedItemId, { sku_id: sku.skuId, currency })
+			.getSkuPriceTrend(trackedItemId, { sku_id: sku.skuId, from: fromStr, to: toStr, currency })
 			.then((res) => {
+				console.log('🚀 ~ createItemDetailPage ~ res:', res);
 				if (res.error || !res.data) {
 					skuPriceHistory = item?.priceHistory ?? [];
 					return;
 				}
-				const mapped = mapPriceHistories(res.data.data, String(sku.price));
+				const mapped = mapPriceTrend(res.data.data.points, String(sku.price));
 				const result = mapped.length > 0 ? mapped : (item?.priceHistory ?? []);
 				historyCache.set(cacheKey, result);
 				skuPriceHistory = result;
