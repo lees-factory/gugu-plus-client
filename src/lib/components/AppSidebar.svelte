@@ -96,7 +96,7 @@
 					: 'text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900'}"
 			>
 				<span class="shrink-0">
-					{#if item.path === '/'}
+					{#if item.path === '/discover'}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
