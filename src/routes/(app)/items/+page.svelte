@@ -2,6 +2,7 @@
 	import type { PageProps } from './$types';
 	import { invalidate } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte';
+	import GuestPlaceholder from '$lib/components/GuestPlaceholder.svelte';
 	import ItemCard from '$lib/components/ItemCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import AddItemModal from '$lib/components/AddItemModal.svelte';
@@ -13,6 +14,10 @@
 	const { data }: PageProps = $props();
 	const page = createItemsPage(() => data);
 </script>
+
+{#if !data.userEmail}
+	<GuestPlaceholder icon="star" />
+{:else}
 
 <div class="space-y-6 p-5 sm:p-6 lg:p-8">
 	<!-- Page header (aligned with web-ref Watchlist) -->
@@ -308,3 +313,4 @@
 	onConfirm={page.confirmDelete}
 	onCancel={page.cancelDelete}
 />
+{/if}

@@ -1,8 +1,15 @@
 <script lang="ts">
+	import type { PageProps } from './$types';
 	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
+	import GuestPlaceholder from '$lib/components/GuestPlaceholder.svelte';
+
+	const { data }: PageProps = $props();
 </script>
 
+{#if !data.userEmail}
+	<GuestPlaceholder icon="bell" />
+{:else}
 <div class="space-y-6 p-5 sm:p-6 lg:p-8">
 	<div class="max-w-2xl">
 		<div
@@ -61,3 +68,4 @@
 		</a>
 	</div>
 </div>
+{/if}
