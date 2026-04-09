@@ -48,7 +48,7 @@
 		<!-- CTAs -->
 		<div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<a
-				href={resolve('/auth/signup')}
+				href={resolve('/discover')}
 				class="inline-flex h-12 items-center gap-2 rounded-2xl px-7 text-sm font-semibold text-white shadow-lg shadow-zinc-900/15 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
 				style="background: linear-gradient(to right, #292524, #3f3f46);"
 			>

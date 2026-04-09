@@ -5,6 +5,7 @@ const LOCALES = ['ko', 'en'];
 
 const PUBLIC_PAGES = [
 	{ path: '/', changefreq: 'weekly', priority: '1.0' },
+	{ path: '/discover', changefreq: 'daily', priority: '0.9' },
 	{ path: '/plan', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/terms', changefreq: 'yearly', priority: '0.3' },
 	{ path: '/privacy', changefreq: 'yearly', priority: '0.3' }

@@ -31,7 +31,7 @@ export function createLayoutModel(getData: () => LayoutData) {
 	});
 
 	const mobileNavItems: Array<{ path: Pathname; label: string }> = $derived([
-		{ path: '/', label: t('nav_home') },
+		{ path: '/discover', label: t('nav_home') },
 		{ path: '/items', label: t('nav_tracked_items') },
 		{ path: '/alerts', label: t('alerts_title') },
 		{ path: '/settings', label: t('nav_settings') }
@@ -41,7 +41,7 @@ export function createLayoutModel(getData: () => LayoutData) {
 
 	function isActive(path: Pathname) {
 		const base = page.url.pathname;
-		if (path === '/') return base === '/';
+		if (path === '/discover') return base === '/discover';
 		return base.startsWith(path);
 	}
 

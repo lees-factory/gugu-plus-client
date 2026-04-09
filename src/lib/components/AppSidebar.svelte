@@ -13,7 +13,7 @@
 	const openQuickAdd = getContext<() => void>('openQuickAdd');
 
 	const navItems = $derived([
-		{ path: '/' as const, label: t('nav_home') },
+		{ path: '/discover' as const, label: t('nav_home') },
 		{ path: '/items' as const, label: t('nav_tracked_items') },
 		{ path: '/alerts' as const, label: t('alerts_title') },
 		{ path: '/settings' as const, label: t('nav_settings') }
@@ -21,7 +21,7 @@
 
 	function isActive(path: string) {
 		const base = page.url.pathname;
-		if (path === '/') return base === '/';
+		if (path === '/discover') return base === '/discover';
 		return base.startsWith(path);
 	}
 </script>
@@ -38,7 +38,7 @@
 		style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);"
 	>
 		<a
-			href={resolve('/')}
+			href={resolve('/discover')}
 			onclick={onClose}
 			class="flex items-center gap-3 overflow-hidden"
 			title={t('brand_name')}

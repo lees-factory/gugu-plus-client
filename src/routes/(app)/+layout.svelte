@@ -309,7 +309,7 @@
 						class="flex min-w-[60px] flex-col items-center gap-1 rounded-xl px-3 py-2 transition-all duration-200
 						{layout.isActive(item.path) ? 'text-stone-800' : 'text-zinc-500'}"
 					>
-						{#if item.path === '/'}
+						{#if item.path === '/discover'}
 							<svg
 								viewBox="0 0 24 24"
 								fill="none"
