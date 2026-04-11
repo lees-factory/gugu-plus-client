@@ -3,7 +3,9 @@
 	import LandingPage from '$lib/components/landing/LandingPage.svelte';
 	import SeoHead from '$lib/components/SeoHead.svelte';
 
-	const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+	const SITE_URL =
+		(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
+		'https://priceeye.vercel.app';
 
 	/**
 	 * FAQ 항목: `LandingFaq.svelte` 의 FAQS 배열과 1:1 동기화.

@@ -2,8 +2,14 @@
 	import { getLocale } from '$lib/paraglide/runtime.js';
 	import { t } from '$lib/i18n/t';
 
-	/** 운영 도메인 — .env 의 VITE_SITE_URL 로 일원화. 값이 비면 빈 문자열(상대경로 canonical). */
-	const BASE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+	/**
+	 * 운영 도메인 — .env 의 VITE_SITE_URL 이 우선, 없으면 프로덕션 fallback.
+	 * 하드코드 fallback 을 두는 이유: Vercel 등 빌드 환경에서 env 가 누락돼도
+	 * canonical/og:url/og:image 가 절대 URL 로 나가야 social 공유·JSON-LD 가 정상 동작한다.
+	 */
+	const BASE_URL =
+		(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
+		'https://priceeye.vercel.app';
 
 	interface Props {
 		title: string;

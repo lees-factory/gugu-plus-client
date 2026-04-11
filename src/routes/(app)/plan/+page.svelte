@@ -5,7 +5,9 @@
 
 	const page = createPlanPage();
 
-	const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+	const SITE_URL =
+		(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
+		'https://priceeye.vercel.app';
 
 	const planJsonLd = {
 		'@context': 'https://schema.org',
