@@ -14,7 +14,10 @@ export type ProductSku = {
 	sku_name: string;
 	color: string;
 	size: string;
+	/** legacy 원본 가격 */
 	price: string;
+	/** 현재 표시 가격 (sku_price_snapshot 기준) */
+	current_price: string;
 	original_price: string;
 	currency: string;
 	image_url: string;
@@ -29,7 +32,6 @@ export type ProductDetailData = {
 	original_url: string;
 	title: string;
 	main_image_url: string;
-	current_price: string;
 	currency: string;
 	product_url: string;
 	promotion_link?: string | null;

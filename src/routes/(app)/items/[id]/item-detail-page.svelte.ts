@@ -266,7 +266,6 @@ export function createItemDetailPage(
 					return;
 				}
 				const points = res.data.data?.points ?? [];
-				console.log('🚀 ~ createItemDetailPage ~ points:', points);
 				const mapped = mapPriceTrend(points, String(sku.price));
 				const result = mapped.length > 0 ? mapped : (item?.priceHistory ?? []);
 				historyCache.set(cacheKey, result);
@@ -301,16 +300,19 @@ export function createItemDetailPage(
 		const maxPrice = Math.max(...prices);
 		const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
 
-		const allSame = minPrice === maxPrice;
+		const range = maxPrice - minPrice;
+		// 변동 폭이 평균의 2% 미만이면 사실상 변화 없음으로 취급한다.
+		// percentile이 극단에 치우쳐도 vsAvg는 0에 수렴해 두 문구가 충돌하는 문제 방지.
+		const allSame = minPrice === maxPrice || (avgPrice > 0 && range / avgPrice < 0.02);
 
 		const current = displayPrice > 0 ? displayPrice : prices[0];
-		const range = maxPrice - minPrice;
 		const percentile = allSame ? 50 : Math.round(((current - minPrice) / range) * 100);
 		const vsAvg = avgPrice > 0 ? Math.round(((current - avgPrice) / avgPrice) * 100) : 0;
 		const vsMin = minPrice > 0 ? Math.round(((current - minPrice) / minPrice) * 100) : 0;
 
 		let level: 'good' | 'normal' | 'high';
-		if (percentile <= 30) level = 'good';
+		if (allSame) level = 'normal';
+		else if (percentile <= 30) level = 'good';
 		else if (percentile >= 70) level = 'high';
 		else level = 'normal';
 
@@ -338,7 +340,7 @@ export function createItemDetailPage(
 	async function toggleAlert() {
 		const trackedItemId = item?.trackedItemId;
 		const skuId = currentSku?.skuId;
-		if (!trackedItemId || ui.alertLoading) return;
+		if (!trackedItemId || !skuId || ui.alertLoading) return;
 		ui.alertLoading = true;
 		ui.alertError = '';
 		try {

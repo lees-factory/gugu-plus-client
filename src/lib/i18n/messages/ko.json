@@ -291,7 +291,7 @@
 	"insight_vs_avg_higher": "평균 대비 {pct}% 높은 가격입니다",
 	"insight_vs_avg_same": "평균과 비슷한 가격입니다",
 	"insight_range_label": "가격 범위",
-	"insight_no_change": "가격 변동이 없습니다",
+	"insight_no_change": "최근 변동 폭이 크지 않습니다",
 	"home_welcome": "안녕하세요, 추적 현황입니다",
 	"home_tracking_count": "{count}개 상품 추적 중",
 	"home_no_items_title": "아직 추적 중인 상품이 없어요",

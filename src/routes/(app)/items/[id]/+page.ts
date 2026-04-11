@@ -20,7 +20,6 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 
 	const res = await fetch(ENDPOINTS.trackedItems.detail(id));
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-	console.log('🚀 ~ load ~ json:', json);
 
 	if (!res.ok) {
 		const err = json?.error as { message?: string } | string | undefined;
@@ -38,15 +37,24 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 		return { trackedItem: null, alertState: null, error: 'response_format_error' };
 	}
 
+	const trackedItem = payload as TrackedItemDetailData;
+
 	// 알림 상태 조회 (실패해도 상세 페이지는 표시)
-	const alertRes = await fetch(ENDPOINTS.trackedItems.priceAlert(id)).catch(() => null);
-	const alertJson = alertRes ? await alertRes.json().catch(() => ({})) : {};
-	const alertState = (
-		alertRes?.ok ? (alertJson?.data ?? null) : null
-	) as PriceAlertStateData | null;
+	// 신 스펙: skuID가 path 필수. 선택 SKU 없으면 호출 스킵.
+	let alertState: PriceAlertStateData | null = null;
+	const selectedSkuId = trackedItem.sku_id;
+	if (selectedSkuId) {
+		const alertRes = await fetch(ENDPOINTS.trackedItems.priceAlert(id, selectedSkuId)).catch(
+			() => null
+		);
+		if (alertRes?.ok) {
+			const alertJson = (await alertRes.json().catch(() => ({}))) as Record<string, unknown>;
+			alertState = (alertJson?.data ?? null) as PriceAlertStateData | null;
+		}
+	}
 
 	return {
-		trackedItem: payload as TrackedItemDetailData,
+		trackedItem,
 		alertState,
 		error: null as string | null
 	};

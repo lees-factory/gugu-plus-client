@@ -126,12 +126,13 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 			}
 		}
 
+		// 표시 가격은 current_price (sku_price_snapshot 기반). 스펙상 required.
 		return {
 			skuId,
 			skuName,
 			colorCode,
 			size,
-			price: parsePriceAmount(s.price),
+			price: parsePriceAmount(s.current_price),
 			originalPrice: s.original_price ? parsePriceAmount(s.original_price) : null,
 			image: skuImageFromApi(s),
 			propColor,
@@ -226,66 +227,8 @@ export function mapProductDetail(
 				? d.skus
 				: null;
 
-	const skusParsed = rawSkus
-		? parseSkusFromApi(rawSkus)
-		: [
-				{
-					skuId: 'default',
-					skuName: d.title?.trim() || 'Default',
-					colorCode: 'Default',
-					size: '',
-					price: parsePriceAmount(d.current_price),
-					originalPrice: null,
-					image: d.main_image_url || null,
-					propColor: null,
-					propSize: null,
-					propertiesFromJson: false
-				}
-			];
-
-	const variantMatrix = hasVariantOptions(skusParsed);
-
-	return {
-		trackedItemId: d.tracked_item_id ?? '',
-		productId: d.product_id,
-		title: d.title,
-		site: marketToSite(d.market),
-		imageUrl: d.main_image_url,
-		url: d.promotion_link || d.product_url || d.original_url,
-		currency: d.currency,
-		lastChecked: '—',
-		trackingFrequency: '24h',
-		alertEnabled: d.is_tracked_by_user,
-		alertThreshold: parsePriceAmount(d.current_price),
-		skus: skusParsed,
-		variantMatrix,
-		priceHistory: mapPriceHistories(d.price_histories ?? [], d.current_price)
-	};
-}
-
-/** TrackedItemDetailData의 ProductSKUData → ProductSku 변환 */
-function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
-	return {
-		id: s.id,
-		external_sku_id: s.external_sku_id,
-		sku_name: s.sku_name,
-		color: s.color,
-		size: s.size,
-		price: s.price,
-		original_price: s.original_price,
-		currency: s.currency,
-		image_url: s.image_url,
-		sku_properties: s.sku_properties,
-		origin_sku_id: s.origin_sku_id
-	};
-}
-
-/**
- * GET /v1/tracked-items/{id} 응답을 ItemDetail로 변환.
- * TrackedItemDetailData에는 price_histories가 없으므로 current_price 기반 단일 엔트리를 만든다.
- */
-export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
-	const rawSkus = d.skus && d.skus.length > 0 ? d.skus.map(trackedSkuToProductSku) : null;
+	// ProductDetailData에는 top-level current_price가 없다. skus[0].current_price에서 파생.
+	const fallbackPriceStr = rawSkus?.[0]?.current_price ?? '';
 
 	const skusParsed = rawSkus
 		? parseSkusFromApi(rawSkus)
@@ -305,8 +248,75 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 			];
 
 	const variantMatrix = hasVariantOptions(skusParsed);
+	const representativePrice = skusParsed[0]?.price ?? 0;
 
-	const representativePrice = skusParsed[0]?.price || 0;
+	return {
+		trackedItemId: d.tracked_item_id ?? '',
+		productId: d.product_id,
+		title: d.title,
+		site: marketToSite(d.market),
+		imageUrl: d.main_image_url,
+		url: d.promotion_link || d.product_url || d.original_url,
+		currency: d.currency,
+		lastChecked: '—',
+		trackingFrequency: '24h',
+		alertEnabled: d.is_tracked_by_user,
+		alertThreshold: representativePrice,
+		skus: skusParsed,
+		variantMatrix,
+		priceHistory: mapPriceHistories(d.price_histories ?? [], fallbackPriceStr)
+	};
+}
+
+/** TrackedItemDetailData의 ProductSKUData → ProductSku 변환 */
+function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
+	return {
+		id: s.id,
+		external_sku_id: s.external_sku_id,
+		sku_name: s.sku_name,
+		color: s.color,
+		size: s.size,
+		price: s.price,
+		current_price: s.current_price,
+		original_price: s.original_price,
+		currency: s.currency,
+		image_url: s.image_url,
+		sku_properties: s.sku_properties,
+		origin_sku_id: s.origin_sku_id
+	};
+}
+
+/**
+ * GET /v1/tracked-items/{id} 응답을 ItemDetail로 변환.
+ * TrackedItemDetailData에는 price_histories가 없으므로 current_price 기반 단일 엔트리를 만든다.
+ */
+export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
+	const rawSkus = d.skus && d.skus.length > 0 ? d.skus.map(trackedSkuToProductSku) : null;
+
+	const topCurrentPrice = parsePriceAmount(d.current_price);
+
+	const skusParsed = rawSkus
+		? parseSkusFromApi(rawSkus)
+		: [
+				{
+					skuId: 'default',
+					skuName: d.title?.trim() || 'Default',
+					colorCode: 'Default',
+					size: '',
+					price: topCurrentPrice,
+					originalPrice: null,
+					image: d.main_image_url || null,
+					propColor: null,
+					propSize: null,
+					propertiesFromJson: false
+				}
+			];
+
+	const variantMatrix = hasVariantOptions(skusParsed);
+
+	// 선택 SKU 우선, 없으면 첫 SKU, 그것도 없으면 top-level current_price
+	const selectedSku = d.sku_id ? skusParsed.find((s) => s.skuId === d.sku_id) : undefined;
+	const representativePrice = selectedSku?.price ?? skusParsed[0]?.price ?? topCurrentPrice;
 
 	return {
 		trackedItemId: d.tracked_item_id,

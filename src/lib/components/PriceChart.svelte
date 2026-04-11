@@ -131,6 +131,7 @@
 
 		<!-- 최저·최고 마커 -->
 		{#if chart.svgPoints.length > 1}
+			{@const lastIdx = chart.svgPoints.length - 1}
 			{#if chart.minIdx >= 0}
 				<circle
 					cx={chart.svgPoints[chart.minIdx].x}
@@ -161,6 +162,30 @@
 					fill-opacity="0.15"
 				/>
 			{/if}
+			<!-- 현재가 마커 (가장 최신 포인트) -->
+			<circle
+				cx={chart.svgPoints[lastIdx].x}
+				cy={chart.svgPoints[lastIdx].y}
+				r="8"
+				fill="#5aad9c"
+				fill-opacity="0.15"
+			>
+				<animate attributeName="r" values="7;11;7" dur="2.4s" repeatCount="indefinite" />
+				<animate
+					attributeName="fill-opacity"
+					values="0.2;0.06;0.2"
+					dur="2.4s"
+					repeatCount="indefinite"
+				/>
+			</circle>
+			<circle
+				cx={chart.svgPoints[lastIdx].x}
+				cy={chart.svgPoints[lastIdx].y}
+				r="4"
+				fill="#5aad9c"
+				stroke="white"
+				stroke-width="2"
+			/>
 		{/if}
 
 		<!-- 호버 요소 -->
@@ -260,7 +285,7 @@
 				class="text-sm font-semibold tabular-nums"
 				style="color: {chart.stats.change <= 0 ? '#3b82f6' : '#ef4444'};"
 			>
-				{chart.stats.change >= 0 ? '+' : ''}{chart.stats.change.toFixed(1)}%
+				{chart.stats.change >= 0 ? '+' : ''}{chart.stats.change.toFixed(2)}%
 			</p>
 		</div>
 	</div>

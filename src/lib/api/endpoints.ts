@@ -30,8 +30,8 @@ export const ENDPOINTS = {
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-histories`,
 		skuPriceTrend: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-trend`,
-		priceAlert: (trackedItemId: string) =>
-			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/price-alert`
+		priceAlert: (trackedItemId: string, skuId: string) =>
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/skus/${encodeURIComponent(skuId)}/price-alert`
 	},
 
 	/** 브라우저 → BFF → GET /v1/discover/… */

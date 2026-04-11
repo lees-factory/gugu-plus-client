@@ -25,10 +25,7 @@ export function buildSmoothPath(pts: { x: number; y: number }[]): string {
 	if (pts.length < 2) return '';
 	let d = `M${pts[0].x},${pts[0].y}`;
 	for (let i = 1; i < pts.length; i++) {
-		const p = pts[i - 1];
-		const c = pts[i];
-		const mx = (p.x + c.x) / 2;
-		d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`;
+		d += ` L${pts[i].x},${pts[i].y}`;
 	}
 	return d;
 }

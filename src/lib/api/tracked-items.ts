@@ -76,6 +76,7 @@ export type TrackedItemDetailData = {
 	original_url: string;
 	title: string;
 	main_image_url: string;
+	current_price: string;
 	currency: string;
 	product_url: string;
 	promotion_link?: string | null;
@@ -88,7 +89,10 @@ export type ProductSKUData = {
 	sku_name: string;
 	color: string;
 	size: string;
+	/** legacy 원본 가격 */
 	price: string;
+	/** 현재 표시 가격 (sku_price_snapshot 기준) */
+	current_price: string;
 	original_price: string;
 	currency: string;
 	image_url: string;
@@ -137,7 +141,7 @@ export type PriceTrendResponse = {
 	data: PriceTrendData;
 };
 
-/** GET /v1/tracked-items/{trackedItemID}/price-alert 응답 */
+/** GET /v1/tracked-items/{trackedItemID}/skus/{skuID}/price-alert 응답 */
 export type PriceAlertStateData = {
 	enabled: boolean;
 	channel?: string;
@@ -216,28 +220,18 @@ export const trackedItemsApi = {
 	},
 
 	/** GET — SKU 가격 알림 상태 조회 */
-	getPriceAlert: (trackedItemId: string, skuId?: string) => {
-		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
-		const qs = new URLSearchParams();
-		if (skuId) qs.set('sku_id', skuId);
-		const query = qs.toString();
-		return apiGet<TrackedItemPriceAlertResponse>(query ? `${base}?${query}` : base);
-	},
+	getPriceAlert: (trackedItemId: string, skuId: string) =>
+		apiGet<TrackedItemPriceAlertResponse>(ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId)),
 
 	/** POST — SKU 가격 알림 등록 */
-	registerPriceAlert: (trackedItemId: string, skuId?: string) => {
-		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
-		const body: Record<string, string> = { channel: 'EMAIL' };
-		if (skuId) body.sku_id = skuId;
-		return apiPost<TrackedItemPriceAlertResponse>(base, body);
-	},
+	registerPriceAlert: (trackedItemId: string, skuId: string) =>
+		apiPost<TrackedItemPriceAlertResponse>(ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId), {
+			channel: 'EMAIL'
+		}),
 
 	/** DELETE — SKU 가격 알림 해제 */
-	unregisterPriceAlert: (trackedItemId: string, skuId?: string) => {
-		const base = ENDPOINTS.trackedItems.priceAlert(trackedItemId);
-		const qs = new URLSearchParams();
-		if (skuId) qs.set('sku_id', skuId);
-		const query = qs.toString();
-		return apiDelete<TrackedItemEmptySuccessResponse>(query ? `${base}?${query}` : base);
-	}
+	unregisterPriceAlert: (trackedItemId: string, skuId: string) =>
+		apiDelete<TrackedItemEmptySuccessResponse>(
+			ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId)
+		)
 };

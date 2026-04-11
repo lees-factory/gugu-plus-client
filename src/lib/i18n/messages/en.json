@@ -291,7 +291,7 @@
 	"insight_vs_avg_higher": "{pct}% above average",
 	"insight_vs_avg_same": "Around average price",
 	"insight_range_label": "Price range",
-	"insight_no_change": "No price changes",
+	"insight_no_change": "Little variation recently",
 	"home_welcome": "Here's your tracking overview",
 	"home_tracking_count": "Tracking {count} items",
 	"home_no_items_title": "No items tracked yet",
