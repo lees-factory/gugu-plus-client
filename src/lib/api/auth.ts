@@ -1,4 +1,4 @@
-import { apiPost } from './client';
+import { apiDelete, apiGet, apiPost } from './client';
 import { ENDPOINTS } from './endpoints';
 export type { ApiResult } from './client';
 
@@ -50,6 +50,26 @@ export type VerifyResponse = {
 
 export type OAuthProvider = 'google' | 'kakao' | 'naver' | 'apple';
 
+/** GET /v1/auth/sessions 응답의 개별 세션 */
+export type LoginSession = {
+	id: string;
+	user_agent: string;
+	client_ip: string;
+	device_name: string;
+	expires_at: string;
+	last_seen_at: string;
+	created_at: string;
+};
+
+export type LoginSessionsResponse = {
+	result: string;
+	data: LoginSession[];
+};
+
+export type RevokeSessionResponse = {
+	result: string;
+};
+
 /**
  * 브라우저(클라이언트) 전용 — 동일 출처 BFF 프록시 경유.
  * BFF 라우트가 쿠키 설정까지 처리하므로, 응답만 받으면 된다.
@@ -77,5 +97,12 @@ export const authBffApi = {
 		}),
 
 	logout: (refresh_token: string) =>
-		apiPost<{ result: string }>(ENDPOINTS.authBff.logout, { refresh_token })
+		apiPost<{ result: string }>(ENDPOINTS.authBff.logout, { refresh_token }),
+
+	/** 내 활성 세션 목록 조회 */
+	listSessions: () => apiGet<LoginSessionsResponse>(ENDPOINTS.authBff.sessions),
+
+	/** 특정 세션 종료(revoke) */
+	revokeSession: (sessionId: string) =>
+		apiDelete<RevokeSessionResponse>(ENDPOINTS.authBff.revokeSession(sessionId))
 };

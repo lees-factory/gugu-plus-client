@@ -2,7 +2,8 @@
 	import { getLocale } from '$lib/paraglide/runtime.js';
 	import { t } from '$lib/i18n/t';
 
-	const BASE_URL = 'https://priceeye.com';
+	/** 운영 도메인 — .env 의 VITE_SITE_URL 로 일원화. 값이 비면 빈 문자열(상대경로 canonical). */
+	const BASE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
 
 	interface Props {
 		title: string;

@@ -20,6 +20,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 
 	const res = await fetch(ENDPOINTS.trackedItems.detail(id));
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+	console.log('🚀 ~ load ~ json:', json);
 
 	if (!res.ok) {
 		const err = json?.error as { message?: string } | string | undefined;

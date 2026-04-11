@@ -10,7 +10,10 @@ export const ENDPOINTS = {
 		verifyEmail: '/api/v1/auth/verify-email',
 		oauthLogin: '/api/v1/auth/oauth/login',
 		refresh: '/api/v1/auth/refresh',
-		logout: '/api/v1/auth/logout'
+		logout: '/api/v1/auth/logout',
+		sessions: '/api/v1/auth/sessions',
+		revokeSession: (sessionId: string) =>
+			`/api/v1/auth/sessions/${encodeURIComponent(sessionId)}`
 	},
 
 	/**
@@ -25,6 +28,8 @@ export const ENDPOINTS = {
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku`,
 		skuPriceHistories: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-histories`,
+		skuPriceTrend: (trackedItemId: string) =>
+			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/sku-price-trend`,
 		priceAlert: (trackedItemId: string) =>
 			`/api/v1/tracked-items/${encodeURIComponent(trackedItemId)}/price-alert`
 	},

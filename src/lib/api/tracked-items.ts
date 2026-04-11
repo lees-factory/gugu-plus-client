@@ -120,6 +120,23 @@ export type SKUPriceHistoryResponse = {
 	data: SKUPriceHistoryItem[];
 };
 
+/** SKU 일별 가격 추세 포인트 (sku_price_snapshot 기준) */
+export type PriceTrendPoint = {
+	date: string; // YYYY-MM-DD
+	price: string;
+	original_price?: string | null;
+	currency: string;
+};
+
+export type PriceTrendData = {
+	points: PriceTrendPoint[];
+};
+
+export type PriceTrendResponse = {
+	result: string;
+	data: PriceTrendData;
+};
+
 /** GET /v1/tracked-items/{trackedItemID}/price-alert 응답 */
 export type PriceAlertStateData = {
 	enabled: boolean;
@@ -172,12 +189,30 @@ export const trackedItemsApi = {
 			body
 		),
 
-	/** GET — SKU 가격 변동 내역 조회 */
+	/** GET — SKU 가격 변동 내역 조회 (변동 이벤트만, 이력 테이블) */
 	getSkuPriceHistories: (trackedItemId: string, params: { sku_id: string; currency?: string }) => {
 		const base = ENDPOINTS.trackedItems.skuPriceHistories(trackedItemId);
 		const qs = new URLSearchParams({ sku_id: params.sku_id });
 		if (params.currency) qs.set('currency', params.currency);
 		return apiGet<SKUPriceHistoryResponse>(`${base}?${qs}`);
+	},
+
+	/**
+	 * GET — SKU 일별 가격 추세 조회 (차트용).
+	 * source: sku_price_snapshot. 지정 구간의 매일 1포인트를 반환한다.
+	 */
+	getSkuPriceTrend: (
+		trackedItemId: string,
+		params: { sku_id: string; from: string; to: string; currency?: string }
+	) => {
+		const base = ENDPOINTS.trackedItems.skuPriceTrend(trackedItemId);
+		const qs = new URLSearchParams({
+			sku_id: params.sku_id,
+			from: params.from,
+			to: params.to
+		});
+		if (params.currency) qs.set('currency', params.currency);
+		return apiGet<PriceTrendResponse>(`${base}?${qs}`);
 	},
 
 	/** GET — SKU 가격 알림 상태 조회 */

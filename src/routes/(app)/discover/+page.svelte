@@ -12,8 +12,8 @@
 </script>
 
 <SeoHead
-	title={t('landing_seo_title')}
-	description={t('landing_seo_desc')}
+	title={t('discover_seo_title')}
+	description={t('discover_seo_desc')}
 	canonical="/discover"
 />
 

@@ -5,6 +5,7 @@
 	import LandingHero from './LandingHero.svelte';
 	import LandingFeatures from './LandingFeatures.svelte';
 	import LandingHowItWorks from './LandingHowItWorks.svelte';
+	import LandingFaq from './LandingFaq.svelte';
 	import LandingCta from './LandingCta.svelte';
 	import AppFooter from '$lib/components/AppFooter.svelte';
 
@@ -114,6 +115,7 @@
 	<LandingHero />
 	<LandingFeatures />
 	<LandingHowItWorks />
+	<LandingFaq />
 	<LandingCta />
 	<AppFooter />
 </div>

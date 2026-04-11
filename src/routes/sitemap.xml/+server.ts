@@ -1,6 +1,9 @@
 import type { RequestHandler } from './$types';
 
-const BASE_URL = 'https://priceeye.com';
+/** 운영 도메인 — .env 의 VITE_SITE_URL 로 일원화. trailing slash 제거. */
+const BASE_URL =
+	(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
+	'https://priceeye.vercel.app';
 const LOCALES = ['ko', 'en'];
 
 const PUBLIC_PAGES = [

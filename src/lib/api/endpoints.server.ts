@@ -13,6 +13,7 @@ export const SERVER_ENDPOINTS = {
 		verifyEmail: `${API_BASE}/v1/auth/verify-email`,
 		oauthLogin: `${API_BASE}/v1/auth/oauth/login`,
 		refresh: `${API_BASE}/v1/auth/refresh`,
-		logout: `${API_BASE}/v1/auth/logout`
+		logout: `${API_BASE}/v1/auth/logout`,
+		sessions: `${API_BASE}/v1/auth/sessions`
 	}
 } as const;

@@ -8,18 +8,63 @@
 
 	const { data }: PageProps = $props();
 
+	const page = createSettingsPage(() => ({
+		sessions: data.sessions,
+		sessionsError: data.sessionsError
+	}));
 	const {
 		settings,
 		handlePasswordChange,
 		toggleEmailNotif,
 		handleDeleteAccount,
-		closeDeleteModal
-	} = createSettingsPage();
+		closeDeleteModal,
+		refreshSessions,
+		revokeSession
+	} = page;
 
 	$effect(() => {
 		const e = auth.user?.email;
 		if (e) settings.email = e;
 	});
+
+	function formatRelativeTime(iso: string): string {
+		if (!iso) return '';
+		const then = new Date(iso).getTime();
+		if (Number.isNaN(then)) return iso;
+		const diffMs = Date.now() - then;
+		const sec = Math.round(diffMs / 1000);
+		if (sec < 60) return `${Math.max(sec, 0)}s`;
+		const min = Math.round(sec / 60);
+		if (min < 60) return `${min}m`;
+		const hr = Math.round(min / 60);
+		if (hr < 24) return `${hr}h`;
+		const day = Math.round(hr / 24);
+		if (day < 30) return `${day}d`;
+		return new Date(iso).toLocaleDateString();
+	}
+
+	function sessionLabel(s: { device_name: string; user_agent: string }): string {
+		const d = (s.device_name ?? '').trim();
+		if (d && d !== 'unknown-device') return d;
+		const ua = s.user_agent ?? '';
+		if (!ua) return t('settings_sessions_unknown_device');
+		// 간단한 브라우저/OS 추정
+		const browser =
+			/Edg\//.test(ua) ? 'Edge'
+			: /Chrome\//.test(ua) ? 'Chrome'
+			: /Safari\//.test(ua) ? 'Safari'
+			: /Firefox\//.test(ua) ? 'Firefox'
+			: '';
+		const os =
+			/Windows/.test(ua) ? 'Windows'
+			: /Mac OS X|Macintosh/.test(ua) ? 'Mac'
+			: /Android/.test(ua) ? 'Android'
+			: /iPhone|iPad|iOS/.test(ua) ? 'iOS'
+			: /Linux/.test(ua) ? 'Linux'
+			: '';
+		const joined = [browser, os].filter(Boolean).join(' · ');
+		return joined || t('settings_sessions_unknown_device');
+	}
 </script>
 
 {#if !data.hasSession}
@@ -217,6 +262,101 @@
 					</button>
 				</div>
 			</div>
+		</section>
+
+		<!-- 활성 세션 -->
+		<section class="rounded-3xl border border-zinc-200/60 bg-white p-7 shadow-sm sm:p-8">
+			<div class="mb-5 flex items-start justify-between gap-4">
+				<div>
+					<h2 class="text-base font-semibold text-zinc-900">{t('settings_sessions')}</h2>
+					<p class="mt-1 text-sm leading-relaxed text-zinc-500">
+						{t('settings_sessions_desc')}
+					</p>
+				</div>
+				<button
+					type="button"
+					onclick={() => refreshSessions()}
+					title={t('settings_sessions_reload')}
+					aria-label={t('settings_sessions_reload')}
+					class="shrink-0 rounded-full p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+				>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="size-4"
+						aria-hidden="true"
+					>
+						<path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+						<path d="M21 3v5h-5" />
+						<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+						<path d="M3 21v-5h5" />
+					</svg>
+				</button>
+			</div>
+
+			{#if page.sessionsLoadError}
+				<div class="space-y-3">
+					<p class="text-sm text-rose-600">{t('settings_sessions_error')}</p>
+					<button
+						type="button"
+						onclick={() => refreshSessions()}
+						class="rounded-xl px-4 py-2 text-sm font-medium transition hover:bg-[#efefed]"
+						style="background-color: #f5f5f4; color: #1a1a17; border: 1px solid rgba(45,45,42,0.1);"
+					>
+						{t('settings_sessions_reload')}
+					</button>
+				</div>
+			{:else if page.sessionItems.length === 0}
+				<p class="text-sm text-zinc-500">{t('settings_sessions_empty')}</p>
+			{:else}
+				<ul class="divide-y divide-zinc-100">
+					{#each page.sessionItems as s (s.id)}
+						{@const isCurrent = s.id === page.currentSessionId}
+						<li class="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+							<div class="min-w-0 flex-1">
+								<div class="flex flex-wrap items-center gap-2">
+									<p class="truncate text-sm font-medium text-zinc-900">
+										{sessionLabel(s)}
+									</p>
+									{#if isCurrent}
+										<span
+											class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+											style="background-color: #dcfce7; color: #166534;"
+										>
+											{t('settings_sessions_current')}
+										</span>
+									{/if}
+								</div>
+								<p class="mt-1 truncate text-xs text-zinc-500">
+									{t('settings_sessions_ip')}: {s.client_ip || '—'}
+								</p>
+								<p class="mt-0.5 text-xs text-zinc-500">
+									{t('settings_sessions_last_seen')}: {formatRelativeTime(s.last_seen_at)}
+								</p>
+							</div>
+							<button
+								type="button"
+								onclick={() => revokeSession(s.id)}
+								disabled={isCurrent || settings.sessions.revokingId === s.id}
+								class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-medium transition hover:bg-rose-50 hover:text-rose-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-zinc-500"
+								style="background-color: #f5f5f4; color: #1a1a17; border: 1px solid rgba(45,45,42,0.1);"
+							>
+								{settings.sessions.revokingId === s.id
+									? t('settings_sessions_revoking')
+									: t('settings_sessions_revoke')}
+							</button>
+						</li>
+					{/each}
+				</ul>
+				<p class="mt-4 text-xs text-zinc-400">{t('settings_sessions_max_note')}</p>
+				{#if settings.sessions.revokeError}
+					<p class="mt-2 text-xs text-rose-600">{settings.sessions.revokeError}</p>
+				{/if}
+			{/if}
 		</section>
 
 		<!-- 로그아웃 -->

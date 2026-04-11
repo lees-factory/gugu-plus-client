@@ -141,6 +141,34 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 	});
 }
 
+/**
+ * 일별 가격 추세(snapshot) → 차트용 PriceEntry[].
+ * 입력은 매일 1포인트(가격 변동 없는 날도 포함). newest-first로 정렬해 반환한다.
+ * change는 하루 전 포인트 대비 delta로 계산한다.
+ */
+export function mapPriceTrend(
+	points: { date: string; price: string }[],
+	fallbackPrice: string
+): PriceEntry[] {
+	if (!points?.length) {
+		const p = parsePriceAmount(fallbackPrice);
+		if (p <= 0) return [];
+		return [{ date: '—', price: p, change: 0 }];
+	}
+	// 날짜 기준 내림차순 (newest-first) — PriceChart가 data.slice(0, n).reverse() 로 쓰기 때문
+	const sorted = [...points].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+	return sorted.map((row, i) => {
+		const price = parsePriceAmount(row.price);
+		const older = sorted[i + 1];
+		const change = older != null ? price - parsePriceAmount(older.price) : 0;
+		const d = new Date(row.date);
+		const label = Number.isNaN(d.getTime())
+			? row.date
+			: d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+		return { date: label, price, change };
+	});
+}
+
 /** 최신순 priceHistory (차트·표 공용) */
 export function mapPriceHistories(
 	hist: { price: string; recorded_at: string; change_value: string }[],

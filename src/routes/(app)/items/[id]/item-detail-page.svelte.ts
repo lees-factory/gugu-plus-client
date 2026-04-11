@@ -4,7 +4,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
-	mapPriceHistories,
+	mapPriceTrend,
 	type ParsedSku,
 	type PriceEntry
 } from '$lib/product-detail/map-product';
@@ -228,7 +228,8 @@ export function createItemDetailPage(
 		}
 	});
 
-	// SKU 변경 시 가격 히스토리 fetch (캐시 우선)
+	// SKU 변경 시 일별 가격 추세(snapshot) fetch — B안: 최장 구간(180일)을 한 번에 받아놓고
+	// 차트 모델의 기간 탭은 로컬 slice로 처리한다. 캐시 우선.
 	$effect(() => {
 		const sku = currentSku;
 		const trackedItemId = item?.trackedItemId;
@@ -245,15 +246,28 @@ export function createItemDetailPage(
 			return;
 		}
 
+		const to = new Date();
+		const from = new Date();
+		from.setDate(from.getDate() - 179); // 오늘 포함 180일
+		const toYmd = to.toISOString().slice(0, 10);
+		const fromYmd = from.toISOString().slice(0, 10);
+
 		historyLoading = true;
 		trackedItemsApi
-			.getSkuPriceHistories(trackedItemId, { sku_id: sku.skuId, currency })
+			.getSkuPriceTrend(trackedItemId, {
+				sku_id: sku.skuId,
+				from: fromYmd,
+				to: toYmd,
+				currency
+			})
 			.then((res) => {
 				if (res.error || !res.data) {
 					skuPriceHistory = item?.priceHistory ?? [];
 					return;
 				}
-				const mapped = mapPriceHistories(res.data.data, String(sku.price));
+				const points = res.data.data?.points ?? [];
+				console.log('🚀 ~ createItemDetailPage ~ points:', points);
+				const mapped = mapPriceTrend(points, String(sku.price));
 				const result = mapped.length > 0 ? mapped : (item?.priceHistory ?? []);
 				historyCache.set(cacheKey, result);
 				skuPriceHistory = result;

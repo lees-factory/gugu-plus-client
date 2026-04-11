@@ -5,11 +5,13 @@
 
 	const page = createPlanPage();
 
+	const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+
 	const planJsonLd = {
 		'@context': 'https://schema.org',
 		'@type': 'WebApplication',
 		name: 'Price Eye',
-		url: 'https://priceeye.com',
+		url: SITE_URL || '/',
 		applicationCategory: 'ShoppingApplication',
 		operatingSystem: 'Web',
 		description: t('plan_jsonld_desc')
