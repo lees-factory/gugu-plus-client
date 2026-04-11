@@ -15,7 +15,7 @@
 	let { data, children } = $props();
 
 	/** 공개 페이지는 각 페이지에서 자체 SeoHead를 렌더링하므로 레이아웃 noindex를 건너뛴다. */
-	const PUBLIC_PATHS = ['/plan', '/terms', '/privacy'];
+	const PUBLIC_PATHS = ['/discover', '/plan', '/terms', '/privacy'];
 	const isPublicPage = $derived(PUBLIC_PATHS.includes($page.url.pathname));
 
 	/** 비로그인 + (루트 or 공개 페이지) = 사이드바/헤더 숨김 */
