@@ -216,10 +216,10 @@
 					{t('sidebar_pro_tip')}
 				</div>
 				<div class="mt-2.5 text-sm leading-snug font-semibold text-zinc-900">
-					{t('sidebar_chrome_extension')}
+					{t('sidebar_tip_target_title')}
 				</div>
 				<p class="mt-2 text-xs leading-relaxed text-zinc-600">
-					{t('sidebar_chrome_extension_desc')}
+					{t('sidebar_tip_target_desc')}
 				</p>
 			</div>
 		</div>
