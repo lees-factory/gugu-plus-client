@@ -8,9 +8,6 @@ import { summaryToCard } from '$lib/tracked-items/map-summary';
 
 export type SortKey = 'recent' | 'title' | 'price';
 
-export const CHROME_EXTENSION_STORE_URL =
-	'https://chromewebstore.google.com/detail/ldigkhkcbjmiingoclccjjcnbcgiooao?utm_source=item-share-cb';
-
 export function createItemsPage(
 	getData: () => {
 		items: TrackedItemData[];
@@ -33,9 +30,6 @@ export function createItemsPage(
 
 	let searchQuery = $state('');
 	let sortBy = $state<SortKey>('recent');
-	let bannerDismissed = $state(
-		typeof localStorage !== 'undefined' && localStorage.getItem('chrome-banner-dismissed') === '1'
-	);
 
 	// load 데이터가 바뀔 때마다 model 갱신
 	$effect(() => {
@@ -76,21 +70,12 @@ export function createItemsPage(
 		if (v === 'recent' || v === 'title' || v === 'price') sortBy = v;
 	}
 
-	function dismissBanner() {
-		bannerDismissed = true;
-		localStorage.setItem('chrome-banner-dismissed', '1');
-	}
-
 	function handleAddClick() {
 		if (!auth.user) {
 			goto(resolve('/auth/login'));
 			return;
 		}
 		model.modalOpen = true;
-	}
-
-	function openChromeExtensionStore() {
-		window.open(CHROME_EXTENSION_STORE_URL, '_blank');
 	}
 
 	async function handleAddItem(entries: AddItemEntry[]) {
@@ -197,13 +182,8 @@ export function createItemsPage(
 		get displayedItems() {
 			return displayedItems;
 		},
-		get bannerDismissed() {
-			return bannerDismissed;
-		},
 		setSortFromSelect,
-		dismissBanner,
 		handleAddClick,
-		openChromeExtensionStore,
 		get confirmDeleteId() {
 			return confirmDeleteId;
 		},

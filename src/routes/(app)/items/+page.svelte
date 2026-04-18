@@ -184,64 +184,6 @@
 			</select>
 		</div>
 
-		<!-- Chrome extension banner -->
-		{#if !page.bannerDismissed}
-			<div
-				class="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white p-5 shadow-sm"
-			>
-				<div class="flex items-center gap-4">
-					<div
-						class="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200/60 bg-white shadow-sm"
-					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							class="size-5 text-zinc-500"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
-							/>
-						</svg>
-					</div>
-					<div>
-						<p class="text-sm font-semibold text-zinc-900">{t('home_chrome_banner_title')}</p>
-						<p class="text-xs text-zinc-500">{t('home_chrome_banner_desc')}</p>
-					</div>
-				</div>
-				<div class="flex items-center gap-2">
-					<button
-						type="button"
-						onclick={page.openChromeExtensionStore}
-						class="shrink-0 rounded-2xl border border-zinc-200/60 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-all duration-200 hover:shadow-sm"
-					>
-						{t('home_install')}
-					</button>
-					<button
-						type="button"
-						onclick={page.dismissBanner}
-						class="flex size-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
-						aria-label={t('aria_close')}
-					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							class="size-4"
-							aria-hidden="true"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-						</svg>
-					</button>
-				</div>
-			</div>
-		{/if}
-
 		{#if page.displayedItems.length === 0}
 			<p class="py-16 text-center text-sm text-zinc-500">{t('items_no_results')}</p>
 		{:else}

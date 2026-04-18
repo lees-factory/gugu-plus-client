@@ -113,41 +113,6 @@
 								</div>
 							</div>
 
-							<!-- Price -->
-							<div
-								class="flex items-center justify-between border-t border-zinc-100 pt-3 md:contents md:border-0 md:pt-0"
-							>
-								<div class="flex flex-col md:w-28 md:items-end">
-									{#if product.originalPrice > 0 && product.originalPrice > product.currentPrice}
-										<span class="text-xs font-medium text-zinc-400 line-through">
-											{page.fmt(product.originalPrice, product.currency)}
-										</span>
-									{/if}
-									<span
-										class="text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl md:text-base"
-									>
-										{page.fmt(product.currentPrice, product.currency)}
-									</span>
-								</div>
-								{#if product.discountPct > 0}
-									<div class="shrink-0 md:flex md:w-20 md:justify-end">
-										<span
-											class="inline-flex items-center gap-1 rounded-full border border-blue-100/50 bg-gradient-to-r from-blue-50 to-sky-50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-600 shadow-sm"
-										>
-											<svg viewBox="0 0 12 12" fill="none" class="size-3" aria-hidden="true">
-												<path
-													d="M6 2v8M6 10l-3-3M6 10l3-3"
-													stroke="currentColor"
-													stroke-width="1.5"
-													stroke-linecap="round"
-													stroke-linejoin="round"
-												/>
-											</svg>
-											-{product.discountPct}%
-										</span>
-									</div>
-								{/if}
-							</div>
 
 							<!-- Add button -->
 							<div
