@@ -149,7 +149,7 @@
 						<div class="flex items-center gap-3">
 							<div
 								class="flex size-9 items-center justify-center rounded-xl"
-								style="background-color: {page.ui.alertEnabled ? '#e8f5f1' : '#f0f0ee'};"
+								style="background-color: {page.alertEnabled ? '#e8f5f1' : '#f0f0ee'};"
 							>
 								<svg
 									viewBox="0 0 24 24"
@@ -157,7 +157,7 @@
 									stroke="currentColor"
 									stroke-width="1.5"
 									class="size-[18px]"
-									style="color: {page.ui.alertEnabled ? '#5aad9c' : '#9b9b95'};"
+									style="color: {page.alertEnabled ? '#5aad9c' : '#9b9b95'};"
 									aria-hidden="true"
 								>
 									<path
@@ -175,18 +175,18 @@
 						<button
 							type="button"
 							role="switch"
-							aria-checked={page.ui.alertEnabled}
+							aria-checked={page.alertEnabled}
 							aria-label={t('detail_alert_title')}
 							disabled={page.ui.alertLoading}
 							onclick={page.toggleAlert}
 							class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 disabled:opacity-50"
-							style="width: 44px; height: 24px; background-color: {page.ui.alertEnabled
+							style="width: 44px; height: 24px; background-color: {page.alertEnabled
 								? '#5aad9c'
 								: 'rgba(45,45,42,0.2)'};"
 						>
 							<span
 								class="absolute rounded-full bg-white transition-all duration-200"
-								style="width: 18px; height: 18px; top: 3px; left: {page.ui.alertEnabled
+								style="width: 18px; height: 18px; top: 3px; left: {page.alertEnabled
 									? '23px'
 									: '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
 							></span>

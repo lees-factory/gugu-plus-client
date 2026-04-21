@@ -40,7 +40,6 @@ export function createItemDetailPage(
 		selectedSkuId: '',
 		propColor: '',
 		propSize: '',
-		alertEnabled: false,
 		alertLoading: false,
 		alertError: '',
 		imgError: false,
@@ -50,6 +49,11 @@ export function createItemDetailPage(
 	let skuPriceHistory = $state<PriceEntry[]>([]);
 	let historyLoading = $state(false);
 	const historyCache = new SvelteMap<string, PriceEntry[]>();
+
+	// SKU별 가격 알림 활성 상태 캐시. 서버 API가 SKU path 기반이므로 UI도 SKU 단위로 관리.
+	const alertStateBySku = new SvelteMap<string, boolean>();
+	const alertFetchInflight = new SvelteSet<string>();
+	let seededAlertForTrackedItem = '';
 
 	let prevProductId = $state('');
 
@@ -161,8 +165,18 @@ export function createItemDetailPage(
 			}
 			ui.selectedSkuId = first?.skuId ?? '';
 		}
+	});
+
+	// load에서 받은 alertState를 서버 저장 선택 SKU(trackedItem.sku_id)에 1회 seed.
+	$effect(() => {
+		const raw = getTrackedItem();
 		const alert = getAlertState();
-		ui.alertEnabled = alert?.enabled ?? false;
+		if (!raw) return;
+		if (seededAlertForTrackedItem === raw.tracked_item_id) return;
+		seededAlertForTrackedItem = raw.tracked_item_id;
+		if (raw.sku_id && alert) {
+			alertStateBySku.set(raw.sku_id, alert.enabled ?? false);
+		}
 	});
 
 	$effect(() => {
@@ -203,6 +217,33 @@ export function createItemDetailPage(
 		const byId = item.skus.find((s) => s.skuId === ui.selectedSkuId);
 		return byId ?? item.skus[0];
 	});
+
+	// 현재 선택 SKU의 알림 상태가 캐시에 없으면 조회해 채운다.
+	$effect(() => {
+		const sku = currentSku;
+		if (!sku || !sku.skuId || sku.skuId === 'default') return;
+		if (alertStateBySku.has(sku.skuId)) return;
+		if (alertFetchInflight.has(sku.skuId)) return;
+
+		const skuId = sku.skuId;
+		alertFetchInflight.add(skuId);
+		trackedItemsApi
+			.getPriceAlert(skuId)
+			.then((res) => {
+				const enabled = !res.error && res.data?.data?.enabled === true;
+				alertStateBySku.set(skuId, enabled);
+			})
+			.catch(() => {
+				alertStateBySku.set(skuId, false);
+			})
+			.finally(() => {
+				alertFetchInflight.delete(skuId);
+			});
+	});
+
+	const alertEnabled = $derived(
+		currentSku?.skuId ? (alertStateBySku.get(currentSku.skuId) ?? false) : false
+	);
 
 	const displayImage = $derived.by(() => {
 		if (!item) return '';
@@ -340,22 +381,23 @@ export function createItemDetailPage(
 	async function toggleAlert() {
 		const skuId = currentSku?.skuId;
 		if (!skuId || ui.alertLoading) return;
+		const current = alertStateBySku.get(skuId) ?? false;
 		ui.alertLoading = true;
 		ui.alertError = '';
 		try {
-			if (ui.alertEnabled) {
+			if (current) {
 				const res = await trackedItemsApi.unregisterPriceAlert(skuId);
 				if (res.error) {
 					ui.alertError = t('alert_toggle_fail');
 				} else {
-					ui.alertEnabled = false;
+					alertStateBySku.set(skuId, false);
 				}
 			} else {
 				const res = await trackedItemsApi.registerPriceAlert(skuId);
 				if (res.error) {
 					ui.alertError = t('alert_toggle_fail');
 				} else {
-					ui.alertEnabled = true;
+					alertStateBySku.set(skuId, true);
 				}
 			}
 		} finally {
@@ -400,6 +442,9 @@ export function createItemDetailPage(
 			return item;
 		},
 		ui,
+		get alertEnabled() {
+			return alertEnabled;
+		},
 		get effectivePropColor() {
 			return effectivePropColor;
 		},
