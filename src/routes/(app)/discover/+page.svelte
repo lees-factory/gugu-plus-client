@@ -113,11 +113,8 @@
 								</div>
 							</div>
 
-
 							<!-- Add button -->
-							<div
-								class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0"
-							>
+							<div class="relative z-10 shrink-0 border-t border-zinc-100 pt-3 md:border-0 md:pt-0">
 								{#if isAdded}
 									<span
 										class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2 text-xs font-semibold text-emerald-700"

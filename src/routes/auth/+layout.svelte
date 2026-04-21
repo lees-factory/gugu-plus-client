@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SeoHead from '$lib/components/SeoHead.svelte';
 	import { t } from '$lib/i18n/t';
 
@@ -9,7 +10,7 @@
 
 <div class="flex min-h-svh items-center justify-center bg-[#F5F4F1] p-4">
 	<div class="w-full max-w-sm">
-		<a href="/" class="mb-10 flex items-center justify-center gap-3 no-underline">
+		<a href={resolve('/')} class="mb-10 flex items-center justify-center gap-3 no-underline">
 			<div
 				class="flex size-11 items-center justify-center rounded-2xl text-white shadow-lg shadow-zinc-900/10"
 				style="background: linear-gradient(135deg, #3f3f46 0%, #1c1917 100%);"

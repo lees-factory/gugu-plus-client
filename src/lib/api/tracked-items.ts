@@ -141,7 +141,7 @@ export type PriceTrendResponse = {
 	data: PriceTrendData;
 };
 
-/** GET /v1/tracked-items/{trackedItemID}/skus/{skuID}/price-alert 응답 */
+/** GET /v1/skus/{skuID}/price-alert 응답 */
 export type PriceAlertStateData = {
 	enabled: boolean;
 	channel?: string;
@@ -220,18 +220,16 @@ export const trackedItemsApi = {
 	},
 
 	/** GET — SKU 가격 알림 상태 조회 */
-	getPriceAlert: (trackedItemId: string, skuId: string) =>
-		apiGet<TrackedItemPriceAlertResponse>(ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId)),
+	getPriceAlert: (skuId: string) =>
+		apiGet<TrackedItemPriceAlertResponse>(ENDPOINTS.skus.priceAlert(skuId)),
 
 	/** POST — SKU 가격 알림 등록 */
-	registerPriceAlert: (trackedItemId: string, skuId: string) =>
-		apiPost<TrackedItemPriceAlertResponse>(ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId), {
+	registerPriceAlert: (skuId: string) =>
+		apiPost<TrackedItemPriceAlertResponse>(ENDPOINTS.skus.priceAlert(skuId), {
 			channel: 'EMAIL'
 		}),
 
 	/** DELETE — SKU 가격 알림 해제 */
-	unregisterPriceAlert: (trackedItemId: string, skuId: string) =>
-		apiDelete<TrackedItemEmptySuccessResponse>(
-			ENDPOINTS.trackedItems.priceAlert(trackedItemId, skuId)
-		)
+	unregisterPriceAlert: (skuId: string) =>
+		apiDelete<TrackedItemEmptySuccessResponse>(ENDPOINTS.skus.priceAlert(skuId))
 };

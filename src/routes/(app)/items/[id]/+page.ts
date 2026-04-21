@@ -44,9 +44,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 	let alertState: PriceAlertStateData | null = null;
 	const selectedSkuId = trackedItem.sku_id;
 	if (selectedSkuId) {
-		const alertRes = await fetch(ENDPOINTS.trackedItems.priceAlert(id, selectedSkuId)).catch(
-			() => null
-		);
+		const alertRes = await fetch(ENDPOINTS.skus.priceAlert(selectedSkuId)).catch(() => null);
 		if (alertRes?.ok) {
 			const alertJson = (await alertRes.json().catch(() => ({}))) as Record<string, unknown>;
 			alertState = (alertJson?.data ?? null) as PriceAlertStateData | null;

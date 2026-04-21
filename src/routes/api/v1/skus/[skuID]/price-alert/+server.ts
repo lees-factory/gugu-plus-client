@@ -3,9 +3,9 @@ import type { RequestHandler } from './$types';
 import { API_BASE } from '$lib/api/config.server';
 import { bffFetch, BffNetworkError } from '$lib/api/bff-fetch';
 
-const buildTarget = (trackedItemID: string, skuID: string, extra?: URLSearchParams) => {
+const buildTarget = (skuID: string, extra?: URLSearchParams) => {
 	const qs = new URLSearchParams(extra);
-	return `${API_BASE}/v1/tracked-items/${encodeURIComponent(trackedItemID)}/skus/${encodeURIComponent(skuID)}/price-alert?${qs}`;
+	return `${API_BASE}/v1/skus/${encodeURIComponent(skuID)}/price-alert?${qs}`;
 };
 
 export const GET: RequestHandler = async ({ params, cookies }) => {
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 	let res: Response;
 	try {
 		res = await bffFetch(
-			buildTarget(params.trackedItemID, params.skuID, qs),
+			buildTarget(params.skuID, qs),
 			{ headers: { Authorization: `Bearer ${accessToken}` } },
 			cookies
 		);
@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ params, request, cookies }) => {
 	let res: Response;
 	try {
 		res = await bffFetch(
-			buildTarget(params.trackedItemID, params.skuID, qs),
+			buildTarget(params.skuID, qs),
 			{
 				method: 'POST',
 				headers: {
@@ -94,7 +94,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	let res: Response;
 	try {
 		res = await bffFetch(
-			buildTarget(params.trackedItemID, params.skuID, qs),
+			buildTarget(params.skuID, qs),
 			{
 				method: 'DELETE',
 				headers: { Authorization: `Bearer ${accessToken}` }

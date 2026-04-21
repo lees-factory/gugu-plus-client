@@ -1,6 +1,6 @@
 import { goto, invalidate } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { SvelteSet } from 'svelte/reactivity';
+import { SvelteSet, SvelteMap, SvelteDate } from 'svelte/reactivity';
 import { t } from '$lib/i18n/t';
 import {
 	mapTrackedItemDetail,
@@ -49,7 +49,7 @@ export function createItemDetailPage(
 
 	let skuPriceHistory = $state<PriceEntry[]>([]);
 	let historyLoading = $state(false);
-	const historyCache = new Map<string, PriceEntry[]>();
+	const historyCache = new SvelteMap<string, PriceEntry[]>();
 
 	let prevProductId = $state('');
 
@@ -246,8 +246,8 @@ export function createItemDetailPage(
 			return;
 		}
 
-		const to = new Date();
-		const from = new Date();
+		const to = new SvelteDate();
+		const from = new SvelteDate();
 		from.setDate(from.getDate() - 179); // 오늘 포함 180일
 		const toYmd = to.toISOString().slice(0, 10);
 		const fromYmd = from.toISOString().slice(0, 10);
@@ -338,21 +338,20 @@ export function createItemDetailPage(
 	}
 
 	async function toggleAlert() {
-		const trackedItemId = item?.trackedItemId;
 		const skuId = currentSku?.skuId;
-		if (!trackedItemId || !skuId || ui.alertLoading) return;
+		if (!skuId || ui.alertLoading) return;
 		ui.alertLoading = true;
 		ui.alertError = '';
 		try {
 			if (ui.alertEnabled) {
-				const res = await trackedItemsApi.unregisterPriceAlert(trackedItemId, skuId);
+				const res = await trackedItemsApi.unregisterPriceAlert(skuId);
 				if (res.error) {
 					ui.alertError = t('alert_toggle_fail');
 				} else {
 					ui.alertEnabled = false;
 				}
 			} else {
-				const res = await trackedItemsApi.registerPriceAlert(trackedItemId, skuId);
+				const res = await trackedItemsApi.registerPriceAlert(skuId);
 				if (res.error) {
 					ui.alertError = t('alert_toggle_fail');
 				} else {

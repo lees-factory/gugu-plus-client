@@ -6,7 +6,7 @@ import { t } from '$lib/i18n/t';
 import type { AddItemEntry, TrackedItem } from '$lib/types';
 import { summaryToCard } from '$lib/tracked-items/map-summary';
 
-export type SortKey = 'recent' | 'title' | 'price';
+export type SortKey = 'recent' | 'title';
 
 export function createItemsPage(
 	getData: () => {
@@ -52,22 +52,13 @@ export function createItemsPage(
 		const sorted = [...list];
 		if (sortBy === 'title') {
 			sorted.sort((a, b) => a.title.localeCompare(b.title));
-		} else if (sortBy === 'price') {
-			sorted.sort((a, b) => {
-				const pa = a.currentPrice;
-				const pb = b.currentPrice;
-				if (pa == null && pb == null) return 0;
-				if (pa == null) return 1;
-				if (pb == null) return -1;
-				return pa - pb;
-			});
 		}
 		return sorted;
 	});
 
 	function setSortFromSelect(ev: Event) {
 		const v = (ev.currentTarget as HTMLSelectElement).value;
-		if (v === 'recent' || v === 'title' || v === 'price') sortBy = v;
+		if (v === 'recent' || v === 'title') sortBy = v;
 	}
 
 	function handleAddClick() {

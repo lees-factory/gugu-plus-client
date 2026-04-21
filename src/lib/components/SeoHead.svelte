@@ -43,10 +43,13 @@
 
 	const fullOgImage = $derived(ogImage.startsWith('http') ? ogImage : `${BASE_URL}${ogImage}`);
 
+	const SCRIPT_OPEN = '<' + 'script type="application/ld+json">';
 	const SCRIPT_CLOSE = '</' + 'script>';
 	const SCRIPT_CLOSE_ESCAPED = '<\\/' + 'script>';
-	const jsonLdScript = $derived(
-		jsonLd ? JSON.stringify(jsonLd).replaceAll(SCRIPT_CLOSE, SCRIPT_CLOSE_ESCAPED) : null
+	const jsonLdHtml = $derived(
+		jsonLd
+			? `${SCRIPT_OPEN}${JSON.stringify(jsonLd).replaceAll(SCRIPT_CLOSE, SCRIPT_CLOSE_ESCAPED)}${SCRIPT_CLOSE}`
+			: null
 	);
 </script>
 
@@ -83,8 +86,9 @@
 	<meta name="twitter:description" content={resolvedDescription} />
 	<meta name="twitter:image" content={fullOgImage} />
 
-	<!-- JSON-LD -->
-	{#if jsonLdScript}
-		{@html `<script type="application/ld+json">${jsonLdScript}</script>`}
+	<!-- JSON-LD — jsonLd 는 JSON.stringify + </script> escape 처리되므로 XSS 안전 -->
+	{#if jsonLdHtml}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html jsonLdHtml}
 	{/if}
 </svelte:head>

@@ -2,7 +2,6 @@
 	import { resolve } from '$app/paths';
 	import { t } from '$lib/i18n/t';
 	import type { TrackedItem } from '$lib/types';
-	import { formatPrice } from '$lib/utils/format-price';
 
 	let {
 		item,
@@ -66,17 +65,6 @@
 					{item.site}
 				</span>
 			</div>
-		</div>
-
-		<!-- Price -->
-		<div class="shrink-0 text-right">
-			{#if item.currentPrice != null}
-				<span class="text-base font-semibold text-zinc-900 tabular-nums sm:text-sm">
-					{formatPrice(item.currentPrice, item.currency)}
-				</span>
-			{:else}
-				<span class="text-sm text-zinc-400">{t('items_price_emdash')}</span>
-			{/if}
 		</div>
 	</a>
 

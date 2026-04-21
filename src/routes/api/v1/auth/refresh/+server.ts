@@ -24,7 +24,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (tokens?.refresh_token) cookies.set('refresh_token', tokens.refresh_token, COOKIE_OPTS);
 
 		// 클라이언트에 토큰 노출 방지 -- httpOnly 쿠키로만 관리
-		const { tokens: _t, access_token: _a, refresh_token: _r, ...safeData } = data.data;
+		const safeData = { ...data.data };
+		delete safeData.access_token;
+		delete safeData.refresh_token;
 		return json({ ...data, data: safeData }, { status: res.status });
 	}
 

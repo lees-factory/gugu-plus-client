@@ -71,7 +71,7 @@
 						<summary
 							class="flex cursor-pointer list-none items-start justify-between gap-4 p-5 sm:p-6"
 						>
-							<span class="text-sm font-semibold leading-6 text-[#1c1917] sm:text-base">
+							<span class="text-sm leading-6 font-semibold text-[#1c1917] sm:text-base">
 								{t(item.q)}
 							</span>
 							<span
@@ -91,7 +91,7 @@
 								</svg>
 							</span>
 						</summary>
-						<div class="border-t border-zinc-100 px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+						<div class="border-t border-zinc-100 px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
 							<p class="text-sm leading-relaxed text-zinc-600 sm:text-[15px]">
 								{t(item.a)}
 							</p>

@@ -47,9 +47,7 @@ export const load: PageServerLoad = async ({ cookies, depends }) => {
 		};
 		if (res.ok && Array.isArray(body.data)) {
 			// 최근 활동 순 정렬
-			sessions = [...body.data].sort((a, b) =>
-				a.last_seen_at < b.last_seen_at ? 1 : -1
-			);
+			sessions = [...body.data].sort((a, b) => (a.last_seen_at < b.last_seen_at ? 1 : -1));
 		} else {
 			sessionsError = body.error?.message ?? 'Failed to load sessions';
 		}

@@ -25,7 +25,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (user?.email) cookies.set('session', encodeURIComponent(user.email), COOKIE_OPTS);
 		if (user?.id) cookies.set('user_id', user.id, COOKIE_OPTS);
 
-		const { tokens: _t, ...safeData } = data.data;
+		const safeData = { ...data.data };
+		delete safeData.tokens;
 		return json({ ...data, data: safeData }, { status: res.status });
 	}
 
