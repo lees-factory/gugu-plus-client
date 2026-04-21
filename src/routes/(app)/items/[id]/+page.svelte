@@ -1,17 +1,14 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import { resolve } from '$app/paths';
-	import { t } from '$lib/i18n/t';
-	import { createItemDetailPage } from './item-detail-page.svelte';
-	import PriceChart from '$lib/components/PriceChart.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import PriceChart from '$lib/components/PriceChart.svelte';
+	import { t } from '$lib/i18n/t';
+	import type { PageProps } from './$types';
+	import { createItemDetailPage } from './item-detail-page.svelte';
 
 	const { data }: PageProps = $props();
 
-	const page = createItemDetailPage(
-		() => data.trackedItem,
-		() => data.alertState
-	);
+	const page = createItemDetailPage(() => data.trackedItem);
 
 	const item = $derived(page.item);
 </script>
@@ -141,23 +138,46 @@
 						</div>
 					{/if}
 
-					<!-- Price alert toggle -->
-					<div
-						class="mt-6 flex items-center justify-between rounded-2xl px-5 py-4"
-						style="background-color: #f7f6f3;"
-					>
-						<div class="flex items-center gap-3">
-							<div
-								class="flex size-9 items-center justify-center rounded-xl"
-								style="background-color: {page.alertEnabled ? '#e8f5f1' : '#f0f0ee'};"
+					<!-- Price alert CTA -->
+					<div class="mt-6">
+						{#if page.alertEnabled}
+							<button
+								type="button"
+								aria-pressed="true"
+								aria-label={t('detail_alert_title')}
+								disabled={page.ui.alertLoading}
+								onclick={page.toggleAlert}
+								class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border px-5 py-3.5 text-sm font-semibold disabled:opacity-60"
+								style="background-color: #e8f5f1; border-color: #5aad9c; color: #2f7566;"
 							>
 								<svg
 									viewBox="0 0 24 24"
 									fill="none"
 									stroke="currentColor"
-									stroke-width="1.5"
-									class="size-[18px]"
-									style="color: {page.alertEnabled ? '#5aad9c' : '#9b9b95'};"
+									stroke-width="2.25"
+									class="size-4"
+									aria-hidden="true"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+								</svg>
+								{t('detail_alert_currently_on')}
+							</button>
+						{:else}
+							<button
+								type="button"
+								aria-pressed="false"
+								aria-label={t('detail_alert_title')}
+								disabled={page.ui.alertLoading}
+								onclick={page.toggleAlert}
+								class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-semibold text-white disabled:opacity-60"
+								style="background-color: #2d2d2a;"
+							>
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									class="size-4"
 									aria-hidden="true"
 								>
 									<path
@@ -166,31 +186,10 @@
 										d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
 									/>
 								</svg>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-zinc-900">{t('detail_alert_title')}</p>
-								<p class="text-xs text-zinc-500">{t('detail_alert_desc')}</p>
-							</div>
-						</div>
-						<button
-							type="button"
-							role="switch"
-							aria-checked={page.alertEnabled}
-							aria-label={t('detail_alert_title')}
-							disabled={page.ui.alertLoading}
-							onclick={page.toggleAlert}
-							class="relative shrink-0 cursor-pointer rounded-full transition-colors duration-200 disabled:opacity-50"
-							style="width: 44px; height: 24px; background-color: {page.alertEnabled
-								? '#5aad9c'
-								: 'rgba(45,45,42,0.2)'};"
-						>
-							<span
-								class="absolute rounded-full bg-white transition-all duration-200"
-								style="width: 18px; height: 18px; top: 3px; left: {page.alertEnabled
-									? '23px'
-									: '3px'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
-							></span>
-						</button>
+								{t('detail_alert_turn_on')}
+							</button>
+						{/if}
+						<p class="mt-2 text-center text-xs text-zinc-500">{t('detail_alert_desc')}</p>
 					</div>
 
 					<!-- CTAs -->

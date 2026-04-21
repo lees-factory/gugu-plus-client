@@ -98,6 +98,7 @@ export type ProductSKUData = {
 	image_url: string;
 	origin_sku_id?: string;
 	sku_properties?: string;
+	price_alert?: PriceAlertStateData;
 };
 
 export type TrackedItemDetailSuccessResponse = {

@@ -19,6 +19,8 @@ export type ParsedSku = {
 	propSize: string | null;
 	/** 해당 행에 `sku_properties` JSON이 있고 파싱됨 */
 	propertiesFromJson: boolean;
+	/** 초기 로드 시점의 가격 알림 활성 여부 (price_alert 없으면 false) */
+	alertEnabled: boolean;
 };
 
 export type PriceEntry = { date: string; price: number; change: number };
@@ -137,7 +139,8 @@ function parseSkusFromApi(skus: ProductSku[]): ParsedSku[] {
 			image: skuImageFromApi(s),
 			propColor,
 			propSize,
-			propertiesFromJson: !!propColor || !!propSize
+			propertiesFromJson: !!propColor || !!propSize,
+			alertEnabled: s.price_alert?.enabled ?? false
 		};
 	});
 }
@@ -243,7 +246,8 @@ export function mapProductDetail(
 					image: d.main_image_url || null,
 					propColor: null,
 					propSize: null,
-					propertiesFromJson: false
+					propertiesFromJson: false,
+					alertEnabled: false
 				}
 			];
 
@@ -282,7 +286,8 @@ function trackedSkuToProductSku(s: ProductSKUData): ProductSku {
 		currency: s.currency,
 		image_url: s.image_url,
 		sku_properties: s.sku_properties,
-		origin_sku_id: s.origin_sku_id
+		origin_sku_id: s.origin_sku_id,
+		price_alert: s.price_alert
 	};
 }
 
@@ -308,7 +313,8 @@ export function mapTrackedItemDetail(d: TrackedItemDetailData): ItemDetail {
 					image: d.main_image_url || null,
 					propColor: null,
 					propSize: null,
-					propertiesFromJson: false
+					propertiesFromJson: false,
+					alertEnabled: false
 				}
 			];
 

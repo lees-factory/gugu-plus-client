@@ -1,5 +1,6 @@
 import { apiGet } from './client';
 import { ENDPOINTS } from './endpoints';
+import type { PriceAlertStateData } from './tracked-items';
 
 export type ProductPriceHistory = {
 	price: string;
@@ -23,6 +24,7 @@ export type ProductSku = {
 	image_url: string;
 	sku_properties?: string;
 	origin_sku_id?: string;
+	price_alert?: PriceAlertStateData;
 };
 
 export type ProductDetailData = {

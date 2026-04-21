@@ -9,7 +9,7 @@ import {
 	type PriceEntry
 } from '$lib/product-detail/map-product';
 import { formatPrice } from '$lib/utils/format-price';
-import type { TrackedItemDetailData, PriceAlertStateData } from '$lib/api/tracked-items';
+import type { TrackedItemDetailData } from '$lib/api/tracked-items';
 import { trackedItemsApi } from '$lib/api/tracked-items';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', '4XL', '5XL'];
@@ -28,8 +28,7 @@ const SITE_COLORS: Record<string, { bg: string; text: string }> = {
 export type MatrixColorOption = { value: string; image: string | null };
 
 export function createItemDetailPage(
-	getTrackedItem: () => TrackedItemDetailData | null | undefined,
-	getAlertState: () => PriceAlertStateData | null | undefined
+	getTrackedItem: () => TrackedItemDetailData | null | undefined
 ) {
 	const item = $derived.by(() => {
 		const raw = getTrackedItem();
@@ -50,10 +49,11 @@ export function createItemDetailPage(
 	let historyLoading = $state(false);
 	const historyCache = new SvelteMap<string, PriceEntry[]>();
 
-	// SKU별 가격 알림 활성 상태 캐시. 서버 API가 SKU path 기반이므로 UI도 SKU 단위로 관리.
+	// 사용자가 이번 세션에서 토글한 SKU의 최신 상태만 담는 override 캐시.
+	// 초기값은 ParsedSku.alertEnabled(서버 응답)에서 동기적으로 읽는다.
+	// map을 seed에 쓰지 않는 이유: $effect는 첫 렌더 이후 실행되므로 OFF→ON 플리커가 생긴다.
 	const alertStateBySku = new SvelteMap<string, boolean>();
-	const alertFetchInflight = new SvelteSet<string>();
-	let seededAlertForTrackedItem = '';
+	let lastTrackedItemIdForAlertCache = '';
 
 	let prevProductId = $state('');
 
@@ -167,16 +167,12 @@ export function createItemDetailPage(
 		}
 	});
 
-	// load에서 받은 alertState를 서버 저장 선택 SKU(trackedItem.sku_id)에 1회 seed.
+	// trackedItem이 교체되면 override 캐시를 버리고 새 서버 상태에 맡긴다.
 	$effect(() => {
-		const raw = getTrackedItem();
-		const alert = getAlertState();
-		if (!raw) return;
-		if (seededAlertForTrackedItem === raw.tracked_item_id) return;
-		seededAlertForTrackedItem = raw.tracked_item_id;
-		if (raw.sku_id && alert) {
-			alertStateBySku.set(raw.sku_id, alert.enabled ?? false);
-		}
+		if (!item) return;
+		if (lastTrackedItemIdForAlertCache === item.trackedItemId) return;
+		lastTrackedItemIdForAlertCache = item.trackedItemId;
+		alertStateBySku.clear();
 	});
 
 	$effect(() => {
@@ -218,32 +214,14 @@ export function createItemDetailPage(
 		return byId ?? item.skus[0];
 	});
 
-	// 현재 선택 SKU의 알림 상태가 캐시에 없으면 조회해 채운다.
-	$effect(() => {
+	// override 캐시에 값이 있으면 그 값을, 없으면 서버가 내려준 ParsedSku.alertEnabled를 쓴다.
+	// 이렇게 해야 첫 렌더부터 동기적으로 올바른 값이 찍혀 SKU 전환 시 OFF→ON 플리커가 없다.
+	const alertEnabled = $derived.by(() => {
 		const sku = currentSku;
-		if (!sku || !sku.skuId || sku.skuId === 'default') return;
-		if (alertStateBySku.has(sku.skuId)) return;
-		if (alertFetchInflight.has(sku.skuId)) return;
-
-		const skuId = sku.skuId;
-		alertFetchInflight.add(skuId);
-		trackedItemsApi
-			.getPriceAlert(skuId)
-			.then((res) => {
-				const enabled = !res.error && res.data?.data?.enabled === true;
-				alertStateBySku.set(skuId, enabled);
-			})
-			.catch(() => {
-				alertStateBySku.set(skuId, false);
-			})
-			.finally(() => {
-				alertFetchInflight.delete(skuId);
-			});
+		if (!sku?.skuId) return false;
+		const override = alertStateBySku.get(sku.skuId);
+		return override ?? sku.alertEnabled;
 	});
-
-	const alertEnabled = $derived(
-		currentSku?.skuId ? (alertStateBySku.get(currentSku.skuId) ?? false) : false
-	);
 
 	const displayImage = $derived.by(() => {
 		if (!item) return '';
@@ -379,9 +357,10 @@ export function createItemDetailPage(
 	}
 
 	async function toggleAlert() {
-		const skuId = currentSku?.skuId;
+		const sku = currentSku;
+		const skuId = sku?.skuId;
 		if (!skuId || ui.alertLoading) return;
-		const current = alertStateBySku.get(skuId) ?? false;
+		const current = alertStateBySku.get(skuId) ?? sku?.alertEnabled ?? false;
 		ui.alertLoading = true;
 		ui.alertError = '';
 		try {
